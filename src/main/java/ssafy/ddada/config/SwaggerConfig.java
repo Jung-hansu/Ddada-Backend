@@ -23,7 +23,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI(ServletContext servletContext){
-        log.trace(">>> [SwaggerConfig::openAPI] OpenAPI 설정");
+        log.debug(">>> [SwaggerConfig::openAPI] OpenAPI 설정");
         String contextPath = servletContext.getContextPath();
         Server server = new Server().url(contextPath);
         return new OpenAPI().servers(List.of(server))
