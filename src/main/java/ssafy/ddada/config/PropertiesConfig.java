@@ -11,6 +11,7 @@ import ssafy.ddada.common.properties.KakaoLoginProperties;
         CorsProperties.class,
         KakaoLoginProperties.class,
         JwtProperties.class,
+        CoolSmsConfig.class
 })
 public class PropertiesConfig {
 }

@@ -12,5 +12,5 @@ public interface MemberService {
     MemberDetailResponse getMemberDetail();
     MemberDetailResponse updateMemberProfile(UpdateProfileCommand command);
     String deleteMember();
-    MemberLoginResponse loginMember(MemberLoginCommand command);
+//    MemberLoginResponse loginMember(MemberLoginCommand command);
 }

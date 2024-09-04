@@ -12,8 +12,8 @@ import ssafy.ddada.common.exception.InvalidTokenException;
 import ssafy.ddada.common.exception.NotMatchedTokenTypeException;
 import ssafy.ddada.common.properties.JwtProperties;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.Member;
-import ssafy.ddada.domain.member.MemberRole;
+//import ssafy.ddada.domain.member.MemberRole;
+import ssafy.ddada.domain.member.entity.MemberInterface;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
 import ssafy.ddada.domain.redis.RefreshTokenRedisRepository;
 
@@ -69,15 +69,15 @@ public class JwtProcessor {
                 .orElseThrow(InvalidTokenException::new);
     }
 
-    public void renewRefreshToken(String oldAccessToken, String newAccessToken, String newRefreshToken) {
-        refreshTokenRedisRepository.save(newAccessToken, newRefreshToken);
-        expireToken(oldAccessToken);
+    public void renewRefreshToken(String oldRefreshToken, String newRefreshToken, MemberInterface member) {
+        refreshTokenRedisRepository.save(newRefreshToken, String.valueOf(member.getId()));
+        expireToken(oldRefreshToken);
     }
 
-    public void expireToken(String token) {
-        blacklistTokenRedisRepository.save(token, getRemainingTime(token));
-        refreshTokenRedisRepository.delete(token);
-        log.info("Token added to blacklist: {}", token);
+    public void expireToken(String refreshToken) {
+        blacklistTokenRedisRepository.save(refreshToken, getRemainingTime(refreshToken));
+        refreshTokenRedisRepository.delete(refreshToken);
+        log.info("Token added to blacklist: {}", refreshToken);
     }
 
     public long getRemainingTime(String token) {
@@ -95,13 +95,13 @@ public class JwtProcessor {
         return getClaim(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String generateAccessToken(Member member) {
+    public String generateAccessToken(MemberInterface member) {
         log.debug("access token exp : {}", jwtProperties.accessTokenExp());
-        return issueToken(member.getId(), member.getRole(), ACCESS_TOKEN, jwtProperties.accessTokenExp());
+        return issueToken(member.getId(), ACCESS_TOKEN, jwtProperties.accessTokenExp());
     }
 
-    public String generateRefreshToken(Member member) {
-        return issueToken(member.getId(), member.getRole(), REFRESH_TOKEN, jwtProperties.refreshTokenExp());
+    public String generateRefreshToken(MemberInterface member) {
+        return issueToken(member.getId(), REFRESH_TOKEN, jwtProperties.refreshTokenExp());
     }
 
     public DecodedJwtToken decodeToken(String token, String type) {
@@ -115,7 +115,8 @@ public class JwtProcessor {
         );
     }
 
-    private String issueToken(Long userId, MemberRole role, String type, Long time) {
+//    private String issueToken(Long userId, MemberRole role, String type, Long time) {
+    private String issueToken(Long userId, String type, Long time) {
         Date now = new Date();
         return Jwts.builder()
                 .issuer("Cooing Inc.")
@@ -123,7 +124,7 @@ public class JwtProcessor {
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + time))
                 .claim("type", type)
-                .claim("role", role.getValue())
+//                .claim("role", role.getValue())
                 .signWith(getSecretKey())
                 .compact();
     }

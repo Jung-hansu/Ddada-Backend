@@ -36,12 +36,12 @@ public class MemberController {
         return CommonResponse.ok(MemberSignupResponse.of(message));
     }
 
-    @Operation(summary = "회원 로그인", description = "회원 로그인을 하는 API입니다.")
-    @PostMapping(value = "/login")
-    public CommonResponse<?> login(@Valid @RequestBody MemberLoginRequest request) {
-        MemberLoginResponse response = memberService.loginMember(request.toCommand());
-        return CommonResponse.ok(response);
-    }
+//    @Operation(summary = "회원 로그인", description = "회원 로그인을 하는 API입니다.")
+//    @PostMapping(value = "/login")
+//    public CommonResponse<?> login(@Valid @RequestBody MemberLoginRequest request) {
+//        MemberLoginResponse response = memberService.loginMember(request.toCommand());
+//        return CommonResponse.ok(response);
+//    }
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
     @DeleteMapping(value="")

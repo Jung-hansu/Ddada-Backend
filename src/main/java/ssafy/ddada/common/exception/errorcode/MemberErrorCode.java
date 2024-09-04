@@ -7,10 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum MemberErrorCode implements BaseErrorCode {
     DUPLICATE_EMAIL(400, "MEMBER_400_1", "이미 존재하는 이메일입니다."),
-    DUPLICATE_NICKNAME(400, "MEMBER_400_2", "이미 존재하는 닉네임입니다."),
+    DUPLICATE_nickname(400, "MEMBER_400_2", "이미 존재하는 닉네임입니다."),
     INVALID_PASSWORD(400, "MEMBER_400_3", "비밀번호가 일치하지 않습니다."),
     INVALID_EMAIL(400, "MEMBER_400_4", "이메일 형식이 올바르지 않습니다."),
-    INVALID_NICKNAME(400, "MEMBER_400_5", "닉네임 형식이 올바르지 않습니다."),
+    INVALID_nickname(400, "MEMBER_400_5", "닉네임 형식이 올바르지 않습니다."),
     INVALID_NAME(400, "MEMBER_400_6", "이름 형식이 올바르지 않습니다."),
     DUPLICATE_MEMBER(400, "MEMBER_400_7", "이미 존재하는 회원입니다."),
     NOT_ALLOWED_EXTENSION(400, "MEMBER_400_8", "프로필 이미지의 확장자는 jpg, jpeg, png, gif만 가능합니다."),

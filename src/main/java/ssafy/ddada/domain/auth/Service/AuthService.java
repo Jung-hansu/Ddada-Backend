@@ -1,14 +1,18 @@
 package ssafy.ddada.domain.auth.Service;
 
+import org.apache.http.auth.InvalidCredentialsException;
+import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.config.auth.AuthResponse;
 import ssafy.ddada.config.auth.IdToken;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
+import ssafy.ddada.domain.auth.command.LoginCommand;
+import ssafy.ddada.domain.auth.command.LogoutCommand;
 
 public interface AuthService {
-    IdToken getIdToken(String loginType, String code);
-    AuthResponse login(String loginType, IdToken request);
-    AuthResponse loginv2(String loginType, String code);
+    IdToken getIdToken(String code);
+    AuthResponse login(LoginCommand command) throws InvalidCredentialsException;
     AuthResponse refresh(TokenRefreshRequest refreshToken);
-    void logout(String accessToken);
-    Boolean checkNickname(String nickname);
+    void logout(LogoutCommand command);
+    Boolean checknickname(String nickname);
+    String sendSMS(SmsRequest smsRequest);
 }
