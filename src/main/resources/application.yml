@@ -1,10 +1,19 @@
 spring:
   application:
     name: ddada
+
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      cluster:
+        nodes: ${REDIS_NODES}
+        max-redirects: 3
+
   graphql:
     cors:
       allowed-origins: ${ALLOWED_ORIGINS:*}
