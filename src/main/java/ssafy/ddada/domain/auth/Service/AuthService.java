@@ -7,6 +7,7 @@ import ssafy.ddada.config.auth.IdToken;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
 import ssafy.ddada.domain.auth.command.LoginCommand;
 import ssafy.ddada.domain.auth.command.LogoutCommand;
+import ssafy.ddada.domain.auth.command.VerifyCommand;
 
 public interface AuthService {
     IdToken getIdToken(String code);
@@ -15,4 +16,5 @@ public interface AuthService {
     void logout(LogoutCommand command);
     Boolean checknickname(String nickname);
     String sendSMS(SmsRequest smsRequest);
+    Boolean verifyCertificationCode(VerifyCommand command);
 }

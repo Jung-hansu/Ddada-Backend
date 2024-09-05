@@ -75,11 +75,11 @@ public class Member extends BaseEntity implements MemberInterface{
         );
     }
 
-    public Member signupMember(MemberSignupCommand signupCommand) {
+    public Member signupMember(MemberSignupCommand signupCommand, String imageUrl, String password) {
         this.email = signupCommand.email();
-        this.password = signupCommand.password();
+        this.password = password;
         this.nickname = signupCommand.nickname();
-        this.profileImg = signupCommand.imageUrl();
+        this.profileImg = imageUrl;
         this.number = signupCommand.number();
         this.gender = signupCommand.gender();
         this.birth = signupCommand.birth();

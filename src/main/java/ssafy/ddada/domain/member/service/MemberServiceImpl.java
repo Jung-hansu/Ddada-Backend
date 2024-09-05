@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.member.response.MemberDetailResponse;
+import ssafy.ddada.api.member.response.MemberSignupResponse;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
@@ -41,31 +42,38 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public String signupMember(MemberSignupCommand signupCommand, MultipartFile profileImage) {
+    public MemberSignupResponse signupMember(MemberSignupCommand signupCommand) {
+        // tempMember가 있는지 확인
         Member tempMember = memberRepository.findByEmail(signupCommand.email())
-                .orElseThrow(NotFoundTempMember::new);
+                .orElse(null);
 
-        String imageUrl = uploadImageToS3(profileImage, tempMember.getId());
+        // tempMember가 없으면 새 유저 생성
+        if (tempMember == null) {
+            tempMember = new Member(
+                    signupCommand.email(),
+                    signupCommand.gender(),
+                    signupCommand.birth(),
+                    signupCommand.nickname(),
+                    passwordEncoder.encode(signupCommand.password()),
+                    null,
+                    signupCommand.number(),
+                    signupCommand.description()
+            );
+            memberRepository.save(tempMember);
+        }
+
+        String imageUrl = uploadImageToS3(signupCommand.imageUrl(), tempMember.getId());
 
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
 
-        MemberSignupCommand updatedCommand = new MemberSignupCommand(
-                signupCommand.nickname(),
-                signupCommand.email(),
-                signupCommand.gender(),
-                signupCommand.password(),
-                signupCommand.birth(),
-                imageUrl,
-                signupCommand.description(),
-                signupCommand.number()
-        );
+        // 회원가입 완료 후 회원 정보 갱신
+        Member signupMember = tempMember.signupMember(signupCommand, imageUrl, encodedPassword);
 
-        Member signupMember = tempMember.signupMember(updatedCommand);
         String accessToken = jwtProcessor.generateAccessToken(signupMember);
         String refreshToken = jwtProcessor.generateRefreshToken(signupMember);
         jwtProcessor.saveRefreshToken(accessToken, refreshToken);
 
-        return "회원가입이 완료되었습니다.";
+        return MemberSignupResponse.of(accessToken, refreshToken);
     }
 
     @Override

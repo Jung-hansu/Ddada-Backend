@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.InvalidCredentialsException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.api.auth.request.SmsRequest;
+import ssafy.ddada.api.auth.request.VerifyRequest;
 import ssafy.ddada.common.client.KakaoApiClient;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenExpireResponse;
@@ -17,10 +19,7 @@ import ssafy.ddada.common.properties.KakaoLoginProperties;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.config.auth.DecodedJwtToken;
-import ssafy.ddada.domain.auth.command.BearerToken;
-import ssafy.ddada.domain.auth.command.KakaoLoginCommand;
-import ssafy.ddada.domain.auth.command.LoginCommand;
-import ssafy.ddada.domain.auth.command.LogoutCommand;
+import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.entity.Member;
 import ssafy.ddada.domain.member.entity.MemberInterface;
@@ -29,6 +28,7 @@ import ssafy.ddada.domain.member.repository.ManagerRepository;
 import ssafy.ddada.domain.member.repository.MemberRepository;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static ssafy.ddada.common.constant.redis.KEY_PREFIX.REFRESH_TOKEN;
 import static ssafy.ddada.common.constant.security.LoginType.BASIC;
@@ -47,7 +47,10 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final CourtAdminRepository courtAdminRepository;
     private final ManagerRepository managerRepository;
-    private final SmsCertificationUtil smsCertificationUtil;
+    private final SmsCertificationUtil smsCertificationUtil; // SMS 유틸리티
+
+    private final RedisTemplate<String, String> redisTemplate; // Redis 사용
+    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 3L; // 3분 만료
 
     @Override
     public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
@@ -105,12 +108,26 @@ public class AuthServiceImpl implements AuthService {
         return expired.success();
     }
 
-    // 새로 추가된 메서드: SMS 인증을 위한 코드 발송
+    // SMS 관련 기능 통합
     public String sendSMS(SmsRequest smsRequest) {
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드 생성
-        smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode); // SMS 인증 유틸리티를 사용하여 SMS 발송
-        return "문자를 전송했습니다.";
+        smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode); // SMS 발송
+
+        // Redis에 인증 코드와 전화번호 저장, 3분간 유효
+        redisTemplate.opsForValue().set(smsRequest.getPhoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+
+        return "인증 코드가 발송되었습니다.";
     }
+
+    // 인증 코드 검증
+    public Boolean verifyCertificationCode(VerifyCommand command) {
+        String storedCode = redisTemplate.opsForValue().get(command.phoneNum());
+        if (storedCode == null) {
+            return false;  // 인증 코드 만료 또는 존재하지 않음
+        }
+        return storedCode.equals(command.certificationCode()); // 입력한 코드와 저장된 코드가 일치하는지 확인
+    }
+
 
     private Boolean notRegisteredMember(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
@@ -158,8 +175,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
-        String refreshToken = jwtProcessor.findRefreshTokenById(request.RefreshToken());
-        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(refreshToken, REFRESH_TOKEN);
+        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.RefreshToken(), REFRESH_TOKEN);
 
         // 각 엔티티에서 사용자 찾기
         MemberInterface member = findMemberById(decodedJwtToken.memberId())

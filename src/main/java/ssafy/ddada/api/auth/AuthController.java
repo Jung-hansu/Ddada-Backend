@@ -10,11 +10,13 @@ import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.auth.request.LoginRequest;
 import ssafy.ddada.api.auth.request.LogoutRequest;
 import ssafy.ddada.api.auth.request.SmsRequest;
+import ssafy.ddada.api.auth.request.VerifyRequest;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.AuthResponse;
 import ssafy.ddada.config.auth.IdToken;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
 import ssafy.ddada.domain.auth.Service.AuthService;
+import ssafy.ddada.domain.auth.command.VerifyCommand;
 
 @RestController
 @RequiredArgsConstructor
@@ -89,5 +91,23 @@ public class AuthController {
             String message = "사용 가능한 닉네임입니다.";
             return CommonResponse.ok(message);
         }
+    }
+
+    @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
+    @PostMapping("/sms/verify")
+    public CommonResponse<String> verifySMSCode(
+            @RequestBody VerifyRequest verityRequest
+    ) {
+        Boolean result = authService.verifyCertificationCode(verityRequest.toCommand());
+
+        // 메시지를 if 문 밖에서 선언하고 할당하도록 변경
+        String message;
+        if (result == true) {
+            message = "인증에 성공했습니다.";
+        } else {
+            message = "인증에 실패했습니다.";
+        }
+
+        return CommonResponse.ok(message);
     }
 }

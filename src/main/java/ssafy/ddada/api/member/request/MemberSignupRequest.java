@@ -22,15 +22,13 @@ public class MemberSignupRequest{
         String nickname;
 
         @Schema(description = "이메일", example = "example@example.com", format = "email")
-        @Email(message = "유저ID는 이메일 형식이어야 합니다.")
         String email;
 
         @Schema(description = "성별", example = "MALE", allowableValues = {"MALE", "FEMALE"}, defaultValue = "MALE")
-        @NotNull(message = "성별은 필수 입력 값입니다.")
         Gender gender;
 
         @Schema(description = "프로필 이미지 파일", example = "profile.jpg")
-        MultipartFile profileImagePath;
+        MultipartFile profileImage;
 
         @Schema(description = "생년월일", example = "1993-01-01")
         LocalDate birth;
@@ -45,7 +43,7 @@ public class MemberSignupRequest{
         String description;
 
 
-        public MemberSignupCommand toCommand(String imageUrl) {
-                return new MemberSignupCommand(nickname, email, gender, password, birth, imageUrl, description, phoneNumber);
+        public MemberSignupCommand toCommand() {
+                return new MemberSignupCommand(nickname, email, gender, password, birth, profileImage, description, phoneNumber);
         }
 }
