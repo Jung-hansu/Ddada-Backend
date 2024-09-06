@@ -8,7 +8,7 @@ import ssafy.ddada.domain.member.entity.Member;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Score {
+public class Score extends BaseMatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Set {
+public class Set extends BaseMatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

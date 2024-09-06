@@ -11,7 +11,7 @@ import ssafy.ddada.domain.member.entity.Member;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Team extends BaseEntity{
+public class Team extends BaseMatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

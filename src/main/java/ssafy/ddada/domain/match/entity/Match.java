@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Match extends BaseEntity {
+public class Match extends BaseMatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
