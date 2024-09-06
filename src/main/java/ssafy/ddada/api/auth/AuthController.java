@@ -1,19 +1,20 @@
 package ssafy.ddada.api.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.auth.request.LoginRequest;
 import ssafy.ddada.api.auth.request.LogoutRequest;
+import ssafy.ddada.api.auth.request.SmsRequest;
+import ssafy.ddada.api.auth.request.VerifyRequest;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.AuthResponse;
-import ssafy.ddada.config.auth.IdToken;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
-import ssafy.ddada.domain.auth.Service.AuthService;
+import ssafy.ddada.domain.auth.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,12 +24,12 @@ import ssafy.ddada.domain.auth.Service.AuthService;
 public class AuthController {
     private final AuthService authService;
 
-    @Operation(summary = "로그인 v3", description = "유저 정보를 이용하여 login type으로 로그인 합니다.")
+    @Operation(summary = "로그인", description = "유저 정보를 이용하여 login type으로 로그인 합니다.")
     @PostMapping("/login")
-    public CommonResponse<AuthResponse> loginv2(
+    public CommonResponse<AuthResponse> login(
             @RequestBody LoginRequest request
-    ) {
-        AuthResponse loginResponse = authService.loginv2(request.authcode());
+    ) throws InvalidCredentialsException {
+        AuthResponse loginResponse = authService.login(request.toCommand());
         return CommonResponse.ok(loginResponse);
     }
 
@@ -41,14 +42,12 @@ public class AuthController {
         return CommonResponse.ok(rotateTokenResponse);
     }
 
-    @Operation(summary = "로그아웃 v3", description = "엑세스 토큰을 이용하여 login type으로 로그인 합니다.")
-    @PostMapping("/{loginType}/logout")
-    public CommonResponse logoutv2(
-            @Schema(description = "로그인 타입", allowableValues = {"kakao"}, example = "kakao")
-            @PathVariable("loginType") String loginType,
+    @Operation(summary = "로그아웃", description = "엑세스 토큰을 이용하여 login type으로 로그인 합니다.")
+    @PostMapping("logout")
+    public CommonResponse<Void> logout(
             @RequestBody LogoutRequest request
     ) {
-        authService.logout(request.accessToken());
+        authService.logout(request.toCommand());
         return CommonResponse.noContent();
     }
 
@@ -59,22 +58,18 @@ public class AuthController {
         return CommonResponse.ok("pong");
     }
 
-    @Deprecated
-    @Operation(summary = "id token 발급", description = "인가 코드로 id token을 발급받습니다.")
-    @GetMapping("/{loginType}/id-token")
-    public CommonResponse<IdToken> getIdToken(
-            @Schema(description = "로그인 타입", allowableValues = {"kakao"}, example = "kakao")
-            @PathVariable("loginType") String loginType,
-
-            @RequestParam("code") String code
+    @Operation(summary = "SMS 인증 코드 전송", description = "사용자에게 인증 코드를 포함한 SMS를 전송합니다.")
+    @PostMapping("/sms/send")
+    public CommonResponse<String> sendSMS(
+            @RequestBody SmsRequest smsRequest
     ) {
-        IdToken idToken = authService.getIdToken(loginType, code);
-        return CommonResponse.ok(idToken);
+        authService.sendSms(smsRequest);  // SMS 전송 서비스 호출
+        return CommonResponse.ok("문자를 전송했습니다.");
     }
 
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
     @GetMapping("/nickname")
-    public CommonResponse<String> checkNickname(
+    public CommonResponse<String> checknickname(
             @RequestParam("nickname") String nickname
     ) {
         Boolean isDuplicated = authService.checkNickname(nickname);
@@ -85,5 +80,23 @@ public class AuthController {
             String message = "사용 가능한 닉네임입니다.";
             return CommonResponse.ok(message);
         }
+    }
+
+    @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
+    @PostMapping("/sms/verify")
+    public CommonResponse<String> verifySMSCode(
+            @RequestBody VerifyRequest verityRequest
+    ) {
+        Boolean result = authService.verifyCertificationCode(verityRequest.toCommand());
+
+        // 메시지를 if 문 밖에서 선언하고 할당하도록 변경
+        String message;
+        if (result == true) {
+            message = "인증에 성공했습니다.";
+        } else {
+            message = "인증에 실패했습니다.";
+        }
+
+        return CommonResponse.ok(message);
     }
 }

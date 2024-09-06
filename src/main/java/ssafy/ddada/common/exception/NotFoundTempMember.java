@@ -4,6 +4,6 @@ import ssafy.ddada.common.exception.errorcode.MemberErrorCode;
 
 public class NotFoundTempMember extends BaseException {
     public NotFoundTempMember() {
-        super(MemberErrorCode.NOT_FOUND_TEMP_MEMBER);
+        super(MemberErrorCode.TEMP_MEMBER_NOT_FOUND);
     }
 }

@@ -4,6 +4,6 @@ import ssafy.ddada.common.exception.errorcode.MemberErrorCode;
 
 public class NotFoundMemberException extends BaseException {
     public NotFoundMemberException() {
-        super(MemberErrorCode.NOT_FOUND_MEMBER);
+        super(MemberErrorCode.MEMBER_NOT_FOUND);
     }
 }
