@@ -1,3 +1,11 @@
+kakao:
+  content-type: application/x-www-form-urlencoded
+  iss: https://kauth.kakao.com
+  client-id: ${CLIENT_ID}
+  client-secret: ${CLIENT_SECRET}
+  login-redirect-uri: ${LOGIN_REDIRECT_URI}
+  logout-redirect-uri: ${LOGOUT_REDIRECT_URI}
+
 spring:
   application:
     name: ddada

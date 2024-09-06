@@ -10,7 +10,6 @@ import ssafy.ddada.domain.auth.command.LogoutCommand;
 import ssafy.ddada.domain.auth.command.VerifyCommand;
 
 public interface AuthService {
-    IdToken getIdToken(String code);
     AuthResponse login(LoginCommand command) throws InvalidCredentialsException;
     AuthResponse refresh(TokenRefreshRequest refreshToken);
     void logout(LogoutCommand command);

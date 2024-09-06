@@ -55,10 +55,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
         LoginTokenModel tokens;
+        log.info(">>> loginType: {}", command.authcode());
 
         switch(command.loginType()) {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authcode());
+
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
                 if (!expireKakaoToken(kakaoLoginCommand)) {
                     throw new KakaoTokenExpireException();
@@ -218,7 +220,9 @@ public class AuthServiceImpl implements AuthService {
 
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
+        log.info(">>> code: {}", code);
         KakaoTokenInfo kakaoTokenInfo = getKakaoToken(code);
+        log.info(">>> kakaoTokenInfo: {}", kakaoTokenInfo);
         return KakaoLoginCommand.byKakao(kakaoTokenInfo, kakaoOauthClient.getPublicKeys(), jwtParser, kakaoLoginProperties);
     }
 
@@ -230,12 +234,5 @@ public class AuthServiceImpl implements AuthService {
                 code,
                 kakaoLoginProperties.clientSecret());
     }
-
-    @Override
-    @Deprecated(since="0.2", forRemoval = true)
-    public IdToken getIdToken(String code) {
-                KakaoTokenInfo kakaoTokenInfo = getKakaoToken(code);
-                return IdToken.of(kakaoTokenInfo.idToken());
-        }
 }
 

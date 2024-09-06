@@ -22,31 +22,24 @@ public class Member extends BaseEntity implements MemberInterface{
     @Column(name = "member_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String nickname;
 
-    @Column(nullable = true)
     private String profileImg;
 
-    @Column(nullable = true)
     private Integer number;
 
-    @Column(nullable = false)
     private Boolean isDeleted = false;  // 기본값 설정
 
-    @Column(nullable = false)
     private Gender gender;
 
-    @Column(nullable = false)
     private LocalDate birth;
 
-    @Column(nullable = true)
     private String description;
 
     // 명시적인 생성자 추가 (null 값 허용)
