@@ -1,7 +1,7 @@
 package ssafy.ddada.domain.auth.command;
 
 public record LoginCommand (
-        String authcode,
+        String authCode,
         String loginType,
         String email,
         String password

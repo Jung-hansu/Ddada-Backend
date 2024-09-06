@@ -1,14 +1,12 @@
-package ssafy.ddada.domain.auth.Service;
+package ssafy.ddada.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.api.auth.request.SmsRequest;
-import ssafy.ddada.api.auth.request.VerifyRequest;
 import ssafy.ddada.common.client.KakaoApiClient;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenExpireResponse;
@@ -31,8 +29,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static ssafy.ddada.common.constant.redis.KEY_PREFIX.REFRESH_TOKEN;
-import static ssafy.ddada.common.constant.security.LoginType.BASIC;
-import static ssafy.ddada.common.constant.security.LoginType.KAKAO;
+import static ssafy.ddada.common.constant.security.LOGIN_TYPE.BASIC;
+import static ssafy.ddada.common.constant.security.LOGIN_TYPE.KAKAO;
 
 @Service
 @Slf4j
@@ -55,11 +53,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
         LoginTokenModel tokens;
-        log.info(">>> loginType: {}", command.authcode());
+        log.info(">>> loginType: {}", command.authCode());
 
         switch(command.loginType()) {
             case KAKAO:
-                KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authcode());
+                KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
 
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
                 if (!expireKakaoToken(kakaoLoginCommand)) {
@@ -111,14 +109,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // SMS 관련 기능 통합
-    public String sendSMS(SmsRequest smsRequest) {
+    public void sendSms(SmsRequest smsRequest) {
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드 생성
         smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode); // SMS 발송
 
         // Redis에 인증 코드와 전화번호 저장, 3분간 유효
         redisTemplate.opsForValue().set(smsRequest.getPhoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
-
-        return "인증 코드가 발송되었습니다.";
     }
 
     // 인증 코드 검증
@@ -177,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
-        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.RefreshToken(), REFRESH_TOKEN);
+        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
 
         // 각 엔티티에서 사용자 찾기
         MemberInterface member = findMemberById(decodedJwtToken.memberId())
@@ -186,7 +182,7 @@ public class AuthServiceImpl implements AuthService {
         String newAccessToken = jwtProcessor.generateAccessToken(member);
         String newRefreshToken = jwtProcessor.generateRefreshToken(member);
 
-        jwtProcessor.renewRefreshToken(request.RefreshToken(), newRefreshToken, member);
+        jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
         return AuthResponse.of(newAccessToken, newRefreshToken);
     }
 
@@ -211,7 +207,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Boolean checknickname(String nickname) {
+    public Boolean checkNickname(String nickname) {
         boolean isDuplicated = memberRepository.existsBynickname(nickname);
 
         log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);

@@ -13,10 +13,8 @@ import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.api.auth.request.VerifyRequest;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.AuthResponse;
-import ssafy.ddada.config.auth.IdToken;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
-import ssafy.ddada.domain.auth.Service.AuthService;
-import ssafy.ddada.domain.auth.command.VerifyCommand;
+import ssafy.ddada.domain.auth.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +26,7 @@ public class AuthController {
 
     @Operation(summary = "로그인", description = "유저 정보를 이용하여 login type으로 로그인 합니다.")
     @PostMapping("/login")
-    public CommonResponse<AuthResponse> loginv2(
+    public CommonResponse<AuthResponse> login(
             @RequestBody LoginRequest request
     ) throws InvalidCredentialsException {
         AuthResponse loginResponse = authService.login(request.toCommand());
@@ -46,7 +44,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "엑세스 토큰을 이용하여 login type으로 로그인 합니다.")
     @PostMapping("logout")
-    public CommonResponse logoutv2(
+    public CommonResponse<Void> logout(
             @RequestBody LogoutRequest request
     ) {
         authService.logout(request.toCommand());
@@ -65,7 +63,7 @@ public class AuthController {
     public CommonResponse<String> sendSMS(
             @RequestBody SmsRequest smsRequest
     ) {
-        authService.sendSMS(smsRequest);  // SMS 전송 서비스 호출
+        authService.sendSms(smsRequest);  // SMS 전송 서비스 호출
         return CommonResponse.ok("문자를 전송했습니다.");
     }
 
@@ -74,7 +72,7 @@ public class AuthController {
     public CommonResponse<String> checknickname(
             @RequestParam("nickname") String nickname
     ) {
-        Boolean isDuplicated = authService.checknickname(nickname);
+        Boolean isDuplicated = authService.checkNickname(nickname);
         if (isDuplicated) {
             String message = "이미 사용중인 닉네임입니다.";
             return CommonResponse.ok(message);

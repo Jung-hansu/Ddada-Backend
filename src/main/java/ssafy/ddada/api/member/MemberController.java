@@ -6,18 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.member.request.MemberLoginRequest;
 import ssafy.ddada.api.member.request.MemberSignupRequest;
 import ssafy.ddada.api.member.response.DeleteMemberResponse;
-import ssafy.ddada.api.member.response.MemberLoginResponse;
 import ssafy.ddada.api.member.response.MemberSignupResponse;
 import ssafy.ddada.domain.member.service.MemberService;
-import ssafy.ddada.domain.member.command.MemberSignupCommand;
-
-
-import static ssafy.ddada.api.member.MemberResponseMessages.SIGNED_UP_MEMBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,13 +32,6 @@ public class MemberController {
 
         return CommonResponse.ok(response);
     }
-
-//    @Operation(summary = "회원 로그인", description = "회원 로그인을 하는 API입니다.")
-//    @PostMapping(value = "/login")
-//    public CommonResponse<?> login(@Valid @RequestBody MemberLoginRequest request) {
-//        MemberLoginResponse response = memberService.loginMember(request.toCommand());
-//        return CommonResponse.ok(response);
-//    }
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
     @DeleteMapping(value="")

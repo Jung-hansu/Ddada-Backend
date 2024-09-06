@@ -12,7 +12,6 @@ import ssafy.ddada.common.exception.InvalidTokenException;
 import ssafy.ddada.common.exception.NotMatchedTokenTypeException;
 import ssafy.ddada.common.properties.JwtProperties;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-//import ssafy.ddada.domain.member.MemberRole;
 import ssafy.ddada.domain.member.entity.MemberInterface;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
 import ssafy.ddada.domain.redis.RefreshTokenRedisRepository;
