@@ -1,6 +1,7 @@
 package ssafy.ddada.api.member;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import ssafy.ddada.domain.member.service.MemberService;
 @RequiredArgsConstructor
 @RequestMapping("/member")
 @Slf4j
+@Tag(name = "Member", description = "회원관리")
 public class MemberController {
     private final MemberService memberService;
 
@@ -38,5 +40,20 @@ public class MemberController {
     public CommonResponse<DeleteMemberResponse> deleteMember() {
         String message = memberService.deleteMember();
         return CommonResponse.ok(DeleteMemberResponse.of(message));
+    }
+
+    @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
+    @GetMapping("/nickname")
+    public CommonResponse<String> checknickname(
+            @RequestParam("nickname") String nickname
+    ) {
+        Boolean isDuplicated = memberService.checkNickname(nickname);
+        if (isDuplicated) {
+            String message = "이미 사용중인 닉네임입니다.";
+            return CommonResponse.ok(message);
+        } else {
+            String message = "사용 가능한 닉네임입니다.";
+            return CommonResponse.ok(message);
+        }
     }
 }

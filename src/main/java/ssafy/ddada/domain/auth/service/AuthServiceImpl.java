@@ -206,13 +206,6 @@ public class AuthServiceImpl implements AuthService {
         jwtProcessor.expireToken(command.accessToken());
     }
 
-    @Override
-    public Boolean checkNickname(String nickname) {
-        boolean isDuplicated = memberRepository.existsBynickname(nickname);
-
-        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
-        return isDuplicated;
-    }
 
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {

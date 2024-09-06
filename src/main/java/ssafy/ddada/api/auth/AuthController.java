@@ -67,21 +67,6 @@ public class AuthController {
         return CommonResponse.ok("문자를 전송했습니다.");
     }
 
-    @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
-    @GetMapping("/nickname")
-    public CommonResponse<String> checknickname(
-            @RequestParam("nickname") String nickname
-    ) {
-        Boolean isDuplicated = authService.checkNickname(nickname);
-        if (isDuplicated) {
-            String message = "이미 사용중인 닉네임입니다.";
-            return CommonResponse.ok(message);
-        } else {
-            String message = "사용 가능한 닉네임입니다.";
-            return CommonResponse.ok(message);
-        }
-    }
-
     @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
     @PostMapping("/sms/verify")
     public CommonResponse<String> verifySMSCode(

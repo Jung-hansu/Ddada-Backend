@@ -171,4 +171,13 @@ public class MemberServiceImpl implements MemberService {
             throw new ProfileNotFoundInS3Exception();
         }
     }
+
+    @Override
+    public Boolean checkNickname(String nickname) {
+        boolean isDuplicated = memberRepository.existsBynickname(nickname);
+
+        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
+        return isDuplicated;
+    }
+
 }
