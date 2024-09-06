@@ -52,4 +52,18 @@ public class MemberExceptionHandler {
         log.error("ImageTooLargeException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
+
+    @ExceptionHandler(MessageSendingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse handleMessageSendingException(MessageSendingException e) {
+        log.error("MessageSendingException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(SmsVerificationException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handleSmsVerificationException(SmsVerificationException e) {
+        log.error("SmsVerificationException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
 }

@@ -1,12 +1,11 @@
 package ssafy.ddada.domain.member.service;
 
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,10 +19,14 @@ import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.member.command.MemberSignupCommand;
 import ssafy.ddada.domain.member.command.UpdateProfileCommand;
 import ssafy.ddada.domain.member.entity.Member;
+import ssafy.ddada.domain.member.entity.MemberRole;
 import ssafy.ddada.domain.member.repository.MemberRepository;
+import com.amazonaws.HttpMethod;
 
+import java.util.Date;
+import java.util.Calendar;
 import java.io.IOException;
-import java.util.Base64;
+import java.net.URL;
 import java.util.List;
 
 @Service
@@ -43,11 +46,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberSignupResponse signupMember(MemberSignupCommand signupCommand) {
-        // tempMember가 있는지 확인
         Member tempMember = memberRepository.findByEmail(signupCommand.email())
                 .orElse(null);
 
-        // tempMember가 없으면 새 유저 생성
         if (tempMember == null) {
             tempMember = new Member(
                     signupCommand.email(),
@@ -57,16 +58,19 @@ public class MemberServiceImpl implements MemberService {
                     passwordEncoder.encode(signupCommand.password()),
                     null,
                     signupCommand.number(),
-                    signupCommand.description()
+                    signupCommand.description(),
+                    MemberRole.USER
             );
             memberRepository.save(tempMember);
         }
 
-        String imageUrl = uploadImageToS3(signupCommand.imageUrl(), tempMember.getId());
+        // 이미지 처리 로직 추가: MultipartFile이 비어 있으면 기본 이미지 사용
+        String imageUrl = (signupCommand.imageUrl() == null || signupCommand.imageUrl().isEmpty())
+                ? "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg" // 기본 이미지 경로
+                : uploadImageToS3(signupCommand.imageUrl(), tempMember.getId()); // 이미지가 있으면 S3에 업로드
 
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
 
-        // 회원가입 완료 후 회원 정보 갱신
         Member signupMember = tempMember.signupMember(signupCommand, imageUrl, encodedPassword);
 
         String accessToken = jwtProcessor.generateAccessToken(signupMember);
@@ -75,6 +79,7 @@ public class MemberServiceImpl implements MemberService {
 
         return MemberSignupResponse.of(accessToken, refreshToken);
     }
+
 
     @Override
     @Transactional
@@ -86,7 +91,7 @@ public class MemberServiceImpl implements MemberService {
         String base64Image = "";
         if (profileImagePath != null) {
             String imagePath = profileImagePath.substring(profileImagePath.indexOf("profileImg/"));
-            base64Image = getImageFromS3AsBase64(imagePath);
+            base64Image = getPresignedUrlFromS3(imagePath);
         }
 
         return MemberDetailResponse.of(
@@ -103,13 +108,30 @@ public class MemberServiceImpl implements MemberService {
         Member currentLoggedInMember = memberRepository.findById(userId)
                 .orElseThrow(NotFoundMemberException::new);
 
-        String imageUrl = uploadImageToS3(command.profileImagePath(), currentLoggedInMember.getId());
+        String imageUrl;
 
+        // 만약 MultipartFile이 비어 있으면 기존 이미지 사용, 그렇지 않으면 새 이미지 업로드
+        if (command.profileImagePath() == null || command.profileImagePath().isEmpty()) {
+            imageUrl = currentLoggedInMember.getProfileImg(); // 기존 이미지 사용
+        } else {
+            // 새 이미지를 업로드하고 새로운 이미지 URL을 얻음
+            imageUrl = uploadImageToS3(command.profileImagePath(), currentLoggedInMember.getId());
+        }
+
+        // presigned URL 생성
+        String presignedUrl = "";
+        if (imageUrl != null) {
+            String imagePath = imageUrl.substring(imageUrl.indexOf("profileImg/"));
+            presignedUrl = getPresignedUrlFromS3(imagePath);
+        }
+
+        // 프로필 정보 업데이트
         currentLoggedInMember.updateProfile(command.nickname(), imageUrl);
         memberRepository.save(currentLoggedInMember);
 
+        // presignedUrl을 반환
         return MemberDetailResponse.of(
-                currentLoggedInMember.getProfileImg(),
+                presignedUrl, // 프리사인드 URL 전달
                 currentLoggedInMember.getNickname(),
                 currentLoggedInMember.getGender()
         );
@@ -120,6 +142,13 @@ public class MemberServiceImpl implements MemberService {
     public String deleteMember() {
         getCurrentLoggedInMember().deleteMember();
         return "회원 탈퇴가 성공적으로 처리되었습니다.";
+    }
+
+    @Override
+    public Boolean checkNickname(String nickname) {
+        boolean isDuplicated = memberRepository.existsBynickname(nickname);
+        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
+        return isDuplicated;
     }
 
     private Member getCurrentLoggedInMember() {
@@ -155,29 +184,29 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    private String getImageFromS3AsBase64(String imagePath) {
+    private String getPresignedUrlFromS3(String imagePath) {
         try {
-            S3Object s3Object = amazonS3Client.getObject(bucketName, imagePath);
-            log.info(imagePath + " 이미지 가져오기 성공");
-            byte[] imageBytes = IOUtils.toByteArray(s3Object.getObjectContent());
-            return Base64.getEncoder().encodeToString(imageBytes);
+            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, imagePath)
+                    .withMethod(HttpMethod.GET)
+                    .withExpiration(getExpirationTime());
+
+            URL presignedUrl = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+            log.info(imagePath + " 이미지에 대한 presigned URL 생성 성공");
+
+            return presignedUrl.toString();
         } catch (AmazonServiceException e) {
             if (e.getStatusCode() == 404) {
                 return null;
             } else {
                 throw new ProfileNotFoundInS3Exception();
             }
-        } catch (IOException e) {
-            throw new ProfileNotFoundInS3Exception();
         }
     }
 
-    @Override
-    public Boolean checkNickname(String nickname) {
-        boolean isDuplicated = memberRepository.existsBynickname(nickname);
-
-        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
-        return isDuplicated;
+    // presigned URL 만료 시간을 지정하는 메서드
+    private Date getExpirationTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MINUTE, 10); // 10분 후 만료되는 URL 설정
+        return cal.getTime();
     }
-
 }

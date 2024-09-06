@@ -37,6 +37,10 @@ public class Manager extends BaseEntity implements MemberInterface{
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
     // 회원가입 메서드
     public void signupMember(String email, String password, String nickname, String profileImg, String number, String description) {
         this.email = email;

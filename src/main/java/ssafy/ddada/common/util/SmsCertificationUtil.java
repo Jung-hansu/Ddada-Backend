@@ -7,6 +7,7 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ssafy.ddada.common.exception.KakaoTokenExpireException;
 
 @Component
 public class SmsCertificationUtil {
@@ -27,7 +28,6 @@ public class SmsCertificationUtil {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr"); // 메시지 서비스 초기화
     }
 
-    // 단일 메시지 발송
     public void sendSMS(String to, String certificationCode){
         Message message = new Message(); // 새 메시지 객체 생성
         message.setFrom(fromNumber); // 발신자 번호 설정
@@ -36,4 +36,5 @@ public class SmsCertificationUtil {
 
         this.messageService.sendOne(new SingleMessageSendingRequest(message)); // 메시지 발송 요청
     }
+
 }

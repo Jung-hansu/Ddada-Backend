@@ -20,3 +20,5 @@ public class SecurityUtil {
         return (Long) authentication.getPrincipal();
     }
 }
+
+

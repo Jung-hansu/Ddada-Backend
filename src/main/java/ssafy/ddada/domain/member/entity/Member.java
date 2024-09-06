@@ -42,8 +42,12 @@ public class Member extends BaseEntity implements MemberInterface{
 
     private String description;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
     // 명시적인 생성자 추가 (null 값 허용)
-    public Member(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, Integer number, String description) {
+    public Member(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, Integer number, String description, MemberRole role) {
         this.email = email;
         this.gender = gender;
         this.birth = birth;
@@ -53,6 +57,7 @@ public class Member extends BaseEntity implements MemberInterface{
         this.number = number;
         this.description = description;
         this.isDeleted = false;
+        this.role = role;
     }
 
     public static Member createTempMember(String email) {
@@ -64,7 +69,8 @@ public class Member extends BaseEntity implements MemberInterface{
                 null,  // 임시 비밀번호
                 null,  // 프로필 이미지 기본값
                 null,  // 전화번호 기본값
-                null   // 임시 설명
+                null,   // 임시 설명
+                MemberRole.TEMP
         );
     }
 
@@ -78,9 +84,14 @@ public class Member extends BaseEntity implements MemberInterface{
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
         this.isDeleted = false;
+        this.setRoleAsUser();
 
         // 현재 객체 (Member) 반환
         return this;
+    }
+
+    public void setRoleAsUser() {
+        this.role = MemberRole.USER;
     }
 
     // 회원 삭제 메서드: 삭제 플래그 설정

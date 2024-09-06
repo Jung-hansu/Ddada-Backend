@@ -9,7 +9,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.member.request.MemberSignupRequest;
+import ssafy.ddada.api.member.request.MemberUpdateRequest;
 import ssafy.ddada.api.member.response.DeleteMemberResponse;
+import ssafy.ddada.api.member.response.MemberDetailResponse;
 import ssafy.ddada.api.member.response.MemberSignupResponse;
 import ssafy.ddada.domain.member.service.MemberService;
 
@@ -27,9 +29,8 @@ public class MemberController {
          """)
     @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
     public CommonResponse<MemberSignupResponse> signup(
-            @ModelAttribute @Validated MemberSignupRequest request // 폼 데이터 처리
+            @ModelAttribute @Validated MemberSignupRequest request
     ) {
-        // signupMember에 MultipartFile을 그대로 전달
         MemberSignupResponse response = memberService.signupMember(request.toCommand());
 
         return CommonResponse.ok(response);
@@ -55,5 +56,22 @@ public class MemberController {
             String message = "사용 가능한 닉네임입니다.";
             return CommonResponse.ok(message);
         }
+    }
+
+    @Operation(summary = "회원 정보 조회", description = "회원 정보를 조회하는 API입니다.")
+    @GetMapping("/profile")
+    public CommonResponse<MemberDetailResponse> getMemberDetail(
+    ) {
+        MemberDetailResponse response = memberService.getMemberDetail();
+        return CommonResponse.ok(response);
+    }
+
+    @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정하는 API입니다.")
+    @PutMapping(value = "/profile", consumes = { "multipart/form-data" })
+    public CommonResponse<MemberDetailResponse> updateMemberProfile(
+            @ModelAttribute @Validated MemberUpdateRequest request
+    ) {
+        MemberDetailResponse response = memberService.updateMemberProfile(request.toCommand());
+        return CommonResponse.ok(response);
     }
 }

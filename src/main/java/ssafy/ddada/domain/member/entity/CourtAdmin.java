@@ -28,6 +28,10 @@ public class CourtAdmin extends BaseEntity implements MemberInterface{
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
     // 회원가입 메서드
     public void signupMember(String email, String password, String number) {
         this.email = email;
