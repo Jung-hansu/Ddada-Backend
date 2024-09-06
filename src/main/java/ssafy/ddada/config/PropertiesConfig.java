@@ -12,6 +12,7 @@ import ssafy.ddada.common.properties.RedisProperties;
         CorsProperties.class,
         KakaoLoginProperties.class,
         JwtProperties.class,
+        CoolSmsConfig.class,
         RedisProperties.class
 })
 public class PropertiesConfig {

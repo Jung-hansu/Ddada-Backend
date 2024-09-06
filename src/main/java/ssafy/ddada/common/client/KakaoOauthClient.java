@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import ssafy.cooingbe.common.client.response.KakaoTokenInfo;
-import ssafy.cooingbe.config.auth.KakaoTokenErrorDecoder;
-import ssafy.cooingbe.config.auth.PublicKeys;
+import ssafy.ddada.common.client.response.KakaoTokenInfo;
+import ssafy.ddada.config.auth.KakaoTokenErrorDecoder;
+import ssafy.ddada.config.auth.PublicKeys;
 
 @FeignClient(
         name = "KakaoTokenClient",

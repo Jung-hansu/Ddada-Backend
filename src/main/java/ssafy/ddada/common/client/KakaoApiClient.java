@@ -3,8 +3,8 @@ package ssafy.ddada.common.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import ssafy.cooingbe.common.client.response.KakaoTokenExpireResponse;
-import ssafy.cooingbe.config.auth.KakaoTokenErrorDecoder;
+import ssafy.ddada.common.client.response.KakaoTokenExpireResponse;
+import ssafy.ddada.config.auth.KakaoTokenErrorDecoder;
 
 @FeignClient(
         name = "KakaoLogoutClient",

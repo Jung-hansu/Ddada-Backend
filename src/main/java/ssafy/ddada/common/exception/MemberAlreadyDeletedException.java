@@ -4,6 +4,6 @@ import ssafy.ddada.common.exception.errorcode.MemberErrorCode;
 
 public class MemberAlreadyDeletedException extends BaseException {
     public MemberAlreadyDeletedException() {
-        super(MemberErrorCode.ALREADY_DELETED_MEMBER);
+        super(MemberErrorCode.MEMBER_ALREADY_DELETED);
     }
 }
