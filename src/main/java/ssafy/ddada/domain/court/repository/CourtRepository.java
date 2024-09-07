@@ -1,0 +1,19 @@
+package ssafy.ddada.domain.court.repository;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import ssafy.ddada.domain.court.entity.Court;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CourtRepository extends JpaRepository<Court, Long> {
+
+    Page<Court> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(String keyword, Pageable pageable);
+
+}
