@@ -30,7 +30,7 @@ public class Set extends BaseMatchEntity {
     @Column(nullable = false)
     private Integer setNumber;
 
-    @OneToMany(mappedBy = "set", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "set", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Score> scores = new ArrayList<>();
 
     public Set (Match match, Team winner, Integer setNumber) {

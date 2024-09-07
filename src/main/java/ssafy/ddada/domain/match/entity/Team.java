@@ -20,11 +20,19 @@ public class Team extends BaseMatchEntity {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    @Column(nullable = false)
     private Member player1;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member player2;
+
+    public Team(Member player1, Member player2) {
+        this.player1 = player1;
+        this.player2 = player2;
+    }
+
+    public static Team createTeam(Member player1, Member player2) {
+        return new Team(player1, player2);
+    }
 
 }

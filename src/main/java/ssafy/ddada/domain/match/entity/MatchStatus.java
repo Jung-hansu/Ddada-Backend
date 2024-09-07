@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public enum MatchStatus {
 
+    CREATED("모집중"),
     RESERVED("예약됨"),
     PLAYING("진행중"),
     FINISHED("종료"),

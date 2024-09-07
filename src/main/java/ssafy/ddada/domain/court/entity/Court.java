@@ -18,4 +18,10 @@ public class Court extends BaseMatchEntity {
     @Column(name = "court_id")
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String address;
+
 }
