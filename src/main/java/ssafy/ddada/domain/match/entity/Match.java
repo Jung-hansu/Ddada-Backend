@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.manager.entity.Manager;
+import ssafy.ddada.domain.member.manager.entity.Manager;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -8,8 +8,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ssafy.ddada.common.exception.ExpiredTokenException;
-import ssafy.ddada.common.exception.IncorrectIssuerTokenException;
+import ssafy.ddada.common.exception.IssuerTokenIncorrectException;
+import ssafy.ddada.common.exception.TokenExpiredException;
 import ssafy.ddada.common.exception.InvalidSignatureTokenException;
 import ssafy.ddada.common.exception.InvalidTokenException;
 import ssafy.ddada.domain.auth.command.KakaoLoginCommand;
@@ -48,9 +48,9 @@ public class JwtParser {
         } catch (SignatureException e) {
             throw new InvalidSignatureTokenException();
         } catch (IncorrectClaimException e) {
-            throw new IncorrectIssuerTokenException();
+            throw new IssuerTokenIncorrectException();
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException();
+            throw new TokenExpiredException();
         } catch (Exception e) {
             throw new InvalidTokenException();
         }
@@ -60,7 +60,7 @@ public class JwtParser {
         PublicKey key = kakaoLoginCommand.publicKeys().getKeys().stream()
                 .filter(k -> k.getKid().equals(kakaoLoginCommand.kid()))
                 .findFirst()
-                .orElseThrow(IncorrectIssuerTokenException::new);
+                .orElseThrow(IssuerTokenIncorrectException::new);
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(PublicKeyGenerator.execute(key))
@@ -73,9 +73,9 @@ public class JwtParser {
         } catch (SignatureException e) {
             throw new InvalidSignatureTokenException();
         } catch (IncorrectClaimException e) {
-            throw new IncorrectIssuerTokenException();
+            throw new IssuerTokenIncorrectException();
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException();
+            throw new TokenExpiredException();
         } catch (Exception e) {
             throw new InvalidTokenException();
         }

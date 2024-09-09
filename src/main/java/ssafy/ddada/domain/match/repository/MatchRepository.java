@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
-import ssafy.ddada.domain.manager.entity.Manager;
+import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 

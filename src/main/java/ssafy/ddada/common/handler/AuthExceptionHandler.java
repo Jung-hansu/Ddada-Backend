@@ -11,31 +11,31 @@ import ssafy.ddada.common.exception.*;
 @RestControllerAdvice
 @Slf4j
 public class AuthExceptionHandler {
-    @ExceptionHandler(IncorrectIssuerTokenException.class)
+    @ExceptionHandler(IssuerTokenIncorrectException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public CommonResponse handleIncorrectIssuerTokenException(IncorrectIssuerTokenException e) {
-        log.error("IncorrectIssuerTokenException", e);
+    public CommonResponse handleIncorrectIssuerTokenException(IssuerTokenIncorrectException e) {
+        log.error("IssuerTokenIncorrectException", e);
         return CommonResponse.unauthorized(e.getErrorCode());
     }
 
-    @ExceptionHandler(ExpiredTokenException.class)
+    @ExceptionHandler(TokenExpiredException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public CommonResponse handleExpiredTokenException(ExpiredTokenException e) {
-        log.error("ExpiredTokenException", e);
+    public CommonResponse handleExpiredTokenException(TokenExpiredException e) {
+        log.error("TokenExpiredException", e);
         return CommonResponse.unauthorized(e.getErrorCode());
     }
 
-    @ExceptionHandler(NotMatchedTokenTypeException.class)
+    @ExceptionHandler(TokenTypeNotMatchedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleNotMatchedTokenTypeException(NotMatchedTokenTypeException e) {
-        log.error("NotMatchedTokenTypeException", e);
+    public CommonResponse handleNotMatchedTokenTypeException(TokenTypeNotMatchedException e) {
+        log.error("TokenTypeNotMatchedException", e);
         return CommonResponse.unauthorized(e.getErrorCode());
     }
 
-    @ExceptionHandler(FilterErrorException.class)
+    @ExceptionHandler(FilterException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public CommonResponse handleFilterErrorException(FilterErrorException e) {
-        log.error("FilterErrorException", e);
+    public CommonResponse handleFilterErrorException(FilterException e) {
+        log.error("FilterException", e);
         return CommonResponse.internalServerError(e.getErrorCode());
     }
 

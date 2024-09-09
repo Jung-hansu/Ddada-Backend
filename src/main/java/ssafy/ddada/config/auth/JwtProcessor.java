@@ -6,14 +6,14 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ssafy.ddada.common.exception.ExpiredTokenException;
+import ssafy.ddada.common.exception.TokenExpiredException;
 import ssafy.ddada.common.exception.InvalidSignatureTokenException;
 import ssafy.ddada.common.exception.InvalidTokenException;
-import ssafy.ddada.common.exception.NotMatchedTokenTypeException;
+import ssafy.ddada.common.exception.TokenTypeNotMatchedException;
 import ssafy.ddada.common.properties.JwtProperties;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.entity.MemberInterface;
-import ssafy.ddada.domain.member.entity.MemberRole;
+import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
 import ssafy.ddada.domain.redis.RefreshTokenRedisRepository;
 
@@ -40,7 +40,7 @@ public class JwtProcessor {
     public Jws<Claims> getClaim(String token) {
         log.debug("token : {}", token);
         if (isTokenExpired(token)) {
-            throw new ExpiredTokenException();
+            throw new TokenExpiredException();
         }
         try {
             return Jwts.parser()
@@ -50,7 +50,7 @@ public class JwtProcessor {
         } catch (SignatureException e) {
             throw new InvalidSignatureTokenException();
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException();
+            throw new TokenExpiredException();
         } catch (Exception e) {
             throw new InvalidTokenException();
         }
@@ -130,7 +130,7 @@ public class JwtProcessor {
 
     private void checkType(Claims claims, String type) {
         if (!type.equals(String.valueOf(claims.get("type")))) {
-            throw new NotMatchedTokenTypeException();
+            throw new TokenTypeNotMatchedException();
         }
     }
 }

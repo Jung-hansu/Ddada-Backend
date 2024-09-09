@@ -18,17 +18,17 @@ public class MemberExceptionHandler {
         return CommonResponse.internalServerError(e.getErrorCode());
     }
 
-    @ExceptionHandler(NotFoundMemberException.class)
+    @ExceptionHandler(MemberNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleNotFoundMemberException(NotFoundMemberException e) {
-        log.error("NotFoundMemberException Error", e);
+    public CommonResponse handleNotFoundMemberException(MemberNotFoundException e) {
+        log.error("MemberNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(NotFoundTempMember.class)
+    @ExceptionHandler(TempMemberNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleNotFoundTempMember(NotFoundTempMember e) {
-        log.error("NotFoundTempMember Error", e);
+    public CommonResponse handleNotFoundTempMember(TempMemberNotFoundException e) {
+        log.error("TempMemberNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
@@ -46,10 +46,10 @@ public class MemberExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(ImageTooLargeException.class)
+    @ExceptionHandler(TooLargeImageException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleImageTooLargeException(ImageTooLargeException e) {
-        log.error("ImageTooLargeException Error", e);
+    public CommonResponse handleImageTooLargeException(TooLargeImageException e) {
+        log.error("TooLargeImageException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 

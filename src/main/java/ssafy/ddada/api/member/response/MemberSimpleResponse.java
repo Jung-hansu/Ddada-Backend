@@ -1,8 +1,8 @@
 package ssafy.ddada.api.member.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.member.entity.Gender;
-import ssafy.ddada.domain.member.entity.Member;
+import ssafy.ddada.domain.member.common.Gender;
+import ssafy.ddada.domain.member.common.Player;
 
 @Schema(description = "멤버 정보 요약 응답 DTO")
 public record MemberSimpleResponse(
@@ -13,11 +13,11 @@ public record MemberSimpleResponse(
         @Schema(description = "멤버 성별")
         Gender gender
 ) {
-    public static MemberSimpleResponse from(Member member) {
+    public static MemberSimpleResponse from(Player player) {
         return new MemberSimpleResponse(
-                member.getId(),
-                member.getNickname(),
-                member.getGender()
+                player.getId(),
+                player.getNickname(),
+                player.getGender()
         );
     }
 }
