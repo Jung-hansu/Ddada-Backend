@@ -13,7 +13,7 @@ public record MemberSignupCommand(
         LocalDate birth,
         MultipartFile imageUrl,
         String description,
-        Integer number
+        String number
 ) {
 
 }

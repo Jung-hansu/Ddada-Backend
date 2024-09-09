@@ -1,6 +1,7 @@
 package ssafy.ddada.api.court;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import ssafy.ddada.domain.court.service.CourtService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/courts")
+@Tag(name = "Court", description = "시설관리")
 public class CourtController {
 
     private final CourtService courtService;
