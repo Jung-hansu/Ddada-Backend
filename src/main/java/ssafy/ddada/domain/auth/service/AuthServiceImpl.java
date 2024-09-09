@@ -18,11 +18,10 @@ import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.common.MemberRole;
-import ssafy.ddada.domain.member.common.Player;
 import ssafy.ddada.domain.member.common.MemberInterface;
-import ssafy.ddada.domain.member.courtadmin.entity.CourtAdmin;
 import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
+import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.Optional;
@@ -181,23 +180,18 @@ public class AuthServiceImpl implements AuthService {
         Long id = decodedJwtToken.memberId();
         log.info(">>> role: {}, id: {}", role, id);
 
-        switch (role) {
-            case "일반 유저":
-                return playerRepository.findById(id)
-                        .map(member -> (MemberInterface) member);
-
-            case "코트관리자":
-                return courtAdminRepository.findById(id)
-                        .map(courtAdmin -> (MemberInterface) courtAdmin);
-
-            case "매니저":
-                return managerRepository.findById(id)
-                        .map(manager -> (MemberInterface) manager);
-
-            default:
-                throw new IllegalArgumentException("Unknown role: " + role);
-        }
+        return switch (role) {
+            case "일반 유저" -> playerRepository.findById(id)
+                    .map(member -> (MemberInterface) member);
+            case "코트관리자" -> courtAdminRepository.findById(id)
+                    .map(courtAdmin -> (MemberInterface) courtAdmin);
+            case "매니저" -> managerRepository.findById(id)
+                    .map(manager -> (MemberInterface) manager);
+            default -> throw new IllegalArgumentException("Unknown role: " + role);
+        };
     }
+
+
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
         log.info(">>> code: {}", code);

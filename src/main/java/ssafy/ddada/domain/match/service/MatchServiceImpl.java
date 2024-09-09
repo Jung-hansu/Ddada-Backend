@@ -11,7 +11,7 @@ import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.command.MatchCreateCommand;
 import ssafy.ddada.domain.match.command.MatchResultCommand;
@@ -94,6 +94,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional
     public void updateTeamPlayer(Long matchId, TeamChangePlayerCommand command) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(TeamNotFoundException::new);
@@ -148,6 +149,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional
     public void allocateManager(Long matchId, Long managerId) {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
@@ -155,6 +157,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional
     public void saveMatch(Long matchId, MatchResultCommand command) {
 //        TODO: 서비스 로직 구현하기
     }

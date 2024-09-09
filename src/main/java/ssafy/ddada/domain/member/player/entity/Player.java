@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.member.common;
+package ssafy.ddada.domain.member.player.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ssafy.ddada.domain.member.common.BaseMemberEntity;
+import ssafy.ddada.domain.member.common.Gender;
+import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 
 import java.time.LocalDate;
@@ -15,14 +19,14 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 @AllArgsConstructor(access = AccessLevel.PROTECTED)  // 모든 필드를 포함한 생성자 (protected)
-public class Player extends BaseEntity implements MemberInterface{
+public class Player extends BaseMemberEntity implements MemberInterface {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
-    @Column(nullable = true, unique = true)
+    @Column(unique = true)
     private String email;
 
     private String password;
@@ -32,9 +36,7 @@ public class Player extends BaseEntity implements MemberInterface{
 
     private String profileImg;
 
-    private Integer number;
-
-    private Boolean isDeleted = false;  // 기본값 설정
+    private String number;
 
     private Gender gender;
 
@@ -42,12 +44,8 @@ public class Player extends BaseEntity implements MemberInterface{
 
     private String description;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MemberRole role;
-
     // 명시적인 생성자 추가 (null 값 허용)
-    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, Integer number, String description, MemberRole role) {
+    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, String number, String description, MemberRole role) {
         this.email = email;
         this.gender = gender;
         this.birth = birth;
@@ -84,23 +82,22 @@ public class Player extends BaseEntity implements MemberInterface{
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
         this.isDeleted = false;
-        this.role = MemberRole.USER;
+        this.role = MemberRole.PLAYER;
 
         // 현재 객체 (Player) 반환
         return this;
     }
 
-    public void setRoleAsUser() {
-        this.role = MemberRole.USER;
-    }
-
-    // 회원 삭제 메서드: 삭제 플래그 설정
-    public void deleteMember() {
-        this.isDeleted = true;
-    }
-
     public void updateProfile(String nickname, String profileImagePath) {
         this.nickname = nickname;
         this.profileImg = profileImagePath;
+    }
+
+    // 저장 전에 기본 role 설정
+    @Override
+    public void prePersist() {
+        if (this.role == null) {
+            this.role = MemberRole.PLAYER;  // 기본값 설정
+        }
     }
 }

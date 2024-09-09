@@ -18,7 +18,7 @@ import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 import ssafy.ddada.domain.member.player.command.UpdateProfileCommand;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import com.amazonaws.HttpMethod;
@@ -57,7 +57,7 @@ public class PlayerServiceImpl implements PlayerService {
                     null,
                     signupCommand.number(),
                     signupCommand.description(),
-                    MemberRole.USER
+                    MemberRole.PLAYER
             );
             playerRepository.save(tempPlayer);
         }
@@ -137,7 +137,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public String deleteMember() {
-        getCurrentLoggedInMember().deleteMember();
+        getCurrentLoggedInMember().delete();
         return "회원 탈퇴가 성공적으로 처리되었습니다.";
     }
 

@@ -1,7 +1,7 @@
 package ssafy.ddada.domain.member.player.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 
 import java.util.Optional;
 

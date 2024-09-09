@@ -1,6 +1,7 @@
 package ssafy.ddada.api.manager;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import ssafy.ddada.domain.match.service.MatchService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/manager")
+@Tag(name = "Manager", description = "매니저관리")
 public class ManagerController {
 
     private final ManagerService managerService;

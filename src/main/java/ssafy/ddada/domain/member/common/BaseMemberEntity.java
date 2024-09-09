@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.member.manager.entity;
+package ssafy.ddada.domain.member.common;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,12 +14,27 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseManagerEntity {
+public abstract class BaseMemberEntity {
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    protected MemberRole role;
+
+    @Column(nullable = false)
+    protected Boolean isDeleted;
 
     @CreatedDate
     @Column(updatable = false)
-    LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
 
     @LastModifiedDate
-    LocalDateTime updatedAt;
+    protected LocalDateTime updatedAt;
+
+    public void delete(){
+        this.isDeleted = true;
+    }
+
+    @PrePersist
+    public abstract void prePersist();
+
 }
