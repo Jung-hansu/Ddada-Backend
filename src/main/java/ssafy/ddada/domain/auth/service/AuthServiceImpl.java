@@ -181,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
         log.info(">>> role: {}, id: {}", role, id);
 
         return switch (role) {
-            case "일반 유저" -> playerRepository.findById(id)
+            case "선수" -> playerRepository.findById(id)
                     .map(member -> (MemberInterface) member);
             case "코트관리자" -> courtAdminRepository.findById(id)
                     .map(courtAdmin -> (MemberInterface) courtAdmin);
@@ -190,8 +190,6 @@ public class AuthServiceImpl implements AuthService {
             default -> throw new IllegalArgumentException("Unknown role: " + role);
         };
     }
-
-
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
         log.info(">>> code: {}", code);
