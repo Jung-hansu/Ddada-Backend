@@ -13,8 +13,8 @@ public enum MatchStatus {
     CREATED("모집중"),
     RESERVED("예약됨"),
     PLAYING("진행중"),
-    FINISHED("종료"),
-    CANCELED("취소");
+    FINISHED("종료됨"),
+    CANCELED("취소됨");
 
     private final String value;
 
