@@ -18,7 +18,7 @@ import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 import ssafy.ddada.domain.member.player.command.UpdateProfileCommand;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import com.amazonaws.HttpMethod;

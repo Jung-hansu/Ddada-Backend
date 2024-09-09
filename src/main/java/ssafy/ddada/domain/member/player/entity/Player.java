@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.member.common;
+package ssafy.ddada.domain.member.player.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ssafy.ddada.domain.member.common.BaseMemberEntity;
+import ssafy.ddada.domain.member.common.Gender;
+import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 
 import java.time.LocalDate;
@@ -15,7 +19,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 @AllArgsConstructor(access = AccessLevel.PROTECTED)  // 모든 필드를 포함한 생성자 (protected)
-public class Player extends BaseMemberEntity implements MemberInterface{
+public class Player extends BaseMemberEntity implements MemberInterface {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

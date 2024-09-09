@@ -2,7 +2,7 @@ package ssafy.ddada.api.member.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.member.common.Gender;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 
 @Schema(description = "멤버 정보 요약 응답 DTO")
 public record MemberSimpleResponse(

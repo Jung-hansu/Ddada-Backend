@@ -35,13 +35,13 @@ public class MemberSignupRequest{
         String password;
 
         @Schema(description = "핸드폰 번호", example = "010-1234-5678")
-        Integer phoneNumber;
+        String number;
 
         @Schema(description = "자기소개", example = "배드민턴 초보입니다")
         String description;
 
 
         public MemberSignupCommand toCommand() {
-                return new MemberSignupCommand(nickname, email, gender, password, birth, profileImage, description, phoneNumber);
+                return new MemberSignupCommand(nickname, email, gender, password, birth, profileImage, description, number);
         }
 }

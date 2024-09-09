@@ -11,7 +11,7 @@ import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.command.MatchCreateCommand;
 import ssafy.ddada.domain.match.command.MatchResultCommand;
