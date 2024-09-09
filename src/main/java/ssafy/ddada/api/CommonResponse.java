@@ -12,7 +12,7 @@ public record CommonResponse<T>(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         T result
 ) {
-    public static <T> CommonResponse<T> ok(T data, String message) {
+    public static <T> CommonResponse<T> ok(String message, T data) {
         return new CommonResponse<>(OK.toString(), message, data);
     }
     public static <T> CommonResponse<T> ok(T data) {

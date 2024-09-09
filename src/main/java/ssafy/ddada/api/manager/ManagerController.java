@@ -51,7 +51,7 @@ public class ManagerController {
 
 //        TODO: 경기 Request 받아 저장 기능 만들기
         matchService.saveMatch(matchId, request.toCommand());
-        return CommonResponse.ok(null, "저장되었습니다.");
+        return CommonResponse.ok("저장되었습니다.", null);
     }
 
 }
