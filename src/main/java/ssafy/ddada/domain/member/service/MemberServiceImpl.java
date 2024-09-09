@@ -86,6 +86,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberDetailResponse getMemberDetail() {
         Member currentLoggedInMember = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInMember.getProfileImg();
+        log.info(">>>> role" + SecurityUtil.getLoginMemberRole());
         log.info(">>>>" + profileImagePath);
 
         String base64Image = "";

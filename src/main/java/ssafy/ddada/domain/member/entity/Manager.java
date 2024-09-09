@@ -9,8 +9,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
-public class Manager extends BaseEntity implements MemberInterface{
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+public class Manager extends BaseEntity implements MemberInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -50,10 +50,19 @@ public class Manager extends BaseEntity implements MemberInterface{
         this.number = number;
         this.description = description;
         this.isDeleted = false;
+        this.role = MemberRole.MANAGER;  // 기본값 설정
     }
 
     // 회원 삭제 메서드
     public void deleteMember() {
         this.isDeleted = true;
+    }
+
+    // 저장 전에 기본 role 설정
+    @PrePersist
+    public void prePersist() {
+        if (this.role == null) {
+            this.role = MemberRole.MANAGER;  // 기본값 설정
+        }
     }
 }

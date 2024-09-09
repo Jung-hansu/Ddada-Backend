@@ -84,7 +84,7 @@ public class Member extends BaseEntity implements MemberInterface{
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
         this.isDeleted = false;
-        this.setRoleAsUser();
+        this.role = MemberRole.USER;
 
         // 현재 객체 (Member) 반환
         return this;

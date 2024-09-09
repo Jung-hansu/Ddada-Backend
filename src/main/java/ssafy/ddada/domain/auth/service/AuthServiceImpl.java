@@ -11,6 +11,7 @@ import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
@@ -95,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
-        MemberInterface member = findMemberById(decodedJwtToken.memberId())
+        MemberInterface member = findMemberById(decodedJwtToken)
                 .orElseThrow(InvalidTokenException::new);
 
         String newAccessToken = jwtProcessor.generateAccessToken(member);
@@ -166,19 +167,30 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
-    private Optional<MemberInterface> findMemberById(Long id) {
-        if (memberRepository.existsById(id)) {
-            return Optional.of(memberRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
-        } else if (courtAdminRepository.existsById(id)) {
-            return Optional.of(courtAdminRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
-        } else if (managerRepository.existsById(id)) {
-            return Optional.of(managerRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
+    private Optional<MemberInterface> findMemberById(DecodedJwtToken decodedJwtToken) {
+        String role = decodedJwtToken.role();
+        Long id = decodedJwtToken.memberId();
+        log.info(">>> role: {}, id: {}", role, id);
+
+        switch (role) {
+            case "일반 유저":
+                return memberRepository.findById(id)
+                        .map(member -> (MemberInterface) member);
+
+            case "코트관리자":
+                return courtAdminRepository.findById(id)
+                        .map(courtAdmin -> (MemberInterface) courtAdmin);
+
+            case "매니저":
+                return managerRepository.findById(id)
+                        .map(manager -> (MemberInterface) manager);
+
+            default:
+                throw new IllegalArgumentException("Unknown role: " + role);
         }
-        return Optional.empty();
     }
+
+
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
         log.info(">>> code: {}", code);
