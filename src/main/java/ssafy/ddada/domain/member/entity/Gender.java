@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 @Getter
 @RequiredArgsConstructor
 public enum Gender {
-    MALE("MALE"), FEMALE("FEMALE");
+    MALE("MALE"), FEMALE("FEMALE"), MIXED("MIXED"), NONE("NONE");
 
     private final String value;
 
