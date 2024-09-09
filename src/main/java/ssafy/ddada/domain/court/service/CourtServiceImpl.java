@@ -6,9 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ssafy.ddada.api.court.response.CourtSearchResponse;
+import ssafy.ddada.api.court.response.CourtDetailResponse;
+import ssafy.ddada.api.court.response.CourtSimpleResponse;
+import ssafy.ddada.common.exception.CourtNotFoundException;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.court.entity.SearchedCourt;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
 @Slf4j
@@ -19,12 +20,21 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
 
     @Override
-    public CourtSearchResponse getCourts(String keyword, int page, int size) {
+    public Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<SearchedCourt> courts = courtRepository
-                .findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(keyword, pageable)
-                .map(SearchedCourt::from);
-        return CourtSearchResponse.of(courts);
+
+        if (keyword == null || keyword.isEmpty()) {
+            return courtRepository.findAllCourtPreviews(pageable);
+        } else {
+            return courtRepository.findCourtPreviewsByKeyword(keyword, pageable);
+        }
+    }
+
+    @Override
+    public CourtDetailResponse getCourtById(Long courtId) {
+        Court court = courtRepository.findById(courtId)
+                .orElseThrow(CourtNotFoundException::new);
+        return CourtDetailResponse.from(court);
     }
 
 }

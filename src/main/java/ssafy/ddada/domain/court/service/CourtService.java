@@ -1,9 +1,12 @@
 package ssafy.ddada.domain.court.service;
 
-import ssafy.ddada.api.court.response.CourtSearchResponse;
+import org.springframework.data.domain.Page;
+import ssafy.ddada.api.court.response.CourtDetailResponse;
+import ssafy.ddada.api.court.response.CourtSimpleResponse;
 
 public interface CourtService {
 
-    CourtSearchResponse getCourts(String keyword, int page, int size);
+    Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, int page, int size);
+    CourtDetailResponse getCourtById(Long courtId);
 
 }

@@ -24,4 +24,8 @@ public class Court extends BaseMatchEntity {
     @Column(nullable = false)
     private String address;
 
+    private String contactNumber;
+
+    private String description;
+
 }
