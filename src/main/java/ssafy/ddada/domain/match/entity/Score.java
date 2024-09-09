@@ -16,21 +16,14 @@ public class Score extends BaseMatchEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "set_id")
-    @Column(nullable = false)
+    @JoinColumn(name = "set_id", nullable = false)
     private Set set;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member earnedMember;
+    private String earnedMember;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member missedMember1;
+    private String missedMember1;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member missedMember2;
+    private String missedMember2;
 
     @Column(nullable = false)
     private Integer scoreNumber;
@@ -39,7 +32,7 @@ public class Score extends BaseMatchEntity {
 
     private MissedType missedType;
 
-    public Score(Set set, Member earnedMember, Member missedMember1, Member missedMember2, Integer scoreNumber, EarnedType earnedType, MissedType missedType) {
+    public Score(Set set, String earnedMember, String missedMember1, String missedMember2, Integer scoreNumber, EarnedType earnedType, MissedType missedType) {
         this.set = set;
         this.earnedMember = earnedMember;
         this.missedMember1 = missedMember1;

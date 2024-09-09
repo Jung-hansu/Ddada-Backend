@@ -1,22 +1,18 @@
 package ssafy.ddada.api.match.response;
 
-import ssafy.ddada.domain.member.entity.Member;
+import ssafy.ddada.domain.match.entity.Team;
+import ssafy.ddada.api.member.response.MemberSimpleResponse;
 
 public record TeamDetailResponse(
         Long id,
-        Player player1,
-        Player player2
+        MemberSimpleResponse player1,
+        MemberSimpleResponse player2
 ) {
-    public record Player(
-            Long id,
-            String nickname
-    ) { }
-
-    public static TeamDetailResponse of(Long teamId, Member player1, Member player2) {
+    public static TeamDetailResponse from(Team team){
         return new TeamDetailResponse(
-                teamId,
-                new Player(player1.getId(), player1.getNickname()),
-                new Player(player2.getId(), player2.getNickname())
+                team.getId(),
+                MemberSimpleResponse.from(team.getPlayer1()),
+                MemberSimpleResponse.from(team.getPlayer2())
         );
     }
 }

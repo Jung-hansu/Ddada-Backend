@@ -18,25 +18,19 @@ public class Set extends BaseMatchEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "match_id")
-    @Column(nullable = false)
+    @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    @OneToOne
-    @JoinColumn(name = "team_id")
-    @Column(nullable = false)
-    private Team winner;
+    private Integer setWinnerTeamNumber;
 
     @Column(nullable = false)
     private Integer setNumber;
 
+    private Integer team1Score;
+
+    private Integer team2Score;
+
     @OneToMany(mappedBy = "set", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Score> scores = new ArrayList<>();
-
-    public Set (Match match, Team winner, Integer setNumber) {
-        this.match = match;
-        this.winner = winner;
-        this.setNumber = setNumber;
-    }
 
 }

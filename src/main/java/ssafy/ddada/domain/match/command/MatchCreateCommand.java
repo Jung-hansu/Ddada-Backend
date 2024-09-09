@@ -1,12 +1,11 @@
 package ssafy.ddada.domain.match.command;
 
-import java.time.LocalDate;
+import ssafy.ddada.domain.match.entity.MatchType;
+
+import java.time.LocalDateTime;
 
 public record MatchCreateCommand(
     Long court_id,
-    Long team1_id,
-    Long team2_id,
-    Long manager_id,
-    Boolean isSingle,
-    LocalDate matchDate
+    MatchType matchType,
+    LocalDateTime matchDateTime
 ) { }

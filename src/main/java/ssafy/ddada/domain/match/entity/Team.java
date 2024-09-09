@@ -1,10 +1,7 @@
 package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ssafy.ddada.domain.member.entity.Member;
 
 @Getter
@@ -19,20 +16,19 @@ public class Team extends BaseMatchEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "player1_id")
     private Member player1;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "player2_id")
     private Member player2;
 
-    public Team(Member player1, Member player2) {
-        this.player1 = player1;
-        this.player2 = player2;
+    public static Team createNewTeam(Member creator){
+        return new Team(null, creator, null);
     }
 
-    public static Team createTeam(Member player1, Member player2) {
-        return new Team(player1, player2);
+    public static Team createNewTeam(){
+        return new Team();
     }
 
 }
