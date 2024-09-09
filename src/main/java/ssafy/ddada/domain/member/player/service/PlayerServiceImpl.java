@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.member.response.MemberDetailResponse;
 import ssafy.ddada.api.member.response.MemberSignupResponse;
 import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.properties.S3Properties;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
@@ -39,9 +40,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final JwtProcessor jwtProcessor;
     private final PasswordEncoder passwordEncoder;
     private final AmazonS3 amazonS3Client;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucketName;
+    private final S3Properties s3Properties;
 
     @Override
     @Transactional
@@ -178,8 +177,8 @@ public class PlayerServiceImpl implements PlayerService {
         String fileName = "profileImg/" + memberId + extension;
 
         try {
-            amazonS3Client.putObject(new PutObjectRequest(bucketName, fileName, image.getInputStream(), null));
-            return amazonS3Client.getUrl(bucketName, fileName).toString();
+            amazonS3Client.putObject(new PutObjectRequest(s3Properties.s3().bucket(), fileName, image.getInputStream(), null));
+            return amazonS3Client.getUrl(s3Properties.s3().bucket(), fileName).toString();
         } catch (IOException e) {
             throw new RuntimeException("이미지 업로드에 실패했습니다.", e);
         }
@@ -187,7 +186,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     private String getPresignedUrlFromS3(String imagePath) {
         try {
-            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, imagePath)
+            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(s3Properties.s3().bucket(), imagePath)
                     .withMethod(HttpMethod.GET)
                     .withExpiration(getExpirationTime());
 
