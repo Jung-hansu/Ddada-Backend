@@ -2,7 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ssafy.ddada.domain.member.entity.Member;
+import ssafy.ddada.domain.member.common.Player;
 
 @Getter
 @Entity
@@ -17,13 +17,13 @@ public class Team extends BaseMatchEntity {
 
     @ManyToOne
     @JoinColumn(name = "player1_id")
-    private Member player1;
+    private Player player1;
 
     @ManyToOne
     @JoinColumn(name = "player2_id")
-    private Member player2;
+    private Player player2;
 
-    public static Team createNewTeam(Member creator){
+    public static Team createNewTeam(Player creator){
         return new Team(null, creator, null);
     }
 

@@ -1,7 +1,7 @@
 package ssafy.ddada.api.manager.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.manager.entity.Manager;
+import ssafy.ddada.domain.member.manager.entity.Manager;
 
 @Schema(description = "매니저 세부 정보 조회 응답 DTO")
 public record ManagerDetailResponse(

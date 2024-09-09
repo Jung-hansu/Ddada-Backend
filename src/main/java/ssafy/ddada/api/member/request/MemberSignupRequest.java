@@ -1,15 +1,13 @@
 package ssafy.ddada.api.member.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
-import ssafy.ddada.domain.member.entity.Gender;
-import ssafy.ddada.domain.member.command.MemberSignupCommand;
+import ssafy.ddada.domain.member.common.Gender;
+import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 
 import java.time.LocalDate;
 

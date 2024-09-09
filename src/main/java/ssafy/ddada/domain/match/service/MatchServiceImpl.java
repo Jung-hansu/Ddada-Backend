@@ -11,7 +11,8 @@ import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.manager.entity.Manager;
+import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.command.MatchCreateCommand;
 import ssafy.ddada.domain.match.command.MatchResultCommand;
 import ssafy.ddada.domain.match.command.MatchStatusChangeCommand;
@@ -21,9 +22,8 @@ import ssafy.ddada.domain.match.entity.Set;
 import ssafy.ddada.domain.match.entity.Team;
 import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.match.repository.TeamRepository;
-import ssafy.ddada.domain.member.entity.Member;
-import ssafy.ddada.domain.manager.repository.ManagerRepository;
-import ssafy.ddada.domain.member.repository.MemberRepository;
+import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
+import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
 public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
-    private final MemberRepository memberRepository;
+    private final PlayerRepository playerRepository;
     private final CourtRepository courtRepository;
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
@@ -125,8 +125,8 @@ public class MatchServiceImpl implements MatchService {
     public MatchDetailResponse createMatch(Long creatorId, MatchCreateCommand command) {
         Court court = courtRepository.findById(command.court_id())
                 .orElseThrow(CourtNotFoundException::new);
-        Member creator = memberRepository.findById(creatorId)
-                .orElseThrow(NotFoundMemberException::new);
+        Player creator = playerRepository.findById(creatorId)
+                .orElseThrow(MemberNotFoundException::new);
         Team team1 = teamRepository.save(Team.createNewTeam(creator));
         Team team2 = teamRepository.save(Team.createNewTeam());
         Match match = Match.createNewMatch(

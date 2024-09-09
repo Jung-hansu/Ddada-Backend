@@ -11,16 +11,15 @@ import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
-import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.entity.Member;
-import ssafy.ddada.domain.member.entity.MemberInterface;
-import ssafy.ddada.domain.member.repository.CourtAdminRepository;
-import ssafy.ddada.domain.manager.repository.ManagerRepository;
-import ssafy.ddada.domain.member.repository.MemberRepository;
+import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
+import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
+import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtParser jwtParser;
     private final JwtProcessor jwtProcessor;
     private final PasswordEncoder passwordEncoder;
-    private final MemberRepository memberRepository;
+    private final PlayerRepository playerRepository;
     private final CourtAdminRepository courtAdminRepository;
     private final ManagerRepository managerRepository;
     private final SmsCertificationUtil smsCertificationUtil;
@@ -60,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
 
                 MemberInterface kakaoMember = findMemberByEmail(userInfo.email())
-                        .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + userInfo.email()));
+                        .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + userInfo.email()));
 
                 tokens = generateTokens(kakaoMember);
                 jwtProcessor.saveRefreshToken(tokens);
@@ -73,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
                 MemberInterface basicMember = findMemberByEmail(email)
                         .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
-                if (!passwordEncoder.matches(password, ((Member) basicMember).getPassword())) {
+                if (!passwordEncoder.matches(password, ((Player) basicMember).getPassword())) {
                     throw new InvalidCredentialsException("Invalid email or password");
                 }
 
@@ -82,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
                 break;
 
             default:
-                throw new NotSupportedLoginTypeException();
+                throw new LoginTypeNotSupportedException();
         }
 
         return AuthResponse.of(tokens.accessToken(), tokens.refreshToken());
@@ -129,27 +128,27 @@ public class AuthServiceImpl implements AuthService {
     private Boolean notRegisteredMember(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
 
-        if (memberRepository.existsByEmail(userInfo.email()) ||
+        if (playerRepository.existsByEmail(userInfo.email()) ||
                 courtAdminRepository.existsByEmail(userInfo.email()) ||
                 managerRepository.existsByEmail(userInfo.email())) {
             return isTempMember(findMemberByEmail(userInfo.email())
                     .orElseThrow(AbnormalLoginProgressException::new));
         }
 
-        memberRepository.save(Member.createTempMember(userInfo.email()));
+        playerRepository.save(Player.createTempMember(userInfo.email()));
         return true;
     }
 
     private Optional<MemberInterface> findMemberByEmail(String email) {
-        if (memberRepository.existsByEmail(email)) {
-            return Optional.ofNullable(memberRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + email)));
+        if (playerRepository.existsByEmail(email)) {
+            return Optional.ofNullable(playerRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
         } else if (courtAdminRepository.existsByEmail(email)) {
             return Optional.ofNullable(courtAdminRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + email)));
+                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
         } else if (managerRepository.existsByEmail(email)) {
             return Optional.ofNullable(managerRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + email)));
+                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
         }
         return Optional.empty();
     }
@@ -161,8 +160,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Boolean isTempMember(Object member) {
-        if (member instanceof Member) {
-            return ((Member) member).getNickname() == null;
+        if (member instanceof Player) {
+            return ((Player) member).getNickname() == null;
         }
         return true;
     }
@@ -174,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
 
         switch (role) {
             case "일반 유저":
-                return memberRepository.findById(id)
+                return playerRepository.findById(id)
                         .map(member -> (MemberInterface) member);
 
             case "코트관리자":

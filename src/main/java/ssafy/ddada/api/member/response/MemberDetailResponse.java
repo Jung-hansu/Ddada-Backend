@@ -1,7 +1,7 @@
 package ssafy.ddada.api.member.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.member.entity.Gender;
+import ssafy.ddada.domain.member.common.Gender;
 
 public record MemberDetailResponse(
         @Schema(description = "프로필 이미지 경로", example = "https://my-bucket.s3.amazonaws.com/sample-image.jpg\n")

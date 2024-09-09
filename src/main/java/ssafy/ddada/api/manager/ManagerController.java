@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
-import ssafy.ddada.api.match.response.MatchDetailResponse;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.domain.manager.service.ManagerService;
+import ssafy.ddada.domain.member.manager.service.ManagerService;
 import ssafy.ddada.domain.match.service.MatchService;
 
 @Slf4j

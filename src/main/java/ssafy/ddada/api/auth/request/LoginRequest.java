@@ -3,7 +3,6 @@ package ssafy.ddada.api.auth.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import ssafy.ddada.domain.auth.command.LoginCommand;
-import ssafy.ddada.domain.member.command.MemberLoginCommand;
 
 public record  LoginRequest(
         @Schema(description = "인가코드", example = "oIZqkpBr0z8b-PmDRKlsyX05Hxs-XTNyUeSVXXTcVp-wUn4Q3yQhYwAAAAQKKwzUAAABkRB4UCIicpf3YNJZ6g")

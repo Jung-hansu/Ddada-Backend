@@ -2,7 +2,6 @@ package ssafy.ddada.api.member;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -13,15 +12,15 @@ import ssafy.ddada.api.member.request.MemberUpdateRequest;
 import ssafy.ddada.api.member.response.DeleteMemberResponse;
 import ssafy.ddada.api.member.response.MemberDetailResponse;
 import ssafy.ddada.api.member.response.MemberSignupResponse;
-import ssafy.ddada.domain.member.service.MemberService;
+import ssafy.ddada.domain.member.player.service.PlayerService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/member")
 @Slf4j
-@Tag(name = "Member", description = "회원관리")
+@Tag(name = "Player", description = "회원관리")
 public class MemberController {
-    private final MemberService memberService;
+    private final PlayerService playerService;
 
     @Operation(summary = "회원가입", description = """
          소셜로그인 시 저장된 임시 회원 정보를 정식 회원으로 업데이트하는 API입니다.
@@ -31,7 +30,7 @@ public class MemberController {
     public CommonResponse<MemberSignupResponse> signup(
             @ModelAttribute @Validated MemberSignupRequest request
     ) {
-        MemberSignupResponse response = memberService.signupMember(request.toCommand());
+        MemberSignupResponse response = playerService.signupMember(request.toCommand());
 
         return CommonResponse.ok(response);
     }
@@ -39,7 +38,7 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
     @DeleteMapping(value="")
     public CommonResponse<DeleteMemberResponse> deleteMember() {
-        String message = memberService.deleteMember();
+        String message = playerService.deleteMember();
         return CommonResponse.ok(DeleteMemberResponse.of(message));
     }
 
@@ -48,7 +47,7 @@ public class MemberController {
     public CommonResponse<String> checknickname(
             @RequestParam("nickname") String nickname
     ) {
-        Boolean isDuplicated = memberService.checkNickname(nickname);
+        Boolean isDuplicated = playerService.checkNickname(nickname);
         if (isDuplicated) {
             String message = "이미 사용중인 닉네임입니다.";
             return CommonResponse.ok(message);
@@ -62,7 +61,7 @@ public class MemberController {
     @GetMapping("/profile")
     public CommonResponse<MemberDetailResponse> getMemberDetail(
     ) {
-        MemberDetailResponse response = memberService.getMemberDetail();
+        MemberDetailResponse response = playerService.getMemberDetail();
         return CommonResponse.ok(response);
     }
 
@@ -71,7 +70,7 @@ public class MemberController {
     public CommonResponse<MemberDetailResponse> updateMemberProfile(
             @ModelAttribute @Validated MemberUpdateRequest request
     ) {
-        MemberDetailResponse response = memberService.updateMemberProfile(request.toCommand());
+        MemberDetailResponse response = playerService.updateMemberProfile(request.toCommand());
         return CommonResponse.ok(response);
     }
 }
