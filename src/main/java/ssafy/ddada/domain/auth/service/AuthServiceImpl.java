@@ -22,7 +22,7 @@ import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.entity.Member;
 import ssafy.ddada.domain.member.entity.MemberInterface;
 import ssafy.ddada.domain.member.repository.CourtAdminRepository;
-import ssafy.ddada.domain.member.repository.ManagerRepository;
+import ssafy.ddada.domain.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.repository.MemberRepository;
 
 import java.util.Optional;
