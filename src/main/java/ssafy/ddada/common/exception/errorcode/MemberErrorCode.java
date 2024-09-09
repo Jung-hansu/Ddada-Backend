@@ -17,13 +17,14 @@ public enum MemberErrorCode implements BaseErrorCode {
     MEMBER_DUPLICATE(BAD_REQUEST, "MEMBER_400_7", "이미 존재하는 회원입니다."),
     EXTENSION_NOT_ALLOWED(BAD_REQUEST, "MEMBER_400_8", "프로필 이미지의 확장자는 jpg, jpeg, png, gif만 가능합니다."),
     IMAGE_TOO_LARGE(BAD_REQUEST, "MEMBER_400_9", "업로드할 이미지 용량이 2MB를 초과합니다."),
-
+    MESSAGE_SENDING(BAD_REQUEST, "MEMBER_400_10", "메시지 전송에 실패하였습니다."),
     LOGIN_INFO_INVALID(UNAUTHORIZED, "MEMBER_401_1", "로그인 유저가 존재하지 않습니다."),
 
     MEMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_1", "존재하지 않는 회원입니다."),
     TEMP_MEMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_2", "로그인 과정에서 생성된 임시 회원 정보가 존재하지 않습니다."),
     PROFILE_NOT_FOUND(NOT_FOUND, "MEMBER_404_6", "프로필 이미지를 찾을 수 없습니다."),
     PROFILE_NOT_FOUND_IN_S3(NOT_FOUND, "MEMBER_404_7", "S3에 프로필 이미지를 찾을 수 없습니다."),
+    SMS_VERIFICATION_FAILURE(NOT_FOUND, "MEMBER_404_8", "SMS 인증에 실패하였습니다."),
 
     MEMBER_ALREADY_DELETED(CONFLICT, "MEMBER_409_1", "이미 삭제된 회원입니다."),
 

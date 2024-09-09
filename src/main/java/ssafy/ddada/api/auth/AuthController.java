@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.InvalidCredentialsException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.auth.request.LoginRequest;
@@ -23,6 +24,7 @@ import ssafy.ddada.domain.auth.service.AuthService;
 @Tag(name = "Auth", description = "인증/인가 API")
 public class AuthController {
     private final AuthService authService;
+    private final StringRedisTemplate redisTemplate;
 
     @Operation(summary = "로그인", description = "유저 정보를 이용하여 login type으로 로그인 합니다.")
     @PostMapping("/login")
@@ -67,21 +69,6 @@ public class AuthController {
         return CommonResponse.ok("문자를 전송했습니다.");
     }
 
-    @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
-    @GetMapping("/nickname")
-    public CommonResponse<String> checknickname(
-            @RequestParam("nickname") String nickname
-    ) {
-        Boolean isDuplicated = authService.checkNickname(nickname);
-        if (isDuplicated) {
-            String message = "이미 사용중인 닉네임입니다.";
-            return CommonResponse.ok(message);
-        } else {
-            String message = "사용 가능한 닉네임입니다.";
-            return CommonResponse.ok(message);
-        }
-    }
-
     @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
     @PostMapping("/sms/verify")
     public CommonResponse<String> verifySMSCode(
@@ -98,5 +85,22 @@ public class AuthController {
         }
 
         return CommonResponse.ok(message);
+    }
+
+    // Redis 연결 상태 확인을 위한 엔드포인트 추가
+    @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
+    @GetMapping("/redis/check")
+    public CommonResponse<String> checkRedisConnection() {
+        try {
+            String pingResponse = redisTemplate.getConnectionFactory().getConnection().ping();
+            if ("PONG".equals(pingResponse)) {
+                return CommonResponse.ok("Redis 연결 성공: " + pingResponse);
+            } else {
+                return CommonResponse.ok("Redis 연결 실패: " + pingResponse);
+            }
+        } catch (Exception e) {
+            log.error("Redis 연결 오류", e);
+            return CommonResponse.ok("Redis 연결 오류: " + e.getMessage());
+        }
     }
 }

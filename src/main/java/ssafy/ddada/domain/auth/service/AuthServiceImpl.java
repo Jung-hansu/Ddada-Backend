@@ -7,16 +7,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.api.auth.request.SmsRequest;
-import ssafy.ddada.common.client.KakaoApiClient;
 import ssafy.ddada.common.client.KakaoOauthClient;
-import ssafy.ddada.common.client.response.KakaoTokenExpireResponse;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
-import ssafy.ddada.common.constant.requestheader.CONTENT_TYPE;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
-import ssafy.ddada.config.auth.DecodedJwtToken;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.entity.Member;
@@ -37,7 +34,6 @@ import static ssafy.ddada.common.constant.security.LOGIN_TYPE.KAKAO;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final KakaoOauthClient kakaoOauthClient;
-    private final KakaoApiClient kakaoApiClient;
     private final KakaoLoginProperties kakaoLoginProperties;
     private final JwtParser jwtParser;
     private final JwtProcessor jwtProcessor;
@@ -45,34 +41,28 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final CourtAdminRepository courtAdminRepository;
     private final ManagerRepository managerRepository;
-    private final SmsCertificationUtil smsCertificationUtil; // SMS 유틸리티
-
-    private final RedisTemplate<String, String> redisTemplate; // Redis 사용
-    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 3L; // 3분 만료
+    private final SmsCertificationUtil smsCertificationUtil;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 3L;
 
     @Override
     public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
         LoginTokenModel tokens;
         log.info(">>> loginType: {}", command.authCode());
 
-        switch(command.loginType()) {
+        switch (command.loginType()) {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
-
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
-                if (!expireKakaoToken(kakaoLoginCommand)) {
-                    throw new KakaoTokenExpireException();
-                }
                 if (notRegisteredMember(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
 
-                // KAKAO 로그인에서 조회한 사용자
                 MemberInterface kakaoMember = findMemberByEmail(userInfo.email())
                         .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + userInfo.email()));
 
-                tokens = generateTokens(userInfo.email(), kakaoMember); // 이메일과 사용자 정보 전달
+                tokens = generateTokens(kakaoMember);
                 jwtProcessor.saveRefreshToken(tokens);
                 break;
 
@@ -80,17 +70,14 @@ public class AuthServiceImpl implements AuthService {
                 String email = command.email();
                 String password = command.password();
 
-                // BASIC 로그인에서 조회한 사용자
                 MemberInterface basicMember = findMemberByEmail(email)
                         .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
-                // 비밀번호 검증 (암호화된 비밀번호와 비교)
                 if (!passwordEncoder.matches(password, ((Member) basicMember).getPassword())) {
                     throw new InvalidCredentialsException("Invalid email or password");
                 }
 
-                // 로그인 성공 시 토큰 생성
-                tokens = generateTokens(email, basicMember); // 이메일과 사용자 정보 전달
+                tokens = generateTokens(basicMember);
                 jwtProcessor.saveRefreshToken(tokens);
                 break;
 
@@ -101,36 +88,47 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.of(tokens.accessToken(), tokens.refreshToken());
     }
 
-    private Boolean expireKakaoToken(KakaoLoginCommand kakaoLoginCommand) {
-        BearerToken bearerToken = BearerToken.of(kakaoLoginCommand.oauthAccessToken());
-        KakaoTokenExpireResponse expired = kakaoApiClient.expireAccessToken(CONTENT_TYPE.X_WWW_FORM_URLENCODED, bearerToken.accessToken());
-        log.debug(">>> expireKakaoToken.id() : {}", expired.id());
-        return expired.success();
+    @Override
+    public void logout(LogoutCommand command) {
+        jwtProcessor.expireToken(command.accessToken());
     }
 
-    // SMS 관련 기능 통합
-    public void sendSms(SmsRequest smsRequest) {
-        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드 생성
-        smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode); // SMS 발송
+    @Override
+    public AuthResponse refresh(TokenRefreshRequest request) {
+        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
+        MemberInterface member = findMemberById(decodedJwtToken)
+                .orElseThrow(InvalidTokenException::new);
 
-        // Redis에 인증 코드와 전화번호 저장, 3분간 유효
+        String newAccessToken = jwtProcessor.generateAccessToken(member);
+        String newRefreshToken = jwtProcessor.generateRefreshToken(member);
+
+        jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
+        return AuthResponse.of(newAccessToken, newRefreshToken);
+    }
+
+    public void sendSms(SmsRequest smsRequest) {
+        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
+
+        try {
+            smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode);
+        } catch (MessageSendingException e) {
+            throw new MessageSendingException();
+        }
+
         redisTemplate.opsForValue().set(smsRequest.getPhoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
     }
 
-    // 인증 코드 검증
     public Boolean verifyCertificationCode(VerifyCommand command) {
         String storedCode = redisTemplate.opsForValue().get(command.phoneNum());
         if (storedCode == null) {
-            return false;  // 인증 코드 만료 또는 존재하지 않음
+            throw new SmsVerificationException();
         }
-        return storedCode.equals(command.certificationCode()); // 입력한 코드와 저장된 코드가 일치하는지 확인
+        return storedCode.equals(command.certificationCode());
     }
-
 
     private Boolean notRegisteredMember(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
 
-        // 세 종류의 저장소에서 체크
         if (memberRepository.existsByEmail(userInfo.email()) ||
                 courtAdminRepository.existsByEmail(userInfo.email()) ||
                 managerRepository.existsByEmail(userInfo.email())) {
@@ -138,13 +136,11 @@ public class AuthServiceImpl implements AuthService {
                     .orElseThrow(AbnormalLoginProgressException::new));
         }
 
-        // 임시 개인 회원 저장
         memberRepository.save(Member.createTempMember(userInfo.email()));
         return true;
     }
 
     private Optional<MemberInterface> findMemberByEmail(String email) {
-        // 각 엔티티에서 검색
         if (memberRepository.existsByEmail(email)) {
             return Optional.ofNullable(memberRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Member not found with email: " + email)));
@@ -158,8 +154,7 @@ public class AuthServiceImpl implements AuthService {
         return Optional.empty();
     }
 
-    private LoginTokenModel generateTokens(String email, MemberInterface member) {
-
+    private LoginTokenModel generateTokens(MemberInterface member) {
         String accessToken = jwtProcessor.generateAccessToken(member);
         String refreshToken = jwtProcessor.generateRefreshToken(member);
         return new LoginTokenModel(accessToken, refreshToken);
@@ -167,52 +162,34 @@ public class AuthServiceImpl implements AuthService {
 
     private Boolean isTempMember(Object member) {
         if (member instanceof Member) {
-            return ((Member) member).getNickname() == null;}
+            return ((Member) member).getNickname() == null;
+        }
         return true;
     }
 
-    @Override
-    public AuthResponse refresh(TokenRefreshRequest request) {
-        DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
+    private Optional<MemberInterface> findMemberById(DecodedJwtToken decodedJwtToken) {
+        String role = decodedJwtToken.role();
+        Long id = decodedJwtToken.memberId();
+        log.info(">>> role: {}, id: {}", role, id);
 
-        // 각 엔티티에서 사용자 찾기
-        MemberInterface member = findMemberById(decodedJwtToken.memberId())
-                .orElseThrow(InvalidTokenException::new);
+        switch (role) {
+            case "일반 유저":
+                return memberRepository.findById(id)
+                        .map(member -> (MemberInterface) member);
 
-        String newAccessToken = jwtProcessor.generateAccessToken(member);
-        String newRefreshToken = jwtProcessor.generateRefreshToken(member);
+            case "코트관리자":
+                return courtAdminRepository.findById(id)
+                        .map(courtAdmin -> (MemberInterface) courtAdmin);
 
-        jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
-        return AuthResponse.of(newAccessToken, newRefreshToken);
-    }
+            case "매니저":
+                return managerRepository.findById(id)
+                        .map(manager -> (MemberInterface) manager);
 
-    private Optional<MemberInterface> findMemberById(Long id) {
-        if (memberRepository.existsById(id)) {
-            return Optional.of(memberRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
-        } else if (courtAdminRepository.existsById(id)) {
-            return Optional.of(courtAdminRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
-        } else if (managerRepository.existsById(id)) {
-            return Optional.of(managerRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id)));
+            default:
+                throw new IllegalArgumentException("Unknown role: " + role);
         }
-        return Optional.empty();
     }
 
-
-    @Override
-    public void logout(LogoutCommand command) {
-        jwtProcessor.expireToken(command.accessToken());
-    }
-
-    @Override
-    public Boolean checkNickname(String nickname) {
-        boolean isDuplicated = memberRepository.existsBynickname(nickname);
-
-        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
-        return isDuplicated;
-    }
 
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
@@ -231,4 +208,3 @@ public class AuthServiceImpl implements AuthService {
                 kakaoLoginProperties.clientSecret());
     }
 }
-

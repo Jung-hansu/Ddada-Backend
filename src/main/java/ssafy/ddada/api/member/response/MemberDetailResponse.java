@@ -5,7 +5,7 @@ import ssafy.ddada.domain.member.entity.Gender;
 
 public record MemberDetailResponse(
         @Schema(description = "프로필 이미지 경로", example = "https://my-bucket.s3.amazonaws.com/sample-image.jpg\n")
-        String profileImageBase64,
+        String profilePreSignedUrl,
 
         @Schema(description = "닉네임", example = "쿠잉비")
         String nickname,

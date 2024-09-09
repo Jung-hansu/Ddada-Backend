@@ -11,10 +11,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ssafy.ddada.common.properties.CorsProperties;
+import ssafy.ddada.config.filter.JwtAuthenticationFilter;
 
 import static ssafy.ddada.common.constant.security.AUTHENTICATED_PATH.AUTHENTICATED_ONLY;
 
@@ -25,6 +27,7 @@ import static ssafy.ddada.common.constant.security.AUTHENTICATED_PATH.AUTHENTICA
 public class SecurityConfig {
 
     private final CorsProperties corsProperties;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -39,8 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(AUTHENTICATED_ONLY).authenticated()
                         .anyRequest().permitAll())
-                // TODO: JWT 필터 추가 필요
-                // .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
+                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
                 .build();
     }
 

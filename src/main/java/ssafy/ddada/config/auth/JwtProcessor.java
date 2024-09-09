@@ -13,6 +13,7 @@ import ssafy.ddada.common.exception.NotMatchedTokenTypeException;
 import ssafy.ddada.common.properties.JwtProperties;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.entity.MemberInterface;
+import ssafy.ddada.domain.member.entity.MemberRole;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
 import ssafy.ddada.domain.redis.RefreshTokenRedisRepository;
 
@@ -96,11 +97,11 @@ public class JwtProcessor {
 
     public String generateAccessToken(MemberInterface member) {
         log.debug("access token exp : {}", jwtProperties.accessTokenExp());
-        return issueToken(member.getId(), ACCESS_TOKEN, jwtProperties.accessTokenExp());
+        return issueToken(member.getId(), member.getRole(), ACCESS_TOKEN, jwtProperties.accessTokenExp());
     }
 
     public String generateRefreshToken(MemberInterface member) {
-        return issueToken(member.getId(), REFRESH_TOKEN, jwtProperties.refreshTokenExp());
+        return issueToken(member.getId(), member.getRole(), REFRESH_TOKEN, jwtProperties.refreshTokenExp());
     }
 
     public DecodedJwtToken decodeToken(String token, String type) {
@@ -114,8 +115,7 @@ public class JwtProcessor {
         );
     }
 
-//    private String issueToken(Long userId, MemberRole role, String type, Long time) {
-    private String issueToken(Long userId, String type, Long time) {
+    private String issueToken(Long userId, MemberRole role, String type, Long time) {
         Date now = new Date();
         return Jwts.builder()
                 .issuer("Cooing Inc.")
@@ -123,7 +123,7 @@ public class JwtProcessor {
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + time))
                 .claim("type", type)
-//                .claim("role", role.getValue())
+                .claim("role", role.getValue())
                 .signWith(getSecretKey())
                 .compact();
     }
