@@ -10,5 +10,6 @@ public interface MemberService {
     MemberDetailResponse getMemberDetail();
     MemberDetailResponse updateMemberProfile(UpdateProfileCommand command);
     String deleteMember();
+    Boolean checkNickname(String nickname);
 //    MemberLoginResponse loginMember(MemberLoginCommand command);
 }
