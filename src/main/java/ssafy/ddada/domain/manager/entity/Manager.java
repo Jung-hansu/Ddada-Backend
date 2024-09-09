@@ -1,19 +1,18 @@
-package ssafy.ddada.domain.member.entity;
+package ssafy.ddada.domain.manager.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import ssafy.ddada.domain.member.entity.MemberInterface;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
-public class Manager extends BaseEntity implements MemberInterface{
+public class Manager extends BaseManagerEntity implements MemberInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
+    @Column(name = "manager_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -37,8 +36,8 @@ public class Manager extends BaseEntity implements MemberInterface{
     @Column(nullable = false)
     private String description;
 
-    // 회원가입 메서드
-    public void signupMember(String email, String password, String nickname, String profileImg, String number, String description) {
+    // 매니저 회원가입 메서드
+    public void signupManager(String email, String password, String nickname, String profileImg, String number, String description) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -48,8 +47,8 @@ public class Manager extends BaseEntity implements MemberInterface{
         this.isDeleted = false;
     }
 
-    // 회원 삭제 메서드
-    public void deleteMember() {
+    // 매니저 삭제 메서드
+    public void deleteManager() {
         this.isDeleted = true;
     }
 }

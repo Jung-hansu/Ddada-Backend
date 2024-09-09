@@ -1,12 +1,12 @@
-package ssafy.ddada.domain.member.service;
+package ssafy.ddada.domain.manager.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.common.exception.ManagerNotFoundException;
-import ssafy.ddada.domain.member.entity.Manager;
-import ssafy.ddada.domain.member.entity.SearchedManager;
-import ssafy.ddada.domain.member.repository.ManagerRepository;
+import ssafy.ddada.domain.manager.entity.Manager;
+import ssafy.ddada.api.manager.response.ManagerDetailResponse;
+import ssafy.ddada.domain.manager.repository.ManagerRepository;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,9 +16,10 @@ public class ManagerServiceImpl implements ManagerService {
     private final ManagerRepository managerRepository;
 
     @Override
-    public SearchedManager getManagerById(Long managerId) {
+    public ManagerDetailResponse getManagerById(Long managerId) {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
-        return SearchedManager.from(manager);
+        return ManagerDetailResponse.from(manager);
     }
+
 }
