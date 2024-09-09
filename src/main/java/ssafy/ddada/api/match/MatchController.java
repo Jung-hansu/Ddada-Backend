@@ -66,7 +66,7 @@ public class MatchController {
         log.info("경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", request.matchId(), request.status());
 
         matchService.updateMatchStatus(request.toCommand());
-        return CommonResponse.ok(null, "경기 상태가 성공적으로 전환되었습니다.");
+        return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", null);
     }
 
     @Deprecated
@@ -85,7 +85,7 @@ public class MatchController {
         log.info("팀 선수 변경 >>> 경기 ID: {}, 요청: {}", matchId, request);
 
         matchService.updateTeamPlayer(matchId, request.toCommand());
-        return CommonResponse.ok(null, "팀 선수가 성공적으로 변경되었습니다.");
+        return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
 
@@ -96,7 +96,7 @@ public class MatchController {
         log.info("매니저 경기 할당 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
 
         matchService.allocateManager(matchId, managerId);
-        return CommonResponse.ok(null, "경기에 성공적으로 할당되었습니다.");
+        return CommonResponse.ok("경기에 성공적으로 할당되었습니다.", null);
     }
 
 }
