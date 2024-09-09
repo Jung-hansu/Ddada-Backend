@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MemberRole {
-    MANAGER("매니저"), COURT_ADMIN("코트관리자"), USER("일반 유저"), TEMP("임시 유저");
+    PLAYER("선수"), MANAGER("매니저"), COURT_ADMIN("시설 관리자"), TEMP("임시 유저");
     private final String value;
 }

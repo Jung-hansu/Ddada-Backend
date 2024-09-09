@@ -6,7 +6,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,7 @@ public class PlayerServiceImpl implements PlayerService {
                     null,
                     signupCommand.number(),
                     signupCommand.description(),
-                    MemberRole.USER
+                    MemberRole.PLAYER
             );
             playerRepository.save(tempPlayer);
         }
@@ -85,8 +84,8 @@ public class PlayerServiceImpl implements PlayerService {
     public MemberDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInPlayer.getProfileImg();
-        log.info(">>>> role" + SecurityUtil.getLoginMemberRole());
-        log.info(">>>>" + profileImagePath);
+        log.info(">>>> role: {}", SecurityUtil.getLoginMemberRole());
+        log.info(">>>> profile image: {}", profileImagePath);
 
         String base64Image = "";
         if (profileImagePath != null) {
@@ -140,7 +139,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public String deleteMember() {
-        getCurrentLoggedInMember().deleteMember();
+        getCurrentLoggedInMember().delete();
         return "회원 탈퇴가 성공적으로 처리되었습니다.";
     }
 
