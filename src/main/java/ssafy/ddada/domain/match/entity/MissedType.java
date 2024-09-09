@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.member.entity;
+package ssafy.ddada.domain.match.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
@@ -8,16 +8,18 @@ import java.util.stream.Stream;
 
 @Getter
 @RequiredArgsConstructor
-public enum Gender {
-    MALE("MALE"), FEMALE("FEMALE"), MIXED("MIXED"), NONE("NONE");
+public enum MissedType {
+
+    SERVE_MISS("서브 미스");
 
     private final String value;
 
     @JsonCreator
-    public static Gender parse(String input) {
-        return Stream.of(Gender.values())
-                .filter(gender -> gender.toString().equals(input.toUpperCase()))
+    public static MissedType parse(String input) {
+        return Stream.of(MissedType.values())
+                .filter(missedType -> missedType.name().equalsIgnoreCase(input))
                 .findFirst()
                 .orElse(null);
     }
+
 }
