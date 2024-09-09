@@ -66,7 +66,7 @@ public class AuthController {
             @RequestBody SmsRequest smsRequest
     ) {
         authService.sendSms(smsRequest);  // SMS 전송 서비스 호출
-        return CommonResponse.ok("문자를 전송했습니다.");
+        return CommonResponse.ok("문자를 전송했습니다.", null);
     }
 
     @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
@@ -84,7 +84,7 @@ public class AuthController {
             message = "인증에 실패했습니다.";
         }
 
-        return CommonResponse.ok(message);
+        return CommonResponse.ok(message, null);
     }
 
     // Redis 연결 상태 확인을 위한 엔드포인트 추가

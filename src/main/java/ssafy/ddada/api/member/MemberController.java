@@ -50,10 +50,10 @@ public class MemberController {
         Boolean isDuplicated = playerService.checkNickname(nickname);
         if (isDuplicated) {
             String message = "이미 사용중인 닉네임입니다.";
-            return CommonResponse.ok(message);
+            return CommonResponse.ok(message, null);
         } else {
             String message = "사용 가능한 닉네임입니다.";
-            return CommonResponse.ok(message);
+            return CommonResponse.ok(message, null);
         }
     }
 
