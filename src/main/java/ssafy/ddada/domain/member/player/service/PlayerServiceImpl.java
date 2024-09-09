@@ -6,7 +6,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,17 +84,15 @@ public class PlayerServiceImpl implements PlayerService {
     public MemberDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInPlayer.getProfileImg();
-        log.info(">>>> role" + SecurityUtil.getLoginMemberRole());
-        log.info(">>>>" + profileImagePath);
 
-        String base64Image = "";
+        String preSignedProfileImage = "";
         if (profileImagePath != null) {
             String imagePath = profileImagePath.substring(profileImagePath.indexOf("profileImg/"));
-            base64Image = getPresignedUrlFromS3(imagePath);
+            preSignedProfileImage = getPresignedUrlFromS3(imagePath);
         }
 
         return MemberDetailResponse.of(
-                base64Image,
+                preSignedProfileImage,
                 currentLoggedInPlayer.getNickname(),
                 currentLoggedInPlayer.getGender()
         );
@@ -146,7 +143,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Boolean checkNickname(String nickname) {
-        boolean isDuplicated = playerRepository.existsBynickname(nickname);
+        boolean isDuplicated = playerRepository.existsByNickname(nickname);
         log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
         return isDuplicated;
     }

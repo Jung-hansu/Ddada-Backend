@@ -7,16 +7,20 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.api.auth.request.SmsRequest;
+import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.common.Player;
 import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.courtadmin.entity.CourtAdmin;
 import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
@@ -70,10 +74,11 @@ public class AuthServiceImpl implements AuthService {
                 String password = command.password();
 
                 MemberInterface basicMember = findMemberByEmail(email)
-                        .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+                        .orElseThrow(EmailNotFoundException::new);
+
 
                 if (!passwordEncoder.matches(password, ((Player) basicMember).getPassword())) {
-                    throw new InvalidCredentialsException("Invalid email or password");
+                    throw new PasswordNotMatchException();
                 }
 
                 tokens = generateTokens(basicMember);
@@ -123,6 +128,11 @@ public class AuthServiceImpl implements AuthService {
             throw new SmsVerificationException();
         }
         return storedCode.equals(command.certificationCode());
+    }
+
+    public MemberTypeResponse getMemberType() {
+        MemberRole memberType = SecurityUtil.getLoginMemberRole();
+        return MemberTypeResponse.of(memberType);
     }
 
     private Boolean notRegisteredMember(UserInfo userInfo) {
@@ -188,8 +198,6 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Unknown role: " + role);
         }
     }
-
-
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
         log.info(">>> code: {}", code);
