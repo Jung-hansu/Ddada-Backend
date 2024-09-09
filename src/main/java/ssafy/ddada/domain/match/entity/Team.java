@@ -2,7 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ssafy.ddada.domain.member.common.Player;
+import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
 @Entity
