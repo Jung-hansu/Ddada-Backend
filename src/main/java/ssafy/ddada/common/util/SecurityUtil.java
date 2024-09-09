@@ -6,7 +6,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ssafy.ddada.common.exception.NotAuthenticatedException;
+import ssafy.ddada.domain.member.common.MemberRole;
 
+import java.lang.reflect.Member;
 import java.util.Collection;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -23,7 +25,7 @@ public class SecurityUtil {
         return (Long) authentication.getPrincipal();
     }
 
-    public static String getLoginMemberRole() {
+    public static MemberRole getLoginMemberRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new NotAuthenticatedException();
@@ -35,15 +37,10 @@ public class SecurityUtil {
             throw new NotAuthenticatedException();
         }
 
-        // 첫 번째 권한을 가져오고 'ROLE_' 접두어 제거
         String role = authorities.iterator().next().getAuthority();
+        log.info("authorities: {}", authorities);
+        log.info("memberRole: {}", role);
 
-        // ROLE_ 접두어가 있을 경우 제거
-        if (role.startsWith("roleROLE_")) {
-            role = role.substring(5);
-        }
-
-        return role;  // 접두어가 제거된 권한 이름 반환
+        return MemberRole.fromValue(role);
     }
-
 }

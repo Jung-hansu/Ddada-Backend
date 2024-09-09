@@ -44,16 +44,16 @@ public class MemberController {
 
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
     @GetMapping("/nickname")
-    public CommonResponse<String> checknickname(
+    public CommonResponse<String> checkNickname(
             @RequestParam("nickname") String nickname
     ) {
         Boolean isDuplicated = playerService.checkNickname(nickname);
         if (isDuplicated) {
             String message = "이미 사용중인 닉네임입니다.";
-            return CommonResponse.ok(message);
+            return CommonResponse.ok(message, null);
         } else {
             String message = "사용 가능한 닉네임입니다.";
-            return CommonResponse.ok(message);
+            return CommonResponse.ok(message, null);
         }
     }
 

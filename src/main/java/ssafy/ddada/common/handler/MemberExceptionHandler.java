@@ -66,4 +66,18 @@ public class MemberExceptionHandler {
         log.error("SmsVerificationException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
+
+    @ExceptionHandler(EmailNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handleEmailNotFoundException(EmailNotFoundException e) {
+        log.error("EmailNotFoundException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(PasswordNotMatchException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handlePasswordNotMatchException(PasswordNotMatchException e) {
+        log.error("PasswordNotMatchException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
 }

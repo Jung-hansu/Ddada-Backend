@@ -12,6 +12,7 @@ import ssafy.ddada.api.auth.request.LoginRequest;
 import ssafy.ddada.api.auth.request.LogoutRequest;
 import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.api.auth.request.VerifyRequest;
+import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.AuthResponse;
 import ssafy.ddada.config.auth.TokenRefreshRequest;
@@ -66,7 +67,7 @@ public class AuthController {
             @RequestBody SmsRequest smsRequest
     ) {
         authService.sendSms(smsRequest);  // SMS 전송 서비스 호출
-        return CommonResponse.ok("문자를 전송했습니다.");
+        return CommonResponse.ok("문자를 전송했습니다.", null);
     }
 
     @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
@@ -84,7 +85,7 @@ public class AuthController {
             message = "인증에 실패했습니다.";
         }
 
-        return CommonResponse.ok(message);
+        return CommonResponse.ok(message, null);
     }
 
     // Redis 연결 상태 확인을 위한 엔드포인트 추가
@@ -102,5 +103,12 @@ public class AuthController {
             log.error("Redis 연결 오류", e);
             return CommonResponse.ok("Redis 연결 오류: " + e.getMessage());
         }
+    }
+
+    @Operation(summary = "회원 타입 조회", description = "회원의 타입을 조회합니다.")
+    @GetMapping("/type")
+    public CommonResponse<?> getMemberType() {
+        MemberTypeResponse response = authService.getMemberType();
+        return CommonResponse.ok(response);
     }
 }
