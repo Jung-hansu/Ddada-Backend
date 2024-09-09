@@ -5,3 +5,4 @@
 # design : 레이아웃 구현 및 디자인 수정
 # refactor : 리팩토링
 # remove : 파일/코드 삭제
+# merge : 브랜치 병합
