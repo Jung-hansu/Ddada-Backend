@@ -14,7 +14,9 @@ public record CourtDetailResponse(
         @Schema(description = "시설 전화번호")
         String contactNumber,
         @Schema(description = "시설 설명")
-        String description
+        String description,
+        @Schema(description = "시설 이미지")
+        String image
 ) {
     public static CourtDetailResponse from(Court court){
         return new CourtDetailResponse(
@@ -22,7 +24,8 @@ public record CourtDetailResponse(
                 court.getName(),
                 court.getAddress(),
                 court.getContactNumber(),
-                court.getDescription()
+                court.getDescription(),
+                court.getImage()
         );
     }
 }
