@@ -132,8 +132,23 @@ public class AuthServiceImpl implements AuthService {
         if (storedCode == null) {
             throw new VerificationException();
         }
+
+        Player player;
+        if (command.userInfo().contains("@")) {
+            player = playerRepository.findByEmail(command.userInfo())
+                    .orElseThrow(EmailNotFoundException::new);
+        } else {
+            player = playerRepository.findByNumber(command.userInfo())
+                    .orElseThrow(PhoneNumberNotFoundException::new);
+        }
+
+        String accessToken = jwtProcessor.generateAccessToken(player);
+        String refreshToken = jwtProcessor.generateRefreshToken(player);
+        jwtProcessor.saveRefreshToken(accessToken, refreshToken);
+
         return storedCode.equals(command.certificationCode());
     }
+
 
     public MemberTypeResponse getMemberType() {
         MemberRole memberType = SecurityUtil.getLoginMemberRole();
