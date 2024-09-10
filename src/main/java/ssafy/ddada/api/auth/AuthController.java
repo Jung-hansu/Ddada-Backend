@@ -8,10 +8,7 @@ import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.auth.request.LoginRequest;
-import ssafy.ddada.api.auth.request.LogoutRequest;
-import ssafy.ddada.api.auth.request.SmsRequest;
-import ssafy.ddada.api.auth.request.VerifyRequest;
+import ssafy.ddada.api.auth.request.*;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.AuthResponse;
@@ -62,16 +59,16 @@ public class AuthController {
     }
 
     @Operation(summary = "SMS 인증 코드 전송", description = "사용자에게 인증 코드를 포함한 SMS를 전송합니다.")
-    @PostMapping("/sms/send")
+    @PostMapping("/sms")
     public CommonResponse<String> sendSMS(
             @RequestBody SmsRequest smsRequest
     ) {
-        authService.sendSms(smsRequest);  // SMS 전송 서비스 호출
+        authService.sendSms(smsRequest);
         return CommonResponse.ok("문자를 전송했습니다.", null);
     }
 
-    @Operation(summary = "SMS 인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
-    @PostMapping("/sms/verify")
+    @Operation(summary = "인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
+    @PostMapping("/verifyCode")
     public CommonResponse<String> verifySMSCode(
             @RequestBody VerifyRequest verityRequest
     ) {
@@ -110,5 +107,14 @@ public class AuthController {
     public CommonResponse<?> getMemberType() {
         MemberTypeResponse response = authService.getMemberType();
         return CommonResponse.ok(response);
+    }
+
+    @Operation(summary = "이메일 인증", description = "이메일을 통해 인증 코드를 전송합니다.")
+    @PostMapping("/email")
+    public CommonResponse<?> sendEmail(
+            @RequestBody GmailSendRequest request
+    ) {
+        authService.sendEmail(request.toCommand());
+        return CommonResponse.ok("이메일을 전송했습니다.", null);
     }
 }

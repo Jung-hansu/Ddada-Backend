@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.client.KakaoOauthClient;
@@ -34,6 +37,7 @@ import static ssafy.ddada.common.constant.security.LOGIN_TYPE.KAKAO;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
     private final KakaoOauthClient kakaoOauthClient;
     private final KakaoLoginProperties kakaoLoginProperties;
@@ -45,9 +49,11 @@ public class AuthServiceImpl implements AuthService {
     private final ManagerRepository managerRepository;
     private final SmsCertificationUtil smsCertificationUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 3L;
+    private final JavaMailSender javaMailSender;
+    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 5L;
 
     @Override
+    @Transactional
     public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
         LoginTokenModel tokens;
         log.info(">>> loginType: {}", command.authCode());
@@ -90,12 +96,12 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.of(tokens.accessToken(), tokens.refreshToken());
     }
-
+    @Transactional
     @Override
     public void logout(LogoutCommand command) {
         jwtProcessor.expireToken(command.accessToken());
     }
-
+    @Transactional
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
@@ -108,7 +114,7 @@ public class AuthServiceImpl implements AuthService {
         jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
         return AuthResponse.of(newAccessToken, newRefreshToken);
     }
-
+    @Transactional
     public void sendSms(SmsRequest smsRequest) {
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
 
@@ -122,9 +128,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public Boolean verifyCertificationCode(VerifyCommand command) {
-        String storedCode = redisTemplate.opsForValue().get(command.phoneNum());
+        String storedCode = redisTemplate.opsForValue().get(command.userInfo());
         if (storedCode == null) {
-            throw new SmsVerificationException();
+            throw new VerificationException();
         }
         return storedCode.equals(command.certificationCode());
     }
@@ -132,6 +138,30 @@ public class AuthServiceImpl implements AuthService {
     public MemberTypeResponse getMemberType() {
         MemberRole memberType = SecurityUtil.getLoginMemberRole();
         return MemberTypeResponse.of(memberType);
+    }
+
+    public void sendEmail(GmailSendCommand gmailSendCommand) {
+        String title = "DDADA 이메일 인증";
+        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
+        String text = "인증번호는 " + certificationCode + " 입니다.";
+        SimpleMailMessage emailForm = createEmailForm(gmailSendCommand.email(), title, text);
+        redisTemplate.opsForValue().set(gmailSendCommand.email(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+        try {
+            javaMailSender.send(emailForm);
+            log.info("이메일 발송 성공");
+        } catch (Exception e) {
+            log.error("이메일 발송 오류");
+        }
+    }
+
+    // 발신할 이메일 데이터 세팅
+    private SimpleMailMessage createEmailForm(String toEmail, String title, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject(title);
+        message.setText(text);
+
+        return message;
     }
 
     private Boolean notRegisteredMember(UserInfo userInfo) {

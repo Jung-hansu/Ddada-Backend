@@ -6,6 +6,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +81,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
-    @Transactional
     public MemberDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInPlayer.getProfileImg();

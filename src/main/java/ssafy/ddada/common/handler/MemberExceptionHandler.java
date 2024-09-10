@@ -60,10 +60,10 @@ public class MemberExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(SmsVerificationException.class)
+    @ExceptionHandler(VerificationException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleSmsVerificationException(SmsVerificationException e) {
-        log.error("SmsVerificationException Error", e);
+    public CommonResponse handleSmsVerificationException(VerificationException e) {
+        log.error("VerificationException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
