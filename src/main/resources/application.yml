@@ -26,11 +26,17 @@ spring:
           writetimeout: 5000
     auth-code-expiration-millis: 1800000
 
-
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      cluster:
+        max-redirects: 6
+        nodes: ${REDIS_NODES}
 
   graphql:
     cors:
