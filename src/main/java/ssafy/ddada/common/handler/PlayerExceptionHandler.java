@@ -10,7 +10,7 @@ import ssafy.ddada.common.exception.*;
 
 @RestControllerAdvice
 @Slf4j
-public class MemberExceptionHandler {
+public class PlayerExceptionHandler {
     @ExceptionHandler(AbnormalLoginProgressException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonResponse handleAbnormalLoginProgressException(AbnormalLoginProgressException e) {
@@ -60,10 +60,10 @@ public class MemberExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(SmsVerificationException.class)
+    @ExceptionHandler(VerificationException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleSmsVerificationException(SmsVerificationException e) {
-        log.error("SmsVerificationException Error", e);
+    public CommonResponse handleSmsVerificationException(VerificationException e) {
+        log.error("VerificationException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
@@ -78,6 +78,13 @@ public class MemberExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonResponse handlePasswordNotMatchException(PasswordNotMatchException e) {
         log.error("PasswordNotMatchException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(PhoneNumberNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handlePhoneNumberNotFoundException(PhoneNumberNotFoundException e) {
+        log.error("PhoneNumberNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 }

@@ -1,9 +1,9 @@
 package ssafy.ddada.common.exception;
 
-import ssafy.ddada.common.exception.errorcode.MemberErrorCode;
+import ssafy.ddada.common.exception.errorcode.PlayerErrorCode;
 
 public class ProfileNotFoundInS3Exception extends BaseException {
     public ProfileNotFoundInS3Exception() {
-        super(MemberErrorCode.PROFILE_NOT_FOUND_IN_S3);
+        super(PlayerErrorCode.PROFILE_NOT_FOUND_IN_S3);
     }
 }

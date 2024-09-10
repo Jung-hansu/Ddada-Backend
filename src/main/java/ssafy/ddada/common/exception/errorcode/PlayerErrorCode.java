@@ -7,7 +7,7 @@ import static ssafy.ddada.api.StatusCode.*;
 
 @Getter
 @AllArgsConstructor
-public enum MemberErrorCode implements BaseErrorCode {
+public enum PlayerErrorCode implements BaseErrorCode {
     EMAIL_DUPLICATE(BAD_REQUEST, "MEMBER_400_1", "이미 존재하는 이메일입니다."),
     NICKNAME_DUPLICATE(BAD_REQUEST, "MEMBER_400_2", "이미 존재하는 닉네임입니다."),
     INVALID_PASSWORD(BAD_REQUEST, "MEMBER_400_3", "비밀번호가 일치하지 않습니다."),
@@ -24,9 +24,10 @@ public enum MemberErrorCode implements BaseErrorCode {
     TEMP_MEMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_2", "로그인 과정에서 생성된 임시 회원 정보가 존재하지 않습니다."),
     PROFILE_NOT_FOUND(NOT_FOUND, "MEMBER_404_3", "프로필 이미지를 찾을 수 없습니다."),
     PROFILE_NOT_FOUND_IN_S3(NOT_FOUND, "MEMBER_404_4", "S3에 프로필 이미지를 찾을 수 없습니다."),
-    SMS_VERIFICATION_FAILURE(NOT_FOUND, "MEMBER_404_5", "SMS 인증에 실패하였습니다."),
+    VERIFICATION_FAILURE(NOT_FOUND, "MEMBER_404_5", "인증에 실패하였습니다."),
     EMAIL_NOT_FOUND(NOT_FOUND, "MEMBER_404_6", "존재하지 않는 이메일입니다."),
     PASSWORD_NOT_MATCH(NOT_FOUND, "MEMBER_404_7", "비밀번호가 일치하지 않습니다."),
+    PHONE_NUMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_8", "존재하지 않는 전화번호입니다."),
 
     MEMBER_ALREADY_DELETED(CONFLICT, "MEMBER_409_1", "이미 삭제된 회원입니다."),
 

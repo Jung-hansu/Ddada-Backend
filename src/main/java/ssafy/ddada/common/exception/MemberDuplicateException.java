@@ -1,9 +1,9 @@
 package ssafy.ddada.common.exception;
 
-import ssafy.ddada.common.exception.errorcode.MemberErrorCode;
+import ssafy.ddada.common.exception.errorcode.PlayerErrorCode;
 
 public class MemberDuplicateException extends BaseException{
     public MemberDuplicateException() {
-        super(MemberErrorCode.MEMBER_DUPLICATE);
+        super(PlayerErrorCode.MEMBER_DUPLICATE);
     }
 }
