@@ -17,7 +17,7 @@ public class Set extends BaseMatchEntity {
     @Column(name = "set_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
