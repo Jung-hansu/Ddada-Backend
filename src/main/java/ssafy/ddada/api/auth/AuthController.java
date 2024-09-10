@@ -68,7 +68,7 @@ public class AuthController {
     }
 
     @Operation(summary = "인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
-    @PostMapping("/verifyCode")
+    @PostMapping("/verify_code")
     public CommonResponse<String> verifySMSCode(
             @RequestBody VerifyRequest verityRequest
     ) {
