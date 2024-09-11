@@ -9,6 +9,7 @@ import static ssafy.ddada.api.StatusCode.*;
 @AllArgsConstructor
 public enum MatchErrorCode implements BaseErrorCode{
 
+    INVALID_MATCH_STATUS(BAD_REQUEST, "MATCH_400_1", "잘못된 경기 상태입니다."),
     INVALID_TEAM_NUMBER(BAD_REQUEST, "TEAM_400_1", "잘못된 팀 번호입니다."),
     INVALID_TEAM_PLAYER_NUMBER(BAD_REQUEST, "TEAM_400_2", "잘못된 선수 번호입니다."),
     INVALID_SET_NUMBER(BAD_REQUEST, "SET_400_1", "잘못된 세트 번호입니다."),
