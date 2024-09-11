@@ -18,7 +18,7 @@ public record CourtSimpleResponse(
         String name,
         @Schema(description = "시설 주소")
         String address,
-        @Schema(description = "시설 이미지")
+        @Schema(description = "시설 사진")
         String image,
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<MatchTime>> reservations
