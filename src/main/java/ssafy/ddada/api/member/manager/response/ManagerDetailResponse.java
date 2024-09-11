@@ -1,4 +1,4 @@
-package ssafy.ddada.api.manager.response;
+package ssafy.ddada.api.member.manager.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.member.manager.entity.Manager;

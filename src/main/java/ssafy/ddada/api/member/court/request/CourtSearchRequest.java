@@ -1,4 +1,4 @@
-package ssafy.ddada.api.court.request;
+package ssafy.ddada.api.member.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

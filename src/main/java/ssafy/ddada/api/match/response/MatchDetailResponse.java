@@ -2,8 +2,8 @@ package ssafy.ddada.api.match.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.api.court.response.CourtSimpleResponse;
-import ssafy.ddada.api.manager.response.ManagerSimpleResponse;
+import ssafy.ddada.api.member.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.member.manager.response.ManagerSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchTime;

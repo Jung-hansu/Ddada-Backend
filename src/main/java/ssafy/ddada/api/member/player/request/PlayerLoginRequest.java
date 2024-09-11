@@ -1,10 +1,10 @@
-package ssafy.ddada.api.member.request;
+package ssafy.ddada.api.member.player.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import ssafy.ddada.domain.member.player.command.MemberLoginCommand;
 
-public record MemberLoginRequest(
+public record PlayerLoginRequest(
         @Schema(description = "이메일", example = "example@example.com", format = "email")
         @Email(message = "유저ID는 이메일 형식이어야 합니다.")
         String email,

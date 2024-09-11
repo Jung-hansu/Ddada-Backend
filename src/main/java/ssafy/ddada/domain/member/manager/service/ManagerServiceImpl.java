@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.common.exception.ManagerNotFoundException;
 import ssafy.ddada.domain.member.manager.entity.Manager;
-import ssafy.ddada.api.manager.response.ManagerDetailResponse;
+import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 
 @Slf4j

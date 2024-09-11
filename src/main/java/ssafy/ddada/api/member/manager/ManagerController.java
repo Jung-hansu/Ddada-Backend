@@ -1,4 +1,4 @@
-package ssafy.ddada.api.manager;
+package ssafy.ddada.api.member.manager;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.manager.response.ManagerDetailResponse;
+import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.common.util.SecurityUtil;

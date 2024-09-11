@@ -1,11 +1,11 @@
-package ssafy.ddada.api.member.request;
+package ssafy.ddada.api.member.player.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.domain.member.player.command.UpdateProfileCommand;
 
-public record UpdateProfileRequest(
+public record ProfileUpdateRequest(
         @Schema(description = "닉네임", example = "쿠잉비", minimum = "2", maximum = "20")
         @Size(min = 2, max = 20)
         String nickname,

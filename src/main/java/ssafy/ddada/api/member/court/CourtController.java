@@ -1,4 +1,4 @@
-package ssafy.ddada.api.court;
+package ssafy.ddada.api.member.court;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.court.response.CourtDetailResponse;
-import ssafy.ddada.api.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.member.court.response.CourtDetailResponse;
+import ssafy.ddada.api.member.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.court.service.CourtService;
 
 @Slf4j
