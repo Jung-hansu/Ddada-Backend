@@ -11,6 +11,7 @@ import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
+import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.command.MatchCreateCommand;
@@ -39,16 +40,31 @@ public class MatchServiceImpl implements MatchService {
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
 
+    private boolean isEmptyString(String value){
+        return value == null || value.trim().isEmpty();
+    }
 
     @Override
-    public Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, Integer page, Integer size) {
+    public Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, String status, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
+        Page<Match> matchPage;
 
-        if (keyword == null || keyword.isEmpty()) {
-            return matchRepository.findAllMatches(pageable);
+        if (isEmptyString(status)){
+            matchPage = isEmptyString(keyword) ?
+                    matchRepository.findAllMatches(pageable) :
+                    matchRepository.findMatchesByKeyword(keyword, pageable);
         } else {
-            return matchRepository.findMatchesByKeyword(keyword, pageable);
+            MatchStatus matchStatus = MatchStatus.parse(status);
+
+            if (matchStatus == null) {
+                throw new InvalidMatchStatusException();
+            }
+
+            matchPage = isEmptyString(keyword) ?
+                    matchRepository.findAllMatchesByStatus(matchStatus, pageable) :
+                    matchRepository.findMatchesByKeywordAndStatus(keyword, matchStatus, pageable);
         }
+        return matchPage.map(MatchSimpleResponse::from);
     }
 
     @Override
@@ -135,7 +151,8 @@ public class MatchServiceImpl implements MatchService {
                 team1,
                 team2,
                 command.matchType(),
-                command.matchDateTime()
+                command.matchDate(),
+                command.matchTime()
         );
 
         matchRepository.save(match);
