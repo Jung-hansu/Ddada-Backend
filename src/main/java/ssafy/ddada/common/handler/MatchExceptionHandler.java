@@ -12,6 +12,13 @@ import ssafy.ddada.common.exception.*;
 @RestControllerAdvice
 public class MatchExceptionHandler {
 
+    @ExceptionHandler(InvalidMatchStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidMatchStatusException(InvalidMatchStatusException e) {
+        log.error("InvalidMatchStatusException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
     @ExceptionHandler(InvalidTeamNumberException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<?> handleInvalidTeamNumberException(InvalidTeamNumberException e) {

@@ -12,18 +12,39 @@ import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 
+import java.util.List;
+
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
 
-    @Query("SELECT new ssafy.ddada.api.match.response.MatchSimpleResponse(m.id, m.court.name, m.court.address) " +
-            "FROM Match m")
-    Page<MatchSimpleResponse> findAllMatches(Pageable pageable);
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.court c
+    """)
+    Page<Match> findAllMatches(Pageable pageable);
 
-    @Query("SELECT new ssafy.ddada.api.match.response.MatchSimpleResponse(m.id, m.court.name, m.court.address) " +
-            "FROM Match m " +
-            "WHERE m.court.name LIKE CONCAT('%', :keyword, '%') OR " +
-            "      m.court.address LIKE CONCAT('%', :keyword, '%')")
-    Page<MatchSimpleResponse> findMatchesByKeyword(@Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.court c
+        WHERE c.name LIKE CONCAT('%', :keyword, '%') OR
+              c.address LIKE CONCAT('%', :keyword, '%')
+    """)
+    Page<Match> findMatchesByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.court c
+        WHERE m.status = :status
+    """)
+    Page<Match> findAllMatchesByStatus(MatchStatus status, Pageable pageable);
+
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.court c
+        WHERE m.status = :status AND
+             (c.name LIKE CONCAT('%', :keyword, '%') OR c.address LIKE CONCAT('%', :keyword, '%'))
+    """)
+    Page<Match> findMatchesByKeywordAndStatus(@Param("keyword") String keyword, @Param("status") MatchStatus status, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Match m SET m.status = :matchStatus WHERE m.id = :matchId")
@@ -38,4 +59,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             "WHERE m.manager.id = :managerId")
     Page<MatchSimpleResponse> findMatchesByManagerId(Long managerId, Pageable pageable);
 
+    List<Match> findMatchesByCourtId(Long courtId);
 }

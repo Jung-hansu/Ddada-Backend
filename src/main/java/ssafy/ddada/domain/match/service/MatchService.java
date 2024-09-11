@@ -9,7 +9,7 @@ import ssafy.ddada.domain.match.command.TeamChangePlayerCommand;
 
 public interface MatchService {
 
-    Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, Integer page, Integer size);
+    Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, String status, Integer page, Integer size);
     MatchDetailResponse createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchById(Long matchId);
     SetDetailResponse getSetById(Long matchId, Integer setNumber);

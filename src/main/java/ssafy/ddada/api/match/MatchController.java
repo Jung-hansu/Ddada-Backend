@@ -24,12 +24,17 @@ public class MatchController {
     private final MatchService matchService;
 
     // TODO: ES 구상하기
-    @Operation(summary = "경기 리스트 조회", description = "키워드 기반으로 경기 리스트를 조회하는 api입니다.")
+    @Operation(summary = "경기 상태 기반 리스트 조회", description = "키워드 및 경기 상태 기반으로 경기 리스트를 조회하는 api입니다.")
     @GetMapping
-    public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(@RequestParam(required = false) String keyword, @RequestParam int page, @RequestParam int size) {
-        log.info("경기 검색 결과 조회 >>>> 검색어: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, page, size);
+    public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
+            @RequestParam(required = false) String keyword,
+            @RequestParam String status,
+            @RequestParam Integer page,
+            @RequestParam Integer size
+    ) {
+        log.info("경기 검색 결과 조회 >>>> 검색어: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, status, page, size);
 
-        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(keyword, page, size);
+        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(keyword, status, page, size);
         return CommonResponse.ok(response);
     }
 

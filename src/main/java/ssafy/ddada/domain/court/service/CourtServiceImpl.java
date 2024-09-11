@@ -22,12 +22,14 @@ public class CourtServiceImpl implements CourtService {
     @Override
     public Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        Page<Court> courtPage;
 
-        if (keyword == null || keyword.isEmpty()) {
-            return courtRepository.findAllCourtPreviews(pageable);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            courtPage = courtRepository.findAllCourts(pageable);
         } else {
-            return courtRepository.findCourtPreviewsByKeyword(keyword, pageable);
+            courtPage = courtRepository.findCourtsByKeyword(keyword, pageable);
         }
+        return courtPage.map(CourtSimpleResponse::from);
     }
 
     @Override
