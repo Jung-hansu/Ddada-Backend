@@ -6,9 +6,10 @@ import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.api.manager.response.ManagerSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.match.entity.MatchTime;
 import ssafy.ddada.domain.match.entity.MatchType;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Schema(description = "경기 세부 정보 응답 DTO")
@@ -32,9 +33,11 @@ public record MatchDetailResponse(
         @Schema(description = "경기 상태")
         MatchStatus status,
         @Schema(description = "단복식 여부")
-        MatchType matchType,
+        MatchType type,
         @Schema(description = "경기 일자")
-        LocalDateTime matchDateTime,
+        LocalDate date,
+        @Schema(description = "경기 시간")
+        MatchTime time,
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Schema(description = "세트 정보 요약 리스트")
         List<SetSimpleResponse> sets
@@ -52,7 +55,8 @@ public record MatchDetailResponse(
                 match.getTeam2SetScore(),
                 match.getStatus(),
                 match.getMatchType(),
-                match.getMatchDateTime(),
+                match.getMatchDate(),
+                match.getMatchTime(),
                 match.getSets()
                         .stream()
                         .map(SetSimpleResponse::from)

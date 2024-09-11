@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,22 +52,25 @@ public class Match extends BaseMatchEntity {
     private MatchType matchType;
 
     @Column(nullable = false)
-    private LocalDateTime matchDateTime;
+    private LocalDate matchDate;
+
+    private MatchTime matchTime;
 
     @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Set> sets = new ArrayList<>();
 
-    public Match(Court court, Team team1, Team team2, MatchType matchType, LocalDateTime matchDateTime) {
+    public Match(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, MatchTime matchTime) {
         this.court = court;
         this.team1 = team1;
         this.team2 = team2;
         this.status = MatchStatus.RESERVED;
         this.matchType = matchType;
-        this.matchDateTime = matchDateTime;
+        this.matchDate = matchDate;
+        this.matchTime = matchTime;
     }
 
-    public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDateTime matchDateTime) {
-        return new Match(court, team1, team2, matchType, matchDateTime);
+    public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, MatchTime matchTime) {
+        return new Match(court, team1, team2, matchType, matchDate, matchTime);
     }
 
 }
