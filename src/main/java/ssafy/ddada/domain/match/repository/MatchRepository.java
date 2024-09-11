@@ -54,10 +54,10 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     @Query("UPDATE Match m SET m.manager = :manager WHERE m.id = :matchId")
     void setManager(@Param("matchId") Long matchId, @Param("manager") Manager manager);
 
-    @Query("SELECT new ssafy.ddada.api.match.response.MatchSimpleResponse(m.id, m.court.name, m.court.address) " +
-            "FROM Match m " +
-            "WHERE m.manager.id = :managerId")
-    Page<MatchSimpleResponse> findMatchesByManagerId(Long managerId, Pageable pageable);
+    @Query("SELECT m " +
+            "FROM Match m JOIN FETCH m.manager mg " +
+            "WHERE mg.id = :managerId")
+    Page<Match> findMatchesByManagerId(Long managerId, Pageable pageable);
 
     List<Match> findMatchesByCourtId(Long courtId);
 }

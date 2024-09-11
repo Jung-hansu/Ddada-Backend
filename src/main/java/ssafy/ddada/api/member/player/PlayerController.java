@@ -1,4 +1,4 @@
-package ssafy.ddada.api.member;
+package ssafy.ddada.api.member.player;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,19 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.member.request.MemberSignupRequest;
-import ssafy.ddada.api.member.request.MemberUpdateRequest;
-import ssafy.ddada.api.member.response.DeleteMemberResponse;
-import ssafy.ddada.api.member.response.MemberDetailResponse;
-import ssafy.ddada.api.member.response.MemberSignupResponse;
+import ssafy.ddada.api.member.player.request.PlayerSignupRequest;
+import ssafy.ddada.api.member.player.request.PlayerUpdateRequest;
+import ssafy.ddada.api.member.player.response.PlayerDeleteResponse;
+import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
+import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.domain.member.player.service.PlayerService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
+@RequestMapping("/player")
 @Slf4j
 @Tag(name = "Player", description = "회원관리")
-public class MemberController {
+public class PlayerController {
     private final PlayerService playerService;
 
     @Operation(summary = "회원가입", description = """
@@ -27,19 +27,19 @@ public class MemberController {
          이 과정을 통해 해당 회원은 임시 회원이 아닌 정식 회원으로 전환됩니다.
          """)
     @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
-    public CommonResponse<MemberSignupResponse> signup(
-            @ModelAttribute @Validated MemberSignupRequest request
+    public CommonResponse<PlayerSignupResponse> signup(
+            @ModelAttribute @Validated PlayerSignupRequest request
     ) {
-        MemberSignupResponse response = playerService.signupMember(request.toCommand());
+        PlayerSignupResponse response = playerService.signupMember(request.toCommand());
 
         return CommonResponse.ok(response);
     }
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
-    @DeleteMapping(value="")
-    public CommonResponse<DeleteMemberResponse> deleteMember() {
+    @PatchMapping(value="")
+    public CommonResponse<PlayerDeleteResponse> deleteMember() {
         String message = playerService.deleteMember();
-        return CommonResponse.ok(DeleteMemberResponse.of(message));
+        return CommonResponse.ok(PlayerDeleteResponse.of(message));
     }
 
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
@@ -59,18 +59,18 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 조회", description = "회원 정보를 조회하는 API입니다.")
     @GetMapping("/profile")
-    public CommonResponse<MemberDetailResponse> getMemberDetail(
+    public CommonResponse<PlayerDetailResponse> getMemberDetail(
     ) {
-        MemberDetailResponse response = playerService.getMemberDetail();
+        PlayerDetailResponse response = playerService.getMemberDetail();
         return CommonResponse.ok(response);
     }
 
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정하는 API입니다.")
     @PutMapping(value = "/profile", consumes = { "multipart/form-data" })
-    public CommonResponse<MemberDetailResponse> updateMemberProfile(
-            @ModelAttribute @Validated MemberUpdateRequest request
+    public CommonResponse<PlayerDetailResponse> updateMemberProfile(
+            @ModelAttribute @Validated PlayerUpdateRequest request
     ) {
-        MemberDetailResponse response = playerService.updateMemberProfile(request.toCommand());
+        PlayerDetailResponse response = playerService.updateMemberProfile(request.toCommand());
         return CommonResponse.ok(response);
     }
 }

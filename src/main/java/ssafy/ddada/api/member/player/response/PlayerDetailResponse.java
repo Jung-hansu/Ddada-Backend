@@ -1,9 +1,9 @@
-package ssafy.ddada.api.member.response;
+package ssafy.ddada.api.member.player.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.member.common.Gender;
 
-public record MemberDetailResponse(
+public record PlayerDetailResponse(
         @Schema(description = "프로필 이미지 경로", example = "https://my-bucket.s3.amazonaws.com/sample-image.jpg\n")
         String profilePreSignedUrl,
 
@@ -13,7 +13,7 @@ public record MemberDetailResponse(
         @Schema(description = "성별", example = "MALE")
         String gender
 ) {
-    public static MemberDetailResponse of(String profileImageBase64, String nickname, Gender gender) {
-        return new MemberDetailResponse(profileImageBase64, nickname, gender.getValue());
+    public static PlayerDetailResponse of(String profileImageBase64, String nickname, Gender gender) {
+        return new PlayerDetailResponse(profileImageBase64, nickname, gender.getValue());
     }
 }

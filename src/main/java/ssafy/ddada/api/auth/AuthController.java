@@ -68,7 +68,7 @@ public class AuthController {
     }
 
     @Operation(summary = "인증 코드 검증", description = "사용자가 입력한 SMS 인증 코드를 검증합니다.")
-    @PostMapping("/verify_code")
+    @GetMapping("/verify_code")
     public CommonResponse<String> verifySMSCode(
             @RequestBody VerifyRequest verityRequest
     ) {
@@ -83,23 +83,6 @@ public class AuthController {
         }
 
         return CommonResponse.ok(message, null);
-    }
-
-    // Redis 연결 상태 확인을 위한 엔드포인트 추가
-    @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
-    @GetMapping("/redis/check")
-    public CommonResponse<String> checkRedisConnection() {
-        try {
-            String pingResponse = redisTemplate.getConnectionFactory().getConnection().ping();
-            if ("PONG".equals(pingResponse)) {
-                return CommonResponse.ok("Redis 연결 성공: " + pingResponse);
-            } else {
-                return CommonResponse.ok("Redis 연결 실패: " + pingResponse);
-            }
-        } catch (Exception e) {
-            log.error("Redis 연결 오류", e);
-            return CommonResponse.ok("Redis 연결 오류: " + e.getMessage());
-        }
     }
 
     @Operation(summary = "회원 타입 조회", description = "회원의 타입을 조회합니다.")

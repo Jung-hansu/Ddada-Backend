@@ -1,4 +1,4 @@
-package ssafy.ddada.api.member.request;
+package ssafy.ddada.api.member.player.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberSignupRequest{
+public class PlayerSignupRequest {
         @Schema(description = "닉네임", example = "쿠잉비", minimum = "2", maximum = "20")
         @Size(min = 2, max = 20)
         String nickname;

@@ -6,13 +6,12 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ssafy.ddada.api.member.response.MemberDetailResponse;
-import ssafy.ddada.api.member.response.MemberSignupResponse;
+import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
+import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.properties.S3Properties;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -44,7 +43,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional
-    public MemberSignupResponse signupMember(MemberSignupCommand signupCommand) {
+    public PlayerSignupResponse signupMember(MemberSignupCommand signupCommand) {
         Player tempPlayer = playerRepository.findByEmail(signupCommand.email())
                 .orElse(null);
 
@@ -76,12 +75,12 @@ public class PlayerServiceImpl implements PlayerService {
         String refreshToken = jwtProcessor.generateRefreshToken(signupPlayer);
         jwtProcessor.saveRefreshToken(accessToken, refreshToken);
 
-        return MemberSignupResponse.of(accessToken, refreshToken);
+        return PlayerSignupResponse.of(accessToken, refreshToken);
     }
 
 
     @Override
-    public MemberDetailResponse getMemberDetail() {
+    public PlayerDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInPlayer.getProfileImg();
 
@@ -91,7 +90,7 @@ public class PlayerServiceImpl implements PlayerService {
             preSignedProfileImage = getPresignedUrlFromS3(imagePath);
         }
 
-        return MemberDetailResponse.of(
+        return PlayerDetailResponse.of(
                 preSignedProfileImage,
                 currentLoggedInPlayer.getNickname(),
                 currentLoggedInPlayer.getGender()
@@ -100,7 +99,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional
-    public MemberDetailResponse updateMemberProfile(UpdateProfileCommand command) {
+    public PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command) {
         Long userId = SecurityUtil.getLoginMemberId();
         Player currentLoggedInPlayer = playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -127,7 +126,7 @@ public class PlayerServiceImpl implements PlayerService {
         playerRepository.save(currentLoggedInPlayer);
 
         // presignedUrl을 반환
-        return MemberDetailResponse.of(
+        return PlayerDetailResponse.of(
                 presignedUrl, // 프리사인드 URL 전달
                 currentLoggedInPlayer.getNickname(),
                 currentLoggedInPlayer.getGender()
