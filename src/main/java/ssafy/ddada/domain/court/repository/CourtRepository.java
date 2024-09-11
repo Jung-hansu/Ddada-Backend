@@ -6,7 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.court.entity.Facility;
+
+import java.util.Set;
 
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
@@ -23,4 +27,10 @@ public interface CourtRepository extends JpaRepository<Court, Long> {
     """)
     Page<Court> findCourtsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT new ssafy.ddada.api.court.response.CourtSimpleResponse(c.id, c.name, c.address) " +
+            "FROM Court c " +
+            "WHERE (c.name LIKE CONCAT('%', :keyword, '%') OR " +
+            "      c.address LIKE CONCAT('%', :keyword, '%')) AND " +
+            "      (:facilities IS NULL OR :facilities MEMBER OF c.facilities)")
+    Page<CourtSimpleResponse> findCourtPreviewsByKeywordAndFacilities(@Param("keyword") String keyword, @Param("facilities") Set<Facility> facilities, Pageable pageable);
 }

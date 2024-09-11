@@ -10,7 +10,10 @@ import ssafy.ddada.api.member.court.response.CourtDetailResponse;
 import ssafy.ddada.api.member.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
 import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.court.entity.Facility;
 import ssafy.ddada.domain.court.repository.CourtRepository;
+
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,16 +23,15 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
 
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, int page, int size) {
+    public Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, Set<Facility> facilities, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Court> courtPage;
 
-        if (keyword == null || keyword.trim().isEmpty()) {
-            courtPage = courtRepository.findAllCourts(pageable);
+        if ((keyword == null || keyword.isEmpty()) && (facilities == null || facilities.isEmpty())) {
+            return courtRepository.findAllCourtPreviews(pageable);
         } else {
-            courtPage = courtRepository.findCourtsByKeyword(keyword, pageable);
+            return courtRepository.findCourtPreviewsByKeywordAndFacilities(keyword, facilities, pageable);
         }
-        return courtPage.map(CourtSimpleResponse::from);
     }
 
     @Override
