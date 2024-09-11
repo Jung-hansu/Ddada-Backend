@@ -16,7 +16,7 @@ import ssafy.ddada.domain.member.player.service.PlayerService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
+@RequestMapping("/player")
 @Slf4j
 @Tag(name = "Player", description = "회원관리")
 public class PlayerController {
@@ -36,7 +36,7 @@ public class PlayerController {
     }
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
-    @DeleteMapping(value="")
+    @PatchMapping(value="")
     public CommonResponse<PlayerDeleteResponse> deleteMember() {
         String message = playerService.deleteMember();
         return CommonResponse.ok(PlayerDeleteResponse.of(message));
