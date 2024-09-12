@@ -13,12 +13,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
 import ssafy.ddada.common.exception.NotAllowedExtensionException;
-import ssafy.ddada.common.exception.ProfileNotFoundInS3Exception;
 import ssafy.ddada.common.properties.S3Properties;
 import ssafy.ddada.common.util.StringUtil;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
@@ -28,9 +31,8 @@ import ssafy.ddada.domain.court.repository.CourtRepository;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -41,6 +43,7 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
     private final AmazonS3 amazonS3Client;
     private final S3Properties s3Properties;
+    private final S3Presigner s3Presigner;
 
     private boolean isEmptyFacilities(Long facilities) {
         return facilities == null || facilities == 0;
@@ -112,30 +115,31 @@ public class CourtServiceImpl implements CourtService {
         courtRepository.save(court);
     }
 
-    private String getPresignedUrlFromS3(String imagePath) {
+    public String getPresignedUrlFromS3(String imagePath) {
         try {
-            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(s3Properties.s3().bucket(), imagePath)
-                    .withMethod(HttpMethod.GET)
-                    .withExpiration(getExpirationTime());
+            String objectKey = imagePath.replace("https://ddada-image.s3.ap-northeast-2.amazonaws.com/", "");
 
-            URL presignedUrl = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-            log.info(imagePath + " 이미지에 대한 presigned URL 생성 성공");
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(s3Properties.s3().bucket())
+                    .key(objectKey)
+                    .build();
+
+            GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofMinutes(10))
+                    .build();
+
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(getObjectPresignRequest);
+            URL presignedUrl = presignedRequest.url();
+
+            log.info(objectKey + " 이미지에 대한 presigned URL 생성 성공");
+            log.info("presigned URL: " + presignedUrl.toString());
 
             return presignedUrl.toString();
-        } catch (AmazonServiceException e) {
-            if (e.getStatusCode() == 404) {
-                return null;
-            } else {
-                throw new ProfileNotFoundInS3Exception();
-            }
+        } catch (Exception e) {
+            log.error("Presigned URL 생성 중 오류 발생: " + e.getMessage(), e);
+            throw new RuntimeException("Presigned URL 생성 실패", e);
         }
-    }
-
-    // presigned URL 만료 시간을 지정하는 메서드
-    private Date getExpirationTime() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MINUTE, 10); // 10분 후 만료되는 URL 설정
-        return cal.getTime();
     }
 
     private String uploadImageToS3(MultipartFile image, Long courtId) {

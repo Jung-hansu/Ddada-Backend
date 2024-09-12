@@ -10,6 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.common.exception.*;
@@ -23,6 +27,7 @@ import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import com.amazonaws.HttpMethod;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Calendar;
 import java.io.IOException;
@@ -39,6 +44,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final JwtProcessor jwtProcessor;
     private final PasswordEncoder passwordEncoder;
     private final AmazonS3 amazonS3Client;
+    private final S3Presigner s3Presigner;
     private final S3Properties s3Properties;
 
     @Override
@@ -182,27 +188,28 @@ public class PlayerServiceImpl implements PlayerService {
 
     private String getPresignedUrlFromS3(String imagePath) {
         try {
-            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(s3Properties.s3().bucket(), imagePath)
-                    .withMethod(HttpMethod.GET)
-                    .withExpiration(getExpirationTime());
+            String objectKey = imagePath.replace("https://ddada-image.s3.ap-northeast-2.amazonaws.com/", "");
 
-            URL presignedUrl = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-            log.info(imagePath + " 이미지에 대한 presigned URL 생성 성공");
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(s3Properties.s3().bucket())
+                    .key(objectKey)
+                    .build();
+
+            GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofMinutes(10))
+                    .build();
+
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(getObjectPresignRequest);
+            URL presignedUrl = presignedRequest.url();
+
+            log.info(objectKey + " 이미지에 대한 presigned URL 생성 성공");
+            log.info("Presigned URL: " + presignedUrl.toString());
 
             return presignedUrl.toString();
-        } catch (AmazonServiceException e) {
-            if (e.getStatusCode() == 404) {
-                return null;
-            } else {
-                throw new ProfileNotFoundInS3Exception();
-            }
+        } catch (Exception e) {
+            log.error("Presigned URL 생성 중 오류 발생: " + e.getMessage(), e);
+            throw new RuntimeException("Presigned URL 생성 실패", e);
         }
-    }
-
-    // presigned URL 만료 시간을 지정하는 메서드
-    private Date getExpirationTime() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MINUTE, 10); // 10분 후 만료되는 URL 설정
-        return cal.getTime();
     }
 }
