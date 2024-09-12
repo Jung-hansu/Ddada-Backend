@@ -11,7 +11,8 @@ import ssafy.ddada.common.properties.*;
         KakaoLoginProperties.class,
         JwtProperties.class,
         S3Properties.class,
-        GmailStmlProperties.class
+        GmailSmtpProperties.class,
+        CoolSmsProperties.class
 })
 public class PropertiesConfig {
 }

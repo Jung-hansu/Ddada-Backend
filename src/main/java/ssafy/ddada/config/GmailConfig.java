@@ -4,15 +4,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import ssafy.ddada.common.properties.GmailStmlProperties;
+import ssafy.ddada.common.properties.GmailSmtpProperties;
 import java.util.Properties;
 
 @Configuration
 public class GmailConfig {
 
-    private final GmailStmlProperties gmailSmtpProperties;
+    private final GmailSmtpProperties gmailSmtpProperties;
 
-    public GmailConfig(GmailStmlProperties gmailSmtpProperties) {
+    public GmailConfig(GmailSmtpProperties gmailSmtpProperties) {
         this.gmailSmtpProperties = gmailSmtpProperties;
     }
 
@@ -31,12 +31,12 @@ public class GmailConfig {
 
     private Properties getMailProperties() {
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", gmailSmtpProperties.auth());
-        properties.put("mail.smtp.starttls.enable", gmailSmtpProperties.starttlsEnable());
-        properties.put("mail.smtp.starttls.required", gmailSmtpProperties.starttlsRequired());
-        properties.put("mail.smtp.connectiontimeout", gmailSmtpProperties.connectionTimeout());
-        properties.put("mail.smtp.timeout", gmailSmtpProperties.timeout());
-        properties.put("mail.smtp.writetimeout", gmailSmtpProperties.writeTimeout());
+        properties.put("mail.smtp.auth", gmailSmtpProperties.properties().mail().smtp().auth());
+        properties.put("mail.smtp.starttls.enable", gmailSmtpProperties.properties().mail().smtp().starttls().enable());
+        properties.put("mail.smtp.starttls.required", gmailSmtpProperties.properties().mail().smtp().starttls().required());
+        properties.put("mail.smtp.connectiontimeout", gmailSmtpProperties.properties().mail().smtp().connectionTimeout());
+        properties.put("mail.smtp.timeout", gmailSmtpProperties.properties().mail().smtp().timeout());
+        properties.put("mail.smtp.writetimeout", gmailSmtpProperties.properties().mail().smtp().writeTimeout());
 
         return properties;
     }

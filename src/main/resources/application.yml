@@ -68,6 +68,6 @@ cloud:
       secretKey: ${S3_SECRET_KEY}
 
 coolsms:
-  apikey: ${COOLSMS_APIKEY}
-  apisecret: ${COOLSMS_APISECRET}
-  fromnumber: ${COOLSMS_FROMNUMBER}
+  api-key: ${COOLSMS_APIKEY}
+  api-secret: ${COOLSMS_APISECRET}
+  from-number: ${COOLSMS_FROMNUMBER}
