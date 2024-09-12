@@ -2,14 +2,14 @@ package ssafy.ddada.api.match.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.api.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
-import ssafy.ddada.domain.match.entity.MatchTime;
 import ssafy.ddada.domain.match.entity.MatchType;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Schema(description = "경기 세부 정보 응답 DTO")
@@ -17,7 +17,7 @@ public record MatchDetailResponse(
         @Schema(description = "경기 ID")
         Long id,
         @Schema(description = "시설")
-        CourtSimpleResponse court,
+        CourtDetailResponse court,
         @Schema(description = "팀1")
         TeamDetailResponse team1,
         @Schema(description = "팀2")
@@ -32,12 +32,12 @@ public record MatchDetailResponse(
         Integer team2SetScore,
         @Schema(description = "경기 상태")
         MatchStatus status,
-        @Schema(description = "단복식 여부")
+        @Schema(description = "경기 타입")
         MatchType type,
         @Schema(description = "경기 일자")
         LocalDate date,
         @Schema(description = "경기 시간")
-        MatchTime time,
+        LocalTime time,
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Schema(description = "세트 정보 요약 리스트")
         List<SetSimpleResponse> sets
@@ -46,7 +46,7 @@ public record MatchDetailResponse(
     public static MatchDetailResponse from(Match match){
         return new MatchDetailResponse(
                 match.getId(),
-                CourtSimpleResponse.from(match.getCourt()),
+                CourtDetailResponse.fromWhereMatchDetail(match.getCourt()),
                 TeamDetailResponse.from(match.getTeam1()),
                 TeamDetailResponse.from(match.getTeam2()),
                 ManagerSimpleResponse.from(match.getManager()),

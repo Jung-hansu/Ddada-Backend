@@ -11,13 +11,16 @@ public record PlayerSimpleResponse(
         @Schema(description = "멤버 별명")
         String nickname,
         @Schema(description = "멤버 성별")
-        Gender gender
+        Gender gender,
+        @Schema(description = "멤버 레이팅")
+        Integer rating
 ) {
     public static PlayerSimpleResponse from(Player player) {
         return new PlayerSimpleResponse(
                 player.getId(),
                 player.getNickname(),
-                player.getGender()
+                player.getGender(),
+                player.getRating()
         );
     }
 }

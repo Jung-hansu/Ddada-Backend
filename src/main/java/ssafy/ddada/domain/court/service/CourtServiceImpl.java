@@ -29,7 +29,6 @@ import ssafy.ddada.domain.court.repository.CourtRepository;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -51,19 +50,19 @@ public class CourtServiceImpl implements CourtService {
     }
 
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand courtSearchCommand) {
-        Pageable pageable = PageRequest.of(courtSearchCommand.page(), courtSearchCommand.size());
+    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand command) {
+        Pageable pageable = PageRequest.of(command.page(), command.size());
         List<Court> courts;
 
-        if (StringUtil.isEmpty(courtSearchCommand.keyword())) {
+        if (StringUtil.isEmpty(command.keyword())) {
             courts = courtRepository.findAllCourts();
         } else {
-            courts = courtRepository.findCourtsByKeyword(courtSearchCommand.keyword());
+            courts = courtRepository.findCourtsByKeyword(command.keyword());
         }
 
-        if (!isEmptyFacilities(courtSearchCommand.facilities())) {
+        if (!isEmptyFacilities(command.facilities())) {
             courts = courts.stream()
-                    .filter(court -> containsFacility(court.getFacilities(), courtSearchCommand.facilities()))
+                    .filter(court -> containsFacility(court.getFacilities(), command.facilities()))
                     .toList();
         }
 
@@ -82,7 +81,7 @@ public class CourtServiceImpl implements CourtService {
 
     @Override
     public CourtDetailResponse getCourtById(Long courtId) {
-        Court court = courtRepository.findById(courtId)
+        Court court = courtRepository.findCourtWithMatchesById(courtId)
                 .orElseThrow(CourtNotFoundException::new);
 
         String presignedUrl = getPresignedUrlFromS3(court.getImage());
@@ -90,14 +89,13 @@ public class CourtServiceImpl implements CourtService {
     }
 
     public void createBadmintonCourt(CourtCreateRequest request) {
-        Court court = new Court(
-                null,
+        Court court = Court.createCourt(
                 request.name(),
                 request.address(),
                 request.contactNumber(),
                 request.description(),
                 null,
-                new ArrayList<>(),
+                request.url(),
                 Facility.setToBits(request.facilities())
         );
 

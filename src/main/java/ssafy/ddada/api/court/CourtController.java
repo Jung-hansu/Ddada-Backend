@@ -13,10 +13,7 @@ import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.request.CourtSearchRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
-import ssafy.ddada.domain.court.entity.Facility;
 import ssafy.ddada.domain.court.service.CourtService;
-
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -31,7 +28,7 @@ public class CourtController {
     @GetMapping("/search")
     public CommonResponse<Page<CourtSimpleResponse>> getCourtsByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String facilities) {
 
@@ -54,10 +51,8 @@ public class CourtController {
 
     @Operation(summary = "배드민턴 코트 추가", description = "새로운 배드민턴 코트를 추가하는 API입니다.")
     @PostMapping(value = "", consumes = { "multipart/form-data" })
-    public ResponseEntity<Void> createBadmintonCourt(
-            @ModelAttribute @Validated CourtCreateRequest request) {
+    public ResponseEntity<Void> createBadmintonCourt(@ModelAttribute @Validated CourtCreateRequest request) {
         courtService.createBadmintonCourt(request);
         return ResponseEntity.ok().build();
     }
-
 }

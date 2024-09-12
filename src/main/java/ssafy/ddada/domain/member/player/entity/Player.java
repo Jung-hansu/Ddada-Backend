@@ -44,8 +44,10 @@ public class Player extends BaseMemberEntity implements MemberInterface {
 
     private String description;
 
+    private Integer rating;
+
     // 명시적인 생성자 추가 (null 값 허용)
-    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, String number, String description, MemberRole role) {
+    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, String number, String description, Integer rating, MemberRole role) {
         this.email = email;
         this.gender = gender;
         this.birth = birth;
@@ -54,6 +56,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
         this.profileImg = profileImg;
         this.number = number;
         this.description = description;
+        this.rating = rating;
         this.isDeleted = false;
         this.role = role;
     }
@@ -62,12 +65,13 @@ public class Player extends BaseMemberEntity implements MemberInterface {
         return new Player(
                 email,
                 null,  // 성별 기본값 설정
-                null,  // 생년월일 기본값 설정
-                null,  // 닉네임 기본값
-                null,  // 임시 비밀번호
-                null,  // 프로필 이미지 기본값
-                null,  // 전화번호 기본값
+                null,   // 생년월일 기본값 설정
+                null,   // 닉네임 기본값
+                null,   // 임시 비밀번호
+                null,   // 프로필 이미지 기본값
+                null,   // 전화번호 기본값
                 null,   // 임시 설명
+                0,      // 초기 레이팅
                 MemberRole.TEMP
         );
     }
@@ -81,6 +85,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
         this.gender = signupCommand.gender();
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
+        this.rating = 0;
         this.isDeleted = false;
         this.role = MemberRole.PLAYER;
 

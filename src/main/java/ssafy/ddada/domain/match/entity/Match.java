@@ -9,6 +9,7 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,12 +55,12 @@ public class Match extends BaseMatchEntity {
     @Column(nullable = false)
     private LocalDate matchDate;
 
-    private MatchTime matchTime;
+    private LocalTime matchTime;
 
     @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Set> sets = new ArrayList<>();
 
-    public Match(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, MatchTime matchTime) {
+    public Match(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
         this.court = court;
         this.team1 = team1;
         this.team2 = team2;
@@ -69,7 +70,7 @@ public class Match extends BaseMatchEntity {
         this.matchTime = matchTime;
     }
 
-    public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, MatchTime matchTime) {
+    public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
         return new Match(court, team1, team2, matchType, matchDate, matchTime);
     }
 

@@ -106,37 +106,73 @@ public class MatchServiceImpl implements MatchService {
         return TeamDetailResponse.from(team);
     }
 
-    @Override
-    @Transactional
-    public void updateTeamPlayer(Long matchId, TeamChangePlayerCommand command) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(TeamNotFoundException::new);
-        Long teamId;
+    private void updateTeamPlayerCount(Team team){
+        int playerCount = 0;
 
-        if (command.teamNumber() == 1){
-            teamId = match.getTeam1().getId();
-        } else if (command.teamNumber() == 2){
-            teamId = match.getTeam2().getId();
-        } else {
-            throw new InvalidTeamNumberException();
+        if (team.getPlayer1() != null) {
+            playerCount++;
         }
 
-        if (!teamRepository.existsById(teamId)){
-            throw new TeamNotFoundException();
+        if (team.getPlayer2() != null) {
+            playerCount++;
+        }
+        team.setPlayerCount(playerCount);
+    }
+
+    private void updateTeamRating(Team team){
+        Player player1 = team.getPlayer1();
+        Player player2 = team.getPlayer2();
+        int ratingAverage = 0;
+
+        if (player1 != null) {
+            ratingAverage += player1.getRating();
         }
 
-        if (command.playerNumber() == 1){
-            teamRepository.updatePlayer1(teamId, command.playerId());
-        } else if (!match.getMatchType().isSingle() && command.playerNumber() == 2){
-            teamRepository.updatePlayer2(teamId, command.playerId());
-        } else {
-            throw new InvalidTeamPlayerNumberException();
+        if (player2 != null) {
+            ratingAverage += player2.getRating();
         }
+
+        ratingAverage /= team.getPlayerCount();
+        team.setRating(ratingAverage);
+    }
+
+    private void updateTeam(Team team){
+        updateTeamPlayerCount(team);
+        updateTeamRating(team);
     }
 
     @Override
     @Transactional
-    public MatchDetailResponse createMatch(Long creatorId, MatchCreateCommand command) {
+    public void updateTeamPlayer(Long matchId, TeamChangePlayerCommand command) {
+        Match match = matchRepository.findByIdWithTeams(matchId)
+                .orElseThrow(TeamNotFoundException::new);
+        Player player = playerRepository.findById(command.playerId())
+                .orElseThrow(MemberNotFoundException::new);
+        Team team;
+
+        if (command.teamNumber() == 1){
+            team = match.getTeam1();
+        } else if (command.teamNumber() == 2){
+            team = match.getTeam2();
+        } else {
+            throw new InvalidTeamNumberException();
+        }
+
+        if (command.playerNumber() == 1){
+            team.setPlayer1(player);
+        } else if (!match.getMatchType().isSingle() && command.playerNumber() == 2){
+            team.setPlayer2(player);
+        } else {
+            throw new InvalidTeamPlayerNumberException();
+        }
+
+        updateTeam(team);
+        teamRepository.save(team);
+    }
+
+    @Override
+    @Transactional
+    public void createMatch(Long creatorId, MatchCreateCommand command) {
         Court court = courtRepository.findById(command.court_id())
                 .orElseThrow(CourtNotFoundException::new);
         Player creator = playerRepository.findById(creatorId)
@@ -153,7 +189,6 @@ public class MatchServiceImpl implements MatchService {
         );
 
         matchRepository.save(match);
-        return MatchDetailResponse.from(match);
     }
 
     @Override

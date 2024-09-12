@@ -63,6 +63,7 @@ public class PlayerServiceImpl implements PlayerService {
                     null,
                     signupCommand.number(),
                     signupCommand.description(),
+                    0,
                     MemberRole.PLAYER
             );
             playerRepository.save(tempPlayer);
