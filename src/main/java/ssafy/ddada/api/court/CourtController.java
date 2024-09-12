@@ -28,7 +28,7 @@ public class CourtController {
     @GetMapping("/search")
     public CommonResponse<Page<CourtSimpleResponse>> getCourtsByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String facilities) {
 

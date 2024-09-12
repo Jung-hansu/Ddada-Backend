@@ -1,5 +1,6 @@
 package ssafy.ddada.api.court.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.Facility;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "시설 정보 요약 응답 DTO")
 public record CourtSimpleResponse(
         @Schema(description = "시설 ID")

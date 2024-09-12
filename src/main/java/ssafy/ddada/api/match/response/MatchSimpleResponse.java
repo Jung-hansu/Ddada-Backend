@@ -5,7 +5,6 @@ import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchType;
-import ssafy.ddada.domain.match.entity.Team;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -38,7 +37,7 @@ public record MatchSimpleResponse(
                 int team2Rating = match.getTeam2().getRating();
                 int rating = (team1Rating * team1PlayerCount + team2Rating * team2PlayerCount) /
                         (team1PlayerCount + team2PlayerCount);
-                
+
                 return new MatchSimpleResponse(
                         match.getId(),
                         match.getMatchDate(),

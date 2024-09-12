@@ -172,7 +172,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public MatchDetailResponse createMatch(Long creatorId, MatchCreateCommand command) {
+    public void createMatch(Long creatorId, MatchCreateCommand command) {
         Court court = courtRepository.findById(command.court_id())
                 .orElseThrow(CourtNotFoundException::new);
         Player creator = playerRepository.findById(creatorId)
@@ -189,7 +189,6 @@ public class MatchServiceImpl implements MatchService {
         );
 
         matchRepository.save(match);
-        return MatchDetailResponse.from(match);
     }
 
     @Override

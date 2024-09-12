@@ -29,7 +29,6 @@ import ssafy.ddada.domain.court.repository.CourtRepository;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -82,7 +81,7 @@ public class CourtServiceImpl implements CourtService {
 
     @Override
     public CourtDetailResponse getCourtById(Long courtId) {
-        Court court = courtRepository.findById(courtId)
+        Court court = courtRepository.findCourtWithMatchesById(courtId)
                 .orElseThrow(CourtNotFoundException::new);
 
         String presignedUrl = getPresignedUrlFromS3(court.getImage());

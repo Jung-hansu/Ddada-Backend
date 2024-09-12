@@ -46,7 +46,7 @@ public record MatchDetailResponse(
     public static MatchDetailResponse from(Match match){
         return new MatchDetailResponse(
                 match.getId(),
-                CourtDetailResponse.from(match.getCourt()),
+                CourtDetailResponse.fromWhereMatchDetail(match.getCourt()),
                 TeamDetailResponse.from(match.getTeam1()),
                 TeamDetailResponse.from(match.getTeam2()),
                 ManagerSimpleResponse.from(match.getManager()),

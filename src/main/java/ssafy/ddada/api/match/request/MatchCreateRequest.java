@@ -10,7 +10,7 @@ import java.time.LocalTime;
 
 @Schema(description = "경기 생성 요청 DTO")
 public record MatchCreateRequest(
-        @Schema(description = "시설 ID", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "시설 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "시설 ID는 필수입니다.")
         Long court_id,
 
@@ -18,12 +18,12 @@ public record MatchCreateRequest(
         MatchType matchType,
 
         @Schema(description = "경기 일자", example = "2024-09-06", requiredMode = Schema.RequiredMode.REQUIRED)
-        LocalDate matchDate,
+        LocalDate date,
 
         @Schema(description = "경기 시간", example = "10:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
-        LocalTime matchTime
+        LocalTime time
 ) {
     public MatchCreateCommand toCommand(){
-        return new MatchCreateCommand(court_id, matchType, matchDate, matchTime);
+        return new MatchCreateCommand(court_id, matchType, date, time);
     }
 }

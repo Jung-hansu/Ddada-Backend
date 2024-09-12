@@ -63,8 +63,8 @@ public class MatchController {
         Long creatorId = SecurityUtil.getLoginMemberId();
         log.info("경기 생성 >>>> 생성인 ID: {}, 경기 정보: {}", creatorId, request);
 
-        MatchDetailResponse response = matchService.createMatch(creatorId, request.toCommand());
-        return CommonResponse.created("경기가 성공적으로 생성되었습니다.", response);
+        matchService.createMatch(creatorId, request.toCommand());
+        return CommonResponse.created("경기가 성공적으로 생성되었습니다.", null);
     }
 
     @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
