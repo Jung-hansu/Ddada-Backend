@@ -1,10 +1,7 @@
 package ssafy.ddada.domain.court.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ssafy.ddada.domain.match.entity.BaseMatchEntity;
 import ssafy.ddada.domain.match.entity.Match;
 
@@ -35,6 +32,7 @@ public class Court extends BaseMatchEntity {
 
     private String description;
 
+    @Setter
     private String image;
 
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

@@ -18,14 +18,14 @@ public record CourtDetailResponse(
         @Schema(description = "시설 이미지")
         String image
 ) {
-    public static CourtDetailResponse from(Court court){
+    public static CourtDetailResponse from(Court court, String presignedUrl){
         return new CourtDetailResponse(
                 court.getId(),
                 court.getName(),
                 court.getAddress(),
                 court.getContactNumber(),
                 court.getDescription(),
-                court.getImage()
+                presignedUrl
         );
     }
 }
