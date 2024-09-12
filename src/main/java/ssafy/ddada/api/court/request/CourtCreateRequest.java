@@ -20,8 +20,8 @@ public record CourtCreateRequest(
         @Schema(description = "코트 설명")
         String description,
 
-        @Schema(description = "코트 이미지 URL")
-        MultipartFile imageUrl,
+        @Schema(description = "코트 이미지")
+        MultipartFile image,
 
         @Schema(description = "코트 편의시설 목록", example = "[\"PARKING\", \"SHOWER\"]")
         Set<Facility> facilities

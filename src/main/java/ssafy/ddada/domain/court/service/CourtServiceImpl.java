@@ -1,9 +1,6 @@
 package ssafy.ddada.domain.court.service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,9 +103,9 @@ public class CourtServiceImpl implements CourtService {
 
         courtRepository.save(court);
 
-        String imageUrl = (request.imageUrl() == null || request.imageUrl().isEmpty())
+        String imageUrl = (request.image() == null || request.image().isEmpty())
                 ? "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg"
-                : uploadImageToS3(request.imageUrl(), court.getId());
+                : uploadImageToS3(request.image(), court.getId());
 
         court.setImage(imageUrl);
 
