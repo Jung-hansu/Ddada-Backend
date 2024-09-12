@@ -1,4 +1,4 @@
-package ssafy.ddada.api.member.court.response;
+package ssafy.ddada.api.court.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;

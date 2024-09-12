@@ -1,7 +1,7 @@
 package ssafy.ddada.api.match.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.api.member.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchTime;

@@ -8,19 +8,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ssafy.ddada.domain.court.entity.Court;
 
+import java.util.List;
+
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
     // N+1 문제 방지를 위해 FETCH 조인 사용
-    @Query("SELECT c FROM Court c LEFT JOIN FETCH c.matches")
-    Page<Court> findAllCourts(Pageable pageable);
+    @Query("""
+        SELECT c
+        FROM Court c LEFT OUTER JOIN FETCH c.matches
+    """)
+    List<Court> findAllCourts();
 
     @Query("""
         SELECT c
-        FROM Court c LEFT JOIN FETCH c.matches
+        FROM Court c LEFT OUTER JOIN FETCH c.matches
         WHERE c.name LIKE CONCAT('%', :keyword, '%') OR
               c.address LIKE CONCAT('%', :keyword, '%')
     """)
-    Page<Court> findCourtsByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
+    List<Court> findCourtsByKeyword(@Param("keyword") String keyword);
 }

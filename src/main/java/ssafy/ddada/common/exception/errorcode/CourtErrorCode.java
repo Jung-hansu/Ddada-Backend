@@ -9,6 +9,8 @@ import static ssafy.ddada.api.StatusCode.*;
 @AllArgsConstructor
 public enum CourtErrorCode implements BaseErrorCode{
 
+    INVALID_FACILITY(NOT_FOUND, "COURT_404_1", "존재하지 않는 옵션입니다."),
+
     COURT_NOT_FOUND(NOT_FOUND, "COURT_404_1", "존재하지 않는 시설입니다.");
 
     private final Integer httpStatus;
