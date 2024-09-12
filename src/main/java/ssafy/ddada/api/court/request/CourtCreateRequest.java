@@ -1,6 +1,7 @@
 package ssafy.ddada.api.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.domain.court.entity.Facility;
 
 import java.util.Set;
@@ -19,8 +20,8 @@ public record CourtCreateRequest(
         @Schema(description = "코트 설명")
         String description,
 
-        @Schema(description = "코트 이미지 URL")
-        String imageUrl,
+        @Schema(description = "코트 이미지")
+        MultipartFile image,
 
         @Schema(description = "코트 편의시설 목록", example = "[\"PARKING\", \"SHOWER\"]")
         Set<Facility> facilities

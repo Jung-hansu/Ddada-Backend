@@ -53,9 +53,11 @@ public class CourtController {
     }
 
     @Operation(summary = "배드민턴 코트 추가", description = "새로운 배드민턴 코트를 추가하는 API입니다.")
-    @PostMapping
-    public ResponseEntity<Void> createBadmintonCourt(@RequestBody CourtCreateRequest request) {
+    @PostMapping(value = "", consumes = { "multipart/form-data" })
+    public ResponseEntity<Void> createBadmintonCourt(
+            @ModelAttribute @Validated CourtCreateRequest request) {
         courtService.createBadmintonCourt(request);
         return ResponseEntity.ok().build();
     }
+
 }
