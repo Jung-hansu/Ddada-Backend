@@ -22,6 +22,9 @@ public record CourtCreateRequest(
         @Schema(description = "코트 이미지 URL")
         String imageUrl,
 
+        @Schema(description = "코트 홈페이지 URL")
+        String url,
+
         @Schema(description = "코트 편의시설 목록", example = "[\"PARKING\", \"SHOWER\"]")
         Set<Facility> facilities
 ) {}
