@@ -39,7 +39,7 @@ public record CourtSimpleResponse(
                                 Match::getMatchDate,
                                 Collectors.mapping(Match::getMatchTime, Collectors.toList())
                         )),
-                Facility.bitMaskToSet(court.getFacilities())
+                Facility.bitsToSet(court.getFacilities())
         );
     }
 }

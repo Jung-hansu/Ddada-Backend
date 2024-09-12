@@ -33,7 +33,8 @@ public class CourtController {
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Set<Facility> facilities) {
+            @RequestParam(required = false) String facilities) {
+
 
         CourtSearchRequest request = new CourtSearchRequest(keyword, page, size, facilities);
         log.info("시설 검색 결과 조회 >>>> 검색어: {}, 페이지 번호: {}, 페이지 크기: {}, 편의시설: {}", request.keyword(), request.page(), request.size(), request.facilities());

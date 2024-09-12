@@ -7,10 +7,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
+import ssafy.ddada.common.exception.InvalidFacilityException;
 
 @Slf4j
 @RestControllerAdvice
 public class CourtExceptionHandler {
+
+    @ExceptionHandler(InvalidFacilityException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidFacilityException(InvalidFacilityException e) {
+        log.error("InvalidFacilityException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
 
     @ExceptionHandler(CourtNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

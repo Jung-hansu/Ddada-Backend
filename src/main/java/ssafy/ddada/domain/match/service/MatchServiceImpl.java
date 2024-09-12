@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.util.StringUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.entity.MatchStatus;
@@ -40,17 +41,13 @@ public class MatchServiceImpl implements MatchService {
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
 
-    private boolean isEmptyString(String value){
-        return value == null || value.trim().isEmpty();
-    }
-
     @Override
     public Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, String status, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Match> matchPage;
 
-        if (isEmptyString(status)){
-            matchPage = isEmptyString(keyword) ?
+        if (StringUtil.isEmpty(status)){
+            matchPage = StringUtil.isEmpty(keyword) ?
                     matchRepository.findAllMatches(pageable) :
                     matchRepository.findMatchesByKeyword(keyword, pageable);
         } else {
@@ -60,7 +57,7 @@ public class MatchServiceImpl implements MatchService {
                 throw new InvalidMatchStatusException();
             }
 
-            matchPage = isEmptyString(keyword) ?
+            matchPage = StringUtil.isEmpty(keyword) ?
                     matchRepository.findAllMatchesByStatus(matchStatus, pageable) :
                     matchRepository.findMatchesByKeywordAndStatus(keyword, matchStatus, pageable);
         }

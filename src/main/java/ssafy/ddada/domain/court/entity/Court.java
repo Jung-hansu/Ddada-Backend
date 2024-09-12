@@ -45,5 +45,5 @@ public class Court extends BaseMatchEntity {
 //    @Enumerated(EnumType.STRING)  // Enum 값을 저장할 때 문자열(String) 형태로 저장
 //    @CollectionTable(name = "court_facilities", joinColumns = @JoinColumn(name = "court_id"))  // 별도의 테이블 court_facilities에서 관리, court_id를 외래키로 사용
 //    @Column(name = "facility")  // 테이블에서 해당 컬렉션의 컬럼 이름을 "facility"로 지정
-    private Long facilities;  // 편의시설을 Set 형태로 관리, 기본값은 빈 HashSet
+    private long facilities;  // 편의시설을 Set 형태로 관리, 기본값은 빈 HashSet
 }
