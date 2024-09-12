@@ -16,21 +16,15 @@ import java.util.Set;
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
     // N+1 문제 방지를 위해 FETCH 조인 사용
-    @Query("SELECT c FROM Court c LEFT JOIN FETCH c.matches")
+    @Query("SELECT c FROM Court c LEFT OUTER JOIN FETCH c.matches")
     Page<Court> findAllCourts(Pageable pageable);
 
-    @Query("""
+    @Query(value = """
         SELECT c
-        FROM Court c LEFT JOIN FETCH c.matches
-        WHERE c.name LIKE CONCAT('%', :keyword, '%') OR
-              c.address LIKE CONCAT('%', :keyword, '%')
-    """)
-    Page<Court> findCourtsByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT new ssafy.ddada.api.court.response.CourtSimpleResponse(c.id, c.name, c.address) " +
-            "FROM Court c " +
-            "WHERE (c.name LIKE CONCAT('%', :keyword, '%') OR " +
-            "      c.address LIKE CONCAT('%', :keyword, '%')) AND " +
-            "      (:facilities IS NULL OR :facilities MEMBER OF c.facilities)")
-    Page<CourtSimpleResponse> findCourtPreviewsByKeywordAndFacilities(@Param("keyword") String keyword, @Param("facilities") Set<Facility> facilities, Pageable pageable);
+        FROM Court c LEFT OUTER JOIN Match m
+        WHERE c.name LIKE CONCAT('%', :keyword, '%') AND 
+        (c.facilities & :facilities) > 0
+    """, nativeQuery = true)
+    Page<Court> findCourtsByKeywordAndFacilities(@Param("keyword") String keyword, @Param("facilities") Long facilities, Pageable pageable);
 }
+//EXISTS (SELECT f FROM Court court JOIN court.facilities f WHERE f IN :facilities))

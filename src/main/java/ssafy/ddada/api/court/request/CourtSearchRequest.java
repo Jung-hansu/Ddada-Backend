@@ -1,4 +1,4 @@
-package ssafy.ddada.api.member.court.request;
+package ssafy.ddada.api.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
@@ -18,7 +18,12 @@ public record CourtSearchRequest (
         @Schema(description = "필터링할 편의시설 목록", example = "[\"PARKING\", \"SHOWER\", \"TOILET\", \"WIFI\"]")
         Set<Facility> facilities
 ) {
-        CourtSearchCommand toCommand() {
-                return new CourtSearchCommand(keyword, page, size, facilities);
+        public CourtSearchCommand toCommand() {
+                return new CourtSearchCommand(
+                        keyword,
+                        page,
+                        size,
+                        Facility.bitMask(facilities)
+                );
         }
 }

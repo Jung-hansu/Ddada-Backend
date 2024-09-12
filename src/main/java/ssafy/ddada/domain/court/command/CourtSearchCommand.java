@@ -8,5 +8,5 @@ public record CourtSearchCommand(
         String keyword,
         int page,
         int size,
-        Set<Facility> facilities
+        Long facilities
 ) { }

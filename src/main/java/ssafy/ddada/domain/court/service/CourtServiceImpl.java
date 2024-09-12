@@ -6,14 +6,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ssafy.ddada.api.member.court.response.CourtDetailResponse;
-import ssafy.ddada.api.member.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.court.request.CourtCreateRequest;
+import ssafy.ddada.api.court.response.CourtDetailResponse;
+import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
+import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.Facility;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,15 +26,23 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
 
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeyword(String keyword, Set<Facility> facilities, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand courtSearchCommand) {
+        Pageable pageable = PageRequest.of(courtSearchCommand.page(), courtSearchCommand.size());
         Page<Court> courtPage;
 
-        if ((keyword == null || keyword.isEmpty()) && (facilities == null || facilities.isEmpty())) {
-            return courtRepository.findAllCourtPreviews(pageable);
+        log.info("pageable: {}", pageable);
+        if ((courtSearchCommand.keyword() == null || courtSearchCommand.keyword().trim().isEmpty()) &&
+                (courtSearchCommand.facilities() == null || courtSearchCommand.facilities() == 0)) {
+            courtPage = courtRepository.findAllCourts(pageable);
+            log.info("courtPage: {}", courtPage.getContent());
         } else {
-            return courtRepository.findCourtPreviewsByKeywordAndFacilities(keyword, facilities, pageable);
+            courtPage = courtRepository.findCourtsByKeywordAndFacilities(
+                    courtSearchCommand.keyword(),
+                    courtSearchCommand.facilities(),
+                    pageable
+            );
         }
+        return courtPage.map(CourtSimpleResponse::from);
     }
 
     @Override
@@ -41,4 +52,19 @@ public class CourtServiceImpl implements CourtService {
         return CourtDetailResponse.from(court);
     }
 
+    @Override
+    public void createBadmintonCourt(CourtCreateRequest request) {
+        Court court = new Court(
+                null, // ID는 자동 생성
+                request.name(),
+                request.address(),
+                request.contactNumber(),
+                request.description(),
+                request.imageUrl(),
+                new ArrayList<>(),
+                Facility.bitMask(request.facilities())// != null ? request.facilities() : new HashSet<>()
+        );
+        courtRepository.save(court);
+    }
 }
+
