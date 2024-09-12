@@ -6,17 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.request.CourtSearchRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
-import ssafy.ddada.domain.court.entity.Facility;
 import ssafy.ddada.domain.court.service.CourtService;
-
-import java.util.Set;
 
 @Slf4j
 @RestController
