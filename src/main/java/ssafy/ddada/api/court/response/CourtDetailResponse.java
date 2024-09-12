@@ -29,14 +29,14 @@ public record CourtDetailResponse(
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<LocalTime>> reservations
 ) {
-    public static CourtDetailResponse from(Court court){
+    public static CourtDetailResponse from(Court court, String presignedUrl){
         return new CourtDetailResponse(
                 court.getId(),
                 court.getName(),
                 court.getAddress(),
                 court.getContactNumber(),
                 court.getDescription(),
-                court.getImage(),
+                presignedUrl,
                 court.getUrl(),
                 court.getMatches()
                         .stream()

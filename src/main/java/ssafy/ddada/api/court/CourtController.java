@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.court.request.CourtCreateRequest;
@@ -49,8 +50,8 @@ public class CourtController {
     }
 
     @Operation(summary = "배드민턴 코트 추가", description = "새로운 배드민턴 코트를 추가하는 API입니다.")
-    @PostMapping
-    public ResponseEntity<Void> createBadmintonCourt(@RequestBody CourtCreateRequest request) {
+    @PostMapping(value = "", consumes = { "multipart/form-data" })
+    public ResponseEntity<Void> createBadmintonCourt(@ModelAttribute @Validated CourtCreateRequest request) {
         courtService.createBadmintonCourt(request);
         return ResponseEntity.ok().build();
     }

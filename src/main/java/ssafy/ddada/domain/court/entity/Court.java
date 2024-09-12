@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import ssafy.ddada.domain.match.entity.Match;
 
@@ -31,6 +32,7 @@ public class Court extends BaseCourtEntity {
 
     private String description;
 
+    @Setter
     private String image;
 
     private String url;

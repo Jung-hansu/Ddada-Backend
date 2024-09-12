@@ -27,12 +27,28 @@ public record CourtSimpleResponse(
         @Schema(description = "시설 편의시설 목록")
         Set<Facility> facilities
 ) {
-    public static CourtSimpleResponse from(Court court){
+    public static CourtSimpleResponse from(Court court) {
         return new CourtSimpleResponse(
                 court.getId(),
                 court.getName(),
                 court.getAddress(),
-                court.getImage(),
+                court.getImage(),  // 그대로 이미지 경로를 사용
+                court.getMatches()
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                Match::getMatchDate,
+                                Collectors.mapping(Match::getMatchTime, Collectors.toList())
+                        )),
+                Facility.bitsToSet(court.getFacilities())
+        );
+    }
+
+    public static CourtSimpleResponse from(Court court, String presignedUrl) {
+        return new CourtSimpleResponse(
+                court.getId(),
+                court.getName(),
+                court.getAddress(),
+                presignedUrl,  // presigned URL을 사용
                 court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(
