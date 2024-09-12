@@ -36,19 +36,19 @@ public class CourtServiceImpl implements CourtService {
     }
 
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand courtSearchCommand) {
-        Pageable pageable = PageRequest.of(courtSearchCommand.page(), courtSearchCommand.size());
+    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand command) {
+        Pageable pageable = PageRequest.of(command.page(), command.size());
         List<Court> courts;
 
-        if (StringUtil.isEmpty(courtSearchCommand.keyword())) {
+        if (StringUtil.isEmpty(command.keyword())) {
             courts = courtRepository.findAllCourts();
         } else {
-            courts = courtRepository.findCourtsByKeyword(courtSearchCommand.keyword());
+            courts = courtRepository.findCourtsByKeyword(command.keyword());
         }
 
-        if (!isEmptyFacilities(courtSearchCommand.facilities())) {
+        if (!isEmptyFacilities(command.facilities())) {
             courts = courts.stream()
-                    .filter(court -> containsFacility(court.getFacilities(), courtSearchCommand.facilities()))
+                    .filter(court -> containsFacility(court.getFacilities(), command.facilities()))
                     .toList();
         }
         return new PageImpl<>(courts, pageable, courts.size())
@@ -64,15 +64,14 @@ public class CourtServiceImpl implements CourtService {
 
     @Override
     public void createBadmintonCourt(CourtCreateRequest request) {
-        Court court = new Court(
-                null, // ID는 자동 생성
+        Court court = Court.createCourt(
                 request.name(),
                 request.address(),
                 request.contactNumber(),
                 request.description(),
                 request.imageUrl(),
-                new ArrayList<>(),
-                Facility.setToBits(request.facilities())// != null ? request.facilities() : new HashSet<>()
+                request.url(),
+                Facility.setToBits(request.facilities())
         );
         courtRepository.save(court);
     }
