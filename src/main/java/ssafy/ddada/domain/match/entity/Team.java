@@ -5,6 +5,7 @@ import lombok.*;
 import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
+@Setter
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,12 +24,23 @@ public class Team extends BaseMatchEntity {
     @JoinColumn(name = "player2_id")
     private Player player2;
 
+    private Integer playerCount;
+
+    private Integer rating;
+
+    public Team(Player player1, Player player2, Integer playerCount, Integer rating) {
+        this.player1 = player1;
+        this.player2 = player2;
+        this.playerCount = playerCount;
+        this.rating = rating;
+    }
+
     public static Team createNewTeam(Player creator){
-        return new Team(null, creator, null);
+        return new Team(creator, null, 1, creator.getRating());
     }
 
     public static Team createNewTeam(){
-        return new Team();
+        return new Team(null, null, 0, 0);
     }
 
 }

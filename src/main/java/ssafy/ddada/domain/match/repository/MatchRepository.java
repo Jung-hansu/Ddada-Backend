@@ -7,15 +7,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
+
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.team1 t JOIN FETCH m.team2
+    """)
+    Optional<Match> findByIdWithTeams(@Param("matchId") Long matchId);
 
     @Query("""
         SELECT m
@@ -55,9 +60,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     void setManager(@Param("matchId") Long matchId, @Param("manager") Manager manager);
 
     @Query("SELECT m " +
-            "FROM Match m JOIN FETCH m.manager mg " +
+            "FROM Match m JOIN FETCH m.court JOIN FETCH m.manager mg " +
             "WHERE mg.id = :managerId")
     Page<Match> findMatchesByManagerId(Long managerId, Pageable pageable);
 
-    List<Match> findMatchesByCourtId(Long courtId);
 }

@@ -106,32 +106,68 @@ public class MatchServiceImpl implements MatchService {
         return TeamDetailResponse.from(team);
     }
 
+    private void updateTeamPlayerCount(Team team){
+        int playerCount = 0;
+
+        if (team.getPlayer1() != null) {
+            playerCount++;
+        }
+
+        if (team.getPlayer2() != null) {
+            playerCount++;
+        }
+        team.setPlayerCount(playerCount);
+    }
+
+    private void updateTeamRating(Team team){
+        Player player1 = team.getPlayer1();
+        Player player2 = team.getPlayer2();
+        int ratingAverage = 0;
+
+        if (player1 != null) {
+            ratingAverage += player1.getRating();
+        }
+
+        if (player2 != null) {
+            ratingAverage += player2.getRating();
+        }
+
+        ratingAverage /= team.getPlayerCount();
+        team.setRating(ratingAverage);
+    }
+
+    private void updateTeam(Team team){
+        updateTeamPlayerCount(team);
+        updateTeamRating(team);
+    }
+
     @Override
     @Transactional
     public void updateTeamPlayer(Long matchId, TeamChangePlayerCommand command) {
-        Match match = matchRepository.findById(matchId)
+        Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
-        Long teamId;
+        Player player = playerRepository.findById(command.playerId())
+                .orElseThrow(MemberNotFoundException::new);
+        Team team;
 
         if (command.teamNumber() == 1){
-            teamId = match.getTeam1().getId();
+            team = match.getTeam1();
         } else if (command.teamNumber() == 2){
-            teamId = match.getTeam2().getId();
+            team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
         }
 
-        if (!teamRepository.existsById(teamId)){
-            throw new TeamNotFoundException();
-        }
-
         if (command.playerNumber() == 1){
-            teamRepository.updatePlayer1(teamId, command.playerId());
+            team.setPlayer1(player);
         } else if (!match.getMatchType().isSingle() && command.playerNumber() == 2){
-            teamRepository.updatePlayer2(teamId, command.playerId());
+            team.setPlayer2(player);
         } else {
             throw new InvalidTeamPlayerNumberException();
         }
+
+        updateTeam(team);
+        teamRepository.save(team);
     }
 
     @Override
