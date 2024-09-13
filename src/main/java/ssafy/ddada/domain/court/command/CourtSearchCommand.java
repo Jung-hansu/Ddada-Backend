@@ -1,12 +1,9 @@
 package ssafy.ddada.domain.court.command;
 
-import ssafy.ddada.domain.court.entity.Facility;
-
-import java.util.Set;
+import org.springframework.data.domain.Pageable;
 
 public record CourtSearchCommand(
         String keyword,
-        int page,
-        int size,
+        Pageable pageable,
         Long facilities
 ) { }

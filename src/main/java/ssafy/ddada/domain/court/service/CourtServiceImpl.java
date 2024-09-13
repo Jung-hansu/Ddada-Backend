@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
@@ -28,26 +26,21 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
     private final S3Util s3Util;  // S3Util 주입
 
-    private boolean isEmptyFacilities(Long facilities) {
-        return facilities == null || facilities == 0;
-    }
-
     private boolean containsFacility(Long whole, Long part){
         return whole != null && (whole & part) == part;
     }
 
     @Override
     public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand command) {
-        Pageable pageable = PageRequest.of(command.page(), command.size());
         List<Court> courts;
 
-        if (StringUtil.isEmpty(command.keyword())) {
+        if (ParameterUtil.isEmptyString(command.keyword())) {
             courts = courtRepository.findAllCourts();
         } else {
             courts = courtRepository.findCourtsByKeyword(command.keyword());
         }
 
-        if (!isEmptyFacilities(command.facilities())) {
+        if (!ParameterUtil.isNullOrZero(command.facilities())) {
             courts = courts.stream()
                     .filter(court -> containsFacility(court.getFacilities(), command.facilities()))
                     .toList();
@@ -63,7 +56,7 @@ public class CourtServiceImpl implements CourtService {
                 })
                 .toList();
 
-        return new PageImpl<>(courtSimpleResponses, pageable, courtSimpleResponses.size());
+        return new PageImpl<>(courtSimpleResponses, command.pageable(), courtSimpleResponses.size());
     }
 
     @Override
