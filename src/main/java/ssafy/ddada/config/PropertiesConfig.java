@@ -7,7 +7,6 @@ import ssafy.ddada.common.properties.*;
 @Configuration
 @EnableConfigurationProperties({
         CorsProperties.class,
-        RedisProperties.class,
         KakaoLoginProperties.class,
         JwtProperties.class,
         S3Properties.class,

@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
+    public AuthResponse login(LoginCommand command) {
         LoginTokenModel tokens;
         log.info(">>> loginType: {}", command.authCode());
 
@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
 
                 MemberInterface kakaoMember = findMemberByEmail(userInfo.email())
-                        .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + userInfo.email()));
+                        .orElseThrow(KakaoMailPlayerNotFoundException::new);
 
                 tokens = generateTokens(kakaoMember);
                 jwtProcessor.saveRefreshToken(tokens);
@@ -194,17 +194,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Optional<MemberInterface> findMemberByEmail(String email) {
-        if (playerRepository.existsByEmail(email)) {
-            return Optional.ofNullable(playerRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        } else if (courtAdminRepository.existsByEmail(email)) {
-            return Optional.ofNullable(courtAdminRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        } else if (managerRepository.existsByEmail(email)) {
-            return Optional.ofNullable(managerRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        }
-        return Optional.empty();
+        return playerRepository.findByEmail(email).map(member -> (MemberInterface) member)
+                .or(() -> courtAdminRepository.findByEmail(email).map(member -> (MemberInterface) member))
+                .or(() -> managerRepository.findByEmail(email).map(member -> (MemberInterface) member));
     }
 
     private LoginTokenModel generateTokens(MemberInterface member) {

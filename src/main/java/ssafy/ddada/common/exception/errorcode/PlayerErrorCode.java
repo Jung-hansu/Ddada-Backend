@@ -28,6 +28,7 @@ public enum PlayerErrorCode implements BaseErrorCode {
     EMAIL_NOT_FOUND(NOT_FOUND, "MEMBER_404_6", "존재하지 않는 이메일입니다."),
     PASSWORD_NOT_MATCH(NOT_FOUND, "MEMBER_404_7", "비밀번호가 일치하지 않습니다."),
     PHONE_NUMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_8", "존재하지 않는 전화번호입니다."),
+    KAKAO_MAIL_PLAYER_NOT_FOUND(NOT_FOUND, "MEMBER_404_9", "카카오 메일에 해당하는 회원을 찾을 수 없습니다."),
 
     MEMBER_ALREADY_DELETED(CONFLICT, "MEMBER_409_1", "이미 삭제된 회원입니다."),
 

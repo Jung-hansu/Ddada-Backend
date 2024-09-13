@@ -87,4 +87,11 @@ public class PlayerExceptionHandler {
         log.error("PhoneNumberNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
+
+    @ExceptionHandler(KakaoMailPlayerNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handleKakaoMailPlayerNotFoundException(KakaoMailPlayerNotFoundException e) {
+        log.error("KakaoMailPlayerNotFoundException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
 }
