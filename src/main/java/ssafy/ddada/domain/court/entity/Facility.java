@@ -1,7 +1,7 @@
 package ssafy.ddada.domain.court.entity;
 
 import ssafy.ddada.common.exception.InvalidFacilityException;
-import ssafy.ddada.common.util.StringUtil;
+import ssafy.ddada.common.util.ParameterUtil;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ public enum Facility {
     public static long toBits(String facilities) {
         long bitMask = 0;
 
-        if (!StringUtil.isEmpty(facilities) && !facilities.isEmpty()) {
+        if (!ParameterUtil.isEmptyString(facilities)) {
             for (String f : facilities.split(",")) {
                 bitMask |= 1L << Facility.of(f).ordinal();
             }
@@ -34,7 +34,7 @@ public enum Facility {
     public static long setToBits(Set<Facility> facilities) {
         long bitMask = 0;
 
-        if (facilities != null && !facilities.isEmpty()) {
+        if (!ParameterUtil.isEmptyCollection(facilities)) {
             for (Facility f : facilities) {
                 bitMask |= 1 << f.ordinal();
             }
