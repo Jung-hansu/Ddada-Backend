@@ -2,14 +2,11 @@ package ssafy.ddada.domain.match.service;
 
 import org.springframework.data.domain.Page;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.domain.match.command.MatchCreateCommand;
-import ssafy.ddada.domain.match.command.MatchResultCommand;
-import ssafy.ddada.domain.match.command.MatchStatusChangeCommand;
-import ssafy.ddada.domain.match.command.TeamChangePlayerCommand;
+import ssafy.ddada.domain.match.command.*;
 
 public interface MatchService {
 
-    Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, String status, Integer page, Integer size);
+    Page<MatchSimpleResponse> getMatchesByKeyword(MatchSearchCommand command);
     void createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchById(Long matchId);
     SetDetailResponse getSetById(Long matchId, Integer setNumber);

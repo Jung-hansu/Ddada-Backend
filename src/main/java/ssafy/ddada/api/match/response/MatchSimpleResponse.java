@@ -47,7 +47,7 @@ public record MatchSimpleResponse(
                         rating,
                         team1PlayerCount,
                         team2PlayerCount,
-                        CourtSimpleResponse.from(match.getCourt())
+                        CourtSimpleResponse.onMatchListFrom(match.getCourt())
                 );
         }
 }

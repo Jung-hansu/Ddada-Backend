@@ -28,12 +28,10 @@ public class CourtController {
     @GetMapping("/search")
     public CommonResponse<Page<CourtSimpleResponse>> getCourtsByKeyword(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String facilities,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String facilities) {
-
-
-        CourtSearchRequest request = new CourtSearchRequest(keyword, page, size, facilities);
+            @RequestParam(defaultValue = "10") int size) {
+        CourtSearchRequest request = new CourtSearchRequest(keyword, facilities, page, size);
         log.info("시설 검색 결과 조회 >>>> 검색어: {}, 페이지 번호: {}, 페이지 크기: {}, 편의시설: {}", request.keyword(), request.page(), request.size(), request.facilities());
 
         Page<CourtSimpleResponse> response = courtService.getCourtsByKeyword(request.toCommand());

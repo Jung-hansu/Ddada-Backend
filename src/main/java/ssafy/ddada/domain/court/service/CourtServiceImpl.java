@@ -9,8 +9,8 @@ import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
+import ssafy.ddada.common.util.ParameterUtil;
 import ssafy.ddada.common.util.S3Util;
-import ssafy.ddada.common.util.StringUtil;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.Facility;
@@ -40,9 +40,9 @@ public class CourtServiceImpl implements CourtService {
             courts = courtRepository.findCourtsByKeyword(command.keyword());
         }
 
-        if (!ParameterUtil.isNullOrZero(command.facilities())) {
+        if (!ParameterUtil.isNullOrZero(command.facilityBits())) {
             courts = courts.stream()
-                    .filter(court -> containsFacility(court.getFacilities(), command.facilities()))
+                    .filter(court -> containsFacility(court.getFacilityBits(), command.facilityBits()))
                     .toList();
         }
 

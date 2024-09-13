@@ -23,7 +23,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
+    @Column(name = "player_id")
     private Long id;
 
     @Column(unique = true)

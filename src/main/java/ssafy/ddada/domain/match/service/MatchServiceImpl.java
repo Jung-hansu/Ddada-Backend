@@ -12,13 +12,9 @@ import ssafy.ddada.common.exception.*;
 import ssafy.ddada.common.util.ParameterUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
-import ssafy.ddada.domain.match.command.MatchCreateCommand;
-import ssafy.ddada.domain.match.command.MatchResultCommand;
-import ssafy.ddada.domain.match.command.MatchStatusChangeCommand;
-import ssafy.ddada.domain.match.command.TeamChangePlayerCommand;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.Set;
 import ssafy.ddada.domain.match.entity.Team;
@@ -42,24 +38,17 @@ public class MatchServiceImpl implements MatchService {
     private final TeamRepository teamRepository;
 
     @Override
-    public Page<MatchSimpleResponse> getMatchesByKeyword(String keyword, String status, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<MatchSimpleResponse> getMatchesByKeyword(MatchSearchCommand command) {
         Page<Match> matchPage;
 
-        if (ParameterUtil.isEmptyString(status)){
-            matchPage = ParameterUtil.isEmptyString(keyword) ?
-                    matchRepository.findAllMatches(pageable) :
-                    matchRepository.findMatchesByKeyword(keyword, pageable);
+        if (command.status() == null){
+            matchPage = ParameterUtil.isEmptyString(command.keyword()) ?
+                    matchRepository.findAllMatches(command.pageable()) :
+                    matchRepository.findMatchesByKeyword(command.keyword(), command.pageable());
         } else {
-            MatchStatus matchStatus = MatchStatus.parse(status);
-
-            if (matchStatus == null) {
-                throw new InvalidMatchStatusException();
-            }
-
-            matchPage = ParameterUtil.isEmptyString(keyword) ?
-                    matchRepository.findAllMatchesByStatus(matchStatus, pageable) :
-                    matchRepository.findMatchesByKeywordAndStatus(keyword, matchStatus, pageable);
+            matchPage = ParameterUtil.isEmptyString(command.keyword()) ?
+                    matchRepository.findAllMatchesByStatus(command.status(), command.pageable()) :
+                    matchRepository.findMatchesByKeywordAndStatus(command.keyword(), command.status(), command.pageable());
         }
         return matchPage.map(MatchSimpleResponse::from);
     }

@@ -3,6 +3,7 @@ package ssafy.ddada.domain.match.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import ssafy.ddada.common.exception.InvalidMatchStatusException;
 
 import java.util.stream.Stream;
 
@@ -23,7 +24,7 @@ public enum MatchStatus {
         return Stream.of(MatchStatus.values())
                 .filter(status -> status.name().equalsIgnoreCase(input))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(InvalidMatchStatusException::new);
     }
 
 }

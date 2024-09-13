@@ -4,6 +4,6 @@ import org.springframework.data.domain.Pageable;
 
 public record CourtSearchCommand(
         String keyword,
-        Pageable pageable,
-        Long facilities
+        Long facilityBits,
+        Pageable pageable
 ) { }
