@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
+import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
 import ssafy.ddada.api.match.request.TeamChangePlayerRequest;
 import ssafy.ddada.api.match.response.*;
@@ -32,9 +33,10 @@ public class MatchController {
             @RequestParam Integer page,
             @RequestParam Integer size
     ) {
+        MatchSearchRequest request = new MatchSearchRequest(keyword, status, page, size);
         log.info("경기 검색 결과 조회 >>>> 검색어: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, status, page, size);
 
-        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(keyword, status, page, size);
+        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(request.toCommand());
         return CommonResponse.ok(response);
     }
 

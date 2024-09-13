@@ -16,7 +16,7 @@ import ssafy.ddada.domain.member.common.MemberRole;
 public class CourtAdmin extends BaseMemberEntity implements MemberInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
+    @Column(name = "court_admin_id")
     private Long id;
 
     @Column(nullable = false, unique = true)

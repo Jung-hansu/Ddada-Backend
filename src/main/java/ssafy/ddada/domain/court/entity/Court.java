@@ -40,20 +40,19 @@ public class Court extends BaseCourtEntity {
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 
-    // 시설 편의시설 비트마스킹
-    private long facilities;
+    private long facilityBits; // 편의시설 비트마스크
 
-    public Court(String name, String address, String contactNumber, String description, String image, String url, long facilities) {
+    public Court(String name, String address, String contactNumber, String description, String image, String url, long facilityBits) {
         this.name = name;
         this.address = address;
         this.contactNumber = contactNumber;
         this.description = description;
         this.image = image;
         this.url = url;
-        this.facilities = facilities;
+        this.facilityBits = facilityBits;
     }
 
-    public static Court createCourt(String name, String address, String contactNumber, String description, String image, String url, long facilities) {
-        return new Court(name, address, contactNumber, description, image, url, facilities);
+    public static Court createCourt(String name, String address, String contactNumber, String description, String image, String url, long facilityBits) {
+        return new Court(name, address, contactNumber, description, image, url, facilityBits);
     }
 }
