@@ -1,6 +1,7 @@
 package ssafy.ddada.api.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.domain.PageRequest;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Facility;
 
@@ -19,8 +20,7 @@ public record CourtSearchRequest (
         public CourtSearchCommand toCommand() {
                 return new CourtSearchCommand(
                         keyword,
-                        page,
-                        size,
+                        PageRequest.of(page, size),
                         Facility.toBits(facilities)
                 );
         }
