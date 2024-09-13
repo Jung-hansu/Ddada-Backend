@@ -1,9 +1,6 @@
 package ssafy.ddada.common.util;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +12,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import ssafy.ddada.common.exception.NotAllowedExtensionException;
-import ssafy.ddada.common.exception.ProfileNotFoundInS3Exception;
 import ssafy.ddada.common.properties.S3Properties;
 
 import java.io.IOException;
