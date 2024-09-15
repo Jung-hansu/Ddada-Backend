@@ -13,7 +13,6 @@ public interface MatchService {
     void updateMatchStatus(MatchStatusChangeCommand command);
 
     // Team 관련 메소드
-    @Deprecated TeamDetailResponse getTeamByTeamNumber(Long matchId, Integer teamNumber);
     void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
     void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
 

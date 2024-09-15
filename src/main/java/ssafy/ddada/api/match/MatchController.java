@@ -16,8 +16,6 @@ import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.match.service.MatchService;
 import ssafy.ddada.domain.member.common.MemberRole;
 
-import java.lang.reflect.Member;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -84,16 +82,6 @@ public class MatchController {
 
         matchService.updateMatchStatus(request.toCommand());
         return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", null);
-    }
-
-    @Deprecated
-    @Operation(summary = "팀 세부 조회", description = "팀 세부 정보를 조회하는 api입니다.")
-    @GetMapping("/{match_id}/teams/{team_number}")
-    public CommonResponse<TeamDetailResponse> getTeamById(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber) {
-        log.info("팀 세부 조회 >>>> 경기 ID: {}, 팀 번호: {}", matchId, teamNumber);
-
-        TeamDetailResponse response = matchService.getTeamByTeamNumber(matchId, teamNumber);
-        return CommonResponse.ok(response);
     }
 
     @Operation(summary = "팀 선수 추가", description = "팀 선수를 추가하는 api입니다.")
