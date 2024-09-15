@@ -9,4 +9,8 @@ public class ParameterUtil {
         return str == null || str.trim().isEmpty();
     }
 
+    public static String blankToNull(String str) {
+        return str == null || str.trim().isEmpty() ? null : str;
+    }
+
 }
