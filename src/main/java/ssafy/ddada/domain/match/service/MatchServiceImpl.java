@@ -12,7 +12,6 @@ import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
-import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
@@ -38,21 +37,15 @@ public class MatchServiceImpl implements MatchService {
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
 
-    private boolean isReserved(Match match, Long memberId, MemberRole memberRole) {
-        return switch(memberRole){
-            case PLAYER ->
-                    Objects.equals(match.getTeam1().getPlayer1().getId(), memberId) ||
-                    Objects.equals(match.getTeam1().getPlayer2().getId(), memberId) ||
-                    Objects.equals(match.getTeam2().getPlayer1().getId(), memberId) ||
-                    Objects.equals(match.getTeam2().getPlayer2().getId(), memberId);
-            case MANAGER ->
-                    Objects.equals(match.getManager().getId(), memberId);
-            default -> false;
-        };
+    private boolean isReserved(Match match, Long memberId) {
+        return Objects.equals(match.getTeam1().getPlayer1().getId(), memberId) ||
+                Objects.equals(match.getTeam1().getPlayer2().getId(), memberId) ||
+                Objects.equals(match.getTeam2().getPlayer1().getId(), memberId) ||
+                Objects.equals(match.getTeam2().getPlayer2().getId(), memberId);
     }
 
     @Override
-    public Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MemberRole memberRole, MatchSearchCommand command) {
+    public Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command) {
         Page<Match> matchPage = matchRepository.findMatchesByKeywordAndTypeAndStatus(
                 command.keyword(),
                 command.rankType(),
@@ -60,7 +53,7 @@ public class MatchServiceImpl implements MatchService {
                 command.statuses()
         );
 
-        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId, memberRole)));
+        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId)));
     }
 
     @Override

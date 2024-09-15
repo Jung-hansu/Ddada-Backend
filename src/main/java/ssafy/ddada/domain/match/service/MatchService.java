@@ -3,11 +3,10 @@ package ssafy.ddada.domain.match.service;
 import org.springframework.data.domain.Page;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.domain.match.command.*;
-import ssafy.ddada.domain.member.common.MemberRole;
 
 public interface MatchService {
 
-    Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MemberRole role, MatchSearchCommand command);
+    Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command);
     void createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchById(Long matchId);
     SetDetailResponse getSetById(Long matchId, Integer setNumber);
