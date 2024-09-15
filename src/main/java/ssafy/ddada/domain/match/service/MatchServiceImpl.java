@@ -3,8 +3,6 @@ package ssafy.ddada.domain.match.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
@@ -13,6 +11,7 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
@@ -51,7 +50,8 @@ public class MatchServiceImpl implements MatchService {
                 command.keyword(),
                 command.rankType(),
                 command.matchTypes(),
-                command.statuses()
+                command.statuses(),
+                command.pageable()
         );
 
         return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId)));
@@ -218,9 +218,14 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public Page<MatchSimpleResponse> getMatchesByManagerId(Long managerId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return matchRepository.findMatchesByManagerId(managerId, pageable)
+    public Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command) {
+        return matchRepository.findFilteredMatches(
+                    command.managerId(),
+                    command.keyword(),
+                    command.todayOnly(),
+                    command.statuses(),
+                    command.pageable()
+                )
                 .map(match -> MatchSimpleResponse.from(match, true));
     }
 

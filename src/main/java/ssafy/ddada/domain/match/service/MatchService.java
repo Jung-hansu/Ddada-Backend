@@ -3,6 +3,7 @@ package ssafy.ddada.domain.match.service;
 import org.springframework.data.domain.Page;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.domain.match.command.*;
+import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
 
 public interface MatchService {
 
@@ -17,7 +18,7 @@ public interface MatchService {
     void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
 
     // Manager 관련 메소드
-    Page<MatchSimpleResponse> getMatchesByManagerId(Long managerId, Integer page, Integer size);
+    Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command);
     void allocateManager(Long matchId, Long managerId);
     void saveMatch(Long matchId, MatchResultCommand command);
 

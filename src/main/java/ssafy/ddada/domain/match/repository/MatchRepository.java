@@ -35,12 +35,24 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             @Param("keyword") String keyword,
             @Param("rankType") RankType rankType,
             @Param("matchTypes") Set<MatchType> matchTypes,
-            @Param("statuses") Set<MatchStatus> statuses
+            @Param("statuses") Set<MatchStatus> statuses,
+            Pageable pageable
     );
 
-    @Query("SELECT m " +
-            "FROM Match m JOIN FETCH m.court JOIN FETCH m.manager mg " +
-            "WHERE mg.id = :managerId")
-    Page<Match> findMatchesByManagerId(Long managerId, Pageable pageable);
+    @Query("""
+        SELECT m
+        FROM Match m JOIN FETCH m.court c JOIN FETCH m.team1 JOIN FETCH m.team2 JOIN FETCH m.manager mg
+        WHERE (mg.id = :managerId) AND
+            (:keyword IS NULL OR c.name LIKE CONCAT('%', :keyword, '%') OR c.address LIKE CONCAT('%', :keyword, '%')) AND
+            (:todayOnly = FALSE OR m.matchDate = CURRENT_DATE) AND
+            (:statuses IS NULL OR m.status IN :statuses)
+    """)
+    Page<Match> findFilteredMatches(
+            @Param("managerId") Long managerId,
+            @Param("keyword") String keyword,
+            @Param("todayOnly") boolean todayOnly,
+            @Param("statuses") Set<MatchStatus> statuses,
+            Pageable pageable
+    );
 
 }
