@@ -89,7 +89,8 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command) {
-        Long userId = SecurityUtil.getLoginMemberId();
+        Long userId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Player currentLoggedInPlayer = playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -137,7 +138,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private Player getCurrentLoggedInMember() {
-        Long userId = SecurityUtil.getLoginMemberId();
+        Long userId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         return playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
     }

@@ -10,10 +10,11 @@ import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
-import ssafy.ddada.api.match.request.TeamChangePlayerRequest;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.exception.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.match.service.MatchService;
+import ssafy.ddada.domain.member.common.MemberRole;
 
 @Slf4j
 @RestController
@@ -29,14 +30,16 @@ public class MatchController {
     @GetMapping
     public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam String status,
+            @RequestParam(required = false) String status,
             @RequestParam Integer page,
             @RequestParam Integer size
     ) {
+        Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
+        MemberRole memberRole = SecurityUtil.getLoginMemberRole().orElse(null);
         MatchSearchRequest request = new MatchSearchRequest(keyword, status, page, size);
-        log.info("경기 검색 결과 조회 >>>> 검색어: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, status, page, size);
+        log.info("경기 검색 결과 조회 >>>> 멤버 ID: {}, 멤버 역할: {}, 검색어: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", memberId, memberRole, keyword, status, page, size);
 
-        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(request.toCommand());
+        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(memberId, memberRole, request.toCommand());
         return CommonResponse.ok(response);
     }
 
@@ -62,7 +65,8 @@ public class MatchController {
     @Operation(summary = "경기 생성", description = "경기를 생성하는 api입니다.")
     @PostMapping
     public CommonResponse<MatchDetailResponse> createMatch(@RequestBody MatchCreateRequest request) {
-        Long creatorId = SecurityUtil.getLoginMemberId();
+        Long creatorId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         log.info("경기 생성 >>>> 생성인 ID: {}, 경기 정보: {}", creatorId, request);
 
         matchService.createMatch(creatorId, request.toCommand());
@@ -88,20 +92,33 @@ public class MatchController {
         return CommonResponse.ok(response);
     }
 
-    @Operation(summary = "팀 선수 변경", description = "팀 선수를 변경하는 api입니다.")
-    @PatchMapping("/{match_id}/teams")
-    public CommonResponse<?> updateTeamPlayer(@PathVariable("match_id") Long matchId, @RequestBody TeamChangePlayerRequest request){
-        log.info("팀 선수 변경 >>> 경기 ID: {}, 요청: {}", matchId, request);
+    @Operation(summary = "팀 선수 추가", description = "팀 선수를 추가하는 api입니다.")
+    @PatchMapping("/{match_id}/teams/{team_number}")
+    public CommonResponse<?> setTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
 
-        matchService.updateTeamPlayer(matchId, request.toCommand());
+        matchService.setTeamPlayer(matchId, playerId, teamNumber);
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
+    @Operation(summary = "팀 선수 제거", description = "팀 선수를 제거하는 api입니다.")
+    @DeleteMapping("/{match_id}/teams/{team_number}")
+    public CommonResponse<?> unsetTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
+
+        matchService.unsetTeamPlayer(matchId, playerId, teamNumber);
+        return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
+    }
 
     @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
     @PatchMapping("/matches/{match_id}")
     public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
-        Long managerId = SecurityUtil.getLoginMemberId();
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         log.info("매니저 경기 할당 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
 
         matchService.allocateManager(matchId, managerId);
