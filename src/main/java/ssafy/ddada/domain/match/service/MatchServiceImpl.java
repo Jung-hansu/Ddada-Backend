@@ -220,9 +220,8 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public Page<MatchSimpleResponse> getMatchesByManagerId(Long managerId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Match> matchPage = matchRepository.findMatchesByManagerId(managerId, pageable);
-
-        return matchPage.map(match -> MatchSimpleResponse.from(match, true));
+        return matchRepository.findMatchesByManagerId(managerId, pageable)
+                .map(match -> MatchSimpleResponse.from(match, true));
     }
 
     @Override
