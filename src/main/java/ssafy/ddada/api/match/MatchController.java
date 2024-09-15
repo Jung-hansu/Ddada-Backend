@@ -55,7 +55,7 @@ public class MatchController {
     }
 
     @Operation(summary = "세트 세부 조회", description = "세트 세부 정보를 조회하는 api입니다.")
-    @GetMapping("/{match_id}/{set_number}")
+    @GetMapping("/{match_id}/sets/{set_number}")
     public CommonResponse<SetDetailResponse> getSetById(@PathVariable("match_id") Long matchId, @PathVariable("set_number") Integer setNumber) {
         log.info("세트 세부 조회 >>>> 경기 ID: {}, 세트 ID: {}", matchId, setNumber);
 
