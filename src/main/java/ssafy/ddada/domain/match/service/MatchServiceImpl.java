@@ -13,6 +13,7 @@ import ssafy.ddada.common.util.ParameterUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
@@ -24,6 +25,7 @@ import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -37,8 +39,21 @@ public class MatchServiceImpl implements MatchService {
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
 
+    private boolean isReserved(Match match, Long memberId, MemberRole memberRole) {
+        return switch(memberRole){
+            case PLAYER ->
+                    Objects.equals(match.getTeam1().getPlayer1().getId(), memberId) ||
+                    Objects.equals(match.getTeam1().getPlayer2().getId(), memberId) ||
+                    Objects.equals(match.getTeam2().getPlayer1().getId(), memberId) ||
+                    Objects.equals(match.getTeam2().getPlayer2().getId(), memberId);
+            case MANAGER ->
+                    Objects.equals(match.getManager().getId(), memberId);
+            default -> false;
+        };
+    }
+
     @Override
-    public Page<MatchSimpleResponse> getMatchesByKeyword(MatchSearchCommand command) {
+    public Page<MatchSimpleResponse> getMatchesByKeyword(Long memberId, MemberRole memberRole,MatchSearchCommand command) {
         Page<Match> matchPage;
 
         if (command.status() == null){
@@ -50,7 +65,11 @@ public class MatchServiceImpl implements MatchService {
                     matchRepository.findAllMatchesByStatus(command.status(), command.pageable()) :
                     matchRepository.findMatchesByKeywordAndStatus(command.keyword(), command.status(), command.pageable());
         }
-        return matchPage.map(MatchSimpleResponse::from);
+
+        return matchPage.map(match -> {
+            boolean isReserved = isReserved(match, memberId, memberRole);
+            return MatchSimpleResponse.from(match, isReserved);
+        });
     }
 
     @Override
@@ -132,27 +151,55 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void updateTeamPlayer(Long matchId, TeamChangePlayerCommand command) {
+    public void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
-        Player player = playerRepository.findById(command.playerId())
+        Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
         Team team;
 
-        if (command.teamNumber() == 1){
+        if (teamNumber == 1){
             team = match.getTeam1();
-        } else if (command.teamNumber() == 2){
+        } else if (teamNumber == 2){
             team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
         }
 
-        if (command.playerNumber() == 1){
+        if (team.getPlayer1() == null){
             team.setPlayer1(player);
-        } else if (!match.getMatchType().isSingle() && command.playerNumber() == 2){
+        } else if (team.getPlayer2() == null){
             team.setPlayer2(player);
         } else {
-            throw new InvalidTeamPlayerNumberException();
+            throw new TeamFullException();
+        }
+
+        updateTeam(team);
+        teamRepository.save(team);
+    }
+
+    @Override
+    public void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
+        Match match = matchRepository.findByIdWithTeams(matchId)
+                .orElseThrow(TeamNotFoundException::new);
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(MemberNotFoundException::new);
+        Team team;
+
+        if (teamNumber == 1){
+            team = match.getTeam1();
+        } else if (teamNumber == 2){
+            team = match.getTeam2();
+        } else {
+            throw new InvalidTeamNumberException();
+        }
+
+        if (team.getPlayer1() == player){
+            team.setPlayer1(null);
+        } else if (team.getPlayer2() == player){
+            team.setPlayer2(null);
+        } else {
+            throw new TeamPlayerNotFoundException();
         }
 
         updateTeam(team);
@@ -185,7 +232,7 @@ public class MatchServiceImpl implements MatchService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Match> matchPage = matchRepository.findMatchesByManagerId(managerId, pageable);
 
-        return matchPage.map(MatchSimpleResponse::from);
+        return matchPage.map(match -> MatchSimpleResponse.from(match, true));
     }
 
     @Override
@@ -193,6 +240,7 @@ public class MatchServiceImpl implements MatchService {
     public void allocateManager(Long matchId, Long managerId) {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
+
         matchRepository.setManager(matchId, manager);
     }
 
