@@ -12,10 +12,10 @@ import ssafy.ddada.common.exception.*;
 @RestControllerAdvice
 public class MatchExceptionHandler {
 
-    @ExceptionHandler(InvalidMatchStatusException.class)
+    @ExceptionHandler(InvalidRankTypeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse<?> handleInvalidMatchStatusException(InvalidMatchStatusException e) {
-        log.error("InvalidMatchStatusException occurs", e);
+    public CommonResponse<?> handleInvalidRankTypeException(InvalidRankTypeException e) {
+        log.error("InvalidRankTypeException occurs", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
@@ -23,6 +23,13 @@ public class MatchExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<?> handleInvalidMatchTypeException(InvalidMatchTypeException e) {
         log.error("InvalidMatchTypeException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(InvalidMatchStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidMatchStatusException(InvalidMatchStatusException e) {
+        log.error("InvalidMatchStatusException occurs", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 

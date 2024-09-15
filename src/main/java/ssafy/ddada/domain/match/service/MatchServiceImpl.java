@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.*;
-import ssafy.ddada.common.util.ParameterUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -53,23 +52,15 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public Page<MatchSimpleResponse> getMatchesByKeyword(Long memberId, MemberRole memberRole,MatchSearchCommand command) {
-        Page<Match> matchPage;
+    public Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MemberRole memberRole, MatchSearchCommand command) {
+        Page<Match> matchPage = matchRepository.findMatchesByKeywordAndTypeAndStatus(
+                command.keyword(),
+                command.rankType(),
+                command.matchTypes(),
+                command.statuses()
+        );
 
-        if (command.status() == null){
-            matchPage = ParameterUtil.isEmptyString(command.keyword()) ?
-                    matchRepository.findAllMatches(command.pageable()) :
-                    matchRepository.findMatchesByKeyword(command.keyword(), command.pageable());
-        } else {
-            matchPage = ParameterUtil.isEmptyString(command.keyword()) ?
-                    matchRepository.findAllMatchesByStatus(command.status(), command.pageable()) :
-                    matchRepository.findMatchesByKeywordAndStatus(command.keyword(), command.status(), command.pageable());
-        }
-
-        return matchPage.map(match -> {
-            boolean isReserved = isReserved(match, memberId, memberRole);
-            return MatchSimpleResponse.from(match, isReserved);
-        });
+        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId, memberRole)));
     }
 
     @Override

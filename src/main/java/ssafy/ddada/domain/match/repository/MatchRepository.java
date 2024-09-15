@@ -7,11 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ssafy.ddada.domain.match.entity.MatchType;
+import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
@@ -25,31 +28,17 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     @Query("""
         SELECT m
         FROM Match m JOIN FETCH m.court c
+        WHERE (:keyword IS NULL OR c.name LIKE CONCAT('%', :keyword, '%') OR c.address LIKE CONCAT('%', :keyword, '%')) AND
+            (:rankType IS NULL OR m.rankType = :rankType) AND
+            (:matchTypes IS NULL OR m.matchType IN :matchTypes) AND
+            (:statuses IS NULL OR m.status IN :statuses)
     """)
-    Page<Match> findAllMatches(Pageable pageable);
-
-    @Query("""
-        SELECT m
-        FROM Match m JOIN FETCH m.court c
-        WHERE c.name LIKE CONCAT('%', :keyword, '%') OR
-              c.address LIKE CONCAT('%', :keyword, '%')
-    """)
-    Page<Match> findMatchesByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("""
-        SELECT m
-        FROM Match m JOIN FETCH m.court c
-        WHERE m.status = :status
-    """)
-    Page<Match> findAllMatchesByStatus(MatchStatus status, Pageable pageable);
-
-    @Query("""
-        SELECT m
-        FROM Match m JOIN FETCH m.court c
-        WHERE m.status = :status AND
-             (c.name LIKE CONCAT('%', :keyword, '%') OR c.address LIKE CONCAT('%', :keyword, '%'))
-    """)
-    Page<Match> findMatchesByKeywordAndStatus(@Param("keyword") String keyword, @Param("status") MatchStatus status, Pageable pageable);
+    Page<Match> findMatchesByKeywordAndTypeAndStatus(
+            @Param("keyword") String keyword,
+            @Param("rankType") RankType rankType,
+            @Param("matchTypes") Set<MatchType> matchTypes,
+            @Param("statuses") Set<MatchStatus> statuses
+    );
 
     @Modifying
     @Query("UPDATE Match m SET m.status = :matchStatus WHERE m.id = :matchId")
