@@ -12,6 +12,7 @@ import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.common.exception.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.manager.service.ManagerService;
 import ssafy.ddada.domain.match.service.MatchService;
 
@@ -45,6 +46,23 @@ public class ManagerController {
 
         Page<MatchSimpleResponse> response = matchService.getMatchesByManagerId(managerId, page, size);
         return CommonResponse.ok(response);
+    }
+
+    @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
+    @PatchMapping("/matches/{match_id}")
+    public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
+        MemberRole memberRole = SecurityUtil.getLoginMemberRole()
+                .orElseThrow(NotAuthenticatedException::new);
+        if (memberRole != MemberRole.MANAGER){
+            throw new NotAuthenticatedException();
+        }
+
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("매니저 경기 할당 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
+
+        matchService.allocateManager(matchId, managerId);
+        return CommonResponse.ok("경기에 성공적으로 할당되었습니다.", null);
     }
 
     @Operation(summary = "할당된 경기 저장", description = "경기 종료 후 경기 데이터를 저장하는 api입니다.")

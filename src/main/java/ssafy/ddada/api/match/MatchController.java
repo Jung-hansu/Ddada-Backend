@@ -106,21 +106,4 @@ public class MatchController {
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
-    @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
-    @PatchMapping("/matches/{match_id}")
-    public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
-        MemberRole memberRole = SecurityUtil.getLoginMemberRole()
-                .orElseThrow(NotAuthenticatedException::new);
-        if (memberRole != MemberRole.MANAGER){
-            throw new NotAuthenticatedException();
-        }
-
-        Long managerId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
-        log.info("매니저 경기 할당 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
-
-        matchService.allocateManager(matchId, managerId);
-        return CommonResponse.ok("경기에 성공적으로 할당되었습니다.", null);
-    }
-
 }
