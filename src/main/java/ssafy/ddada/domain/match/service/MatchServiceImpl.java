@@ -12,6 +12,7 @@ import ssafy.ddada.common.exception.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
+import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
@@ -78,24 +79,10 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void updateMatchStatus(MatchStatusChangeCommand command) {
-        matchRepository.setMatchStatus(command.matchId(), command.status());
-    }
-
-    @Deprecated
-    @Override
-    public TeamDetailResponse getTeamByTeamNumber(Long matchId, Integer teamNumber) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(TeamNotFoundException::new);
-        Team team;
-
-        if (teamNumber == 1) {
-            team = match.getTeam1();
-        } else if (teamNumber == 2){
-            team = match.getTeam2();
-        } else {
-            throw new InvalidTeamNumberException();
-        }
-        return TeamDetailResponse.from(team);
+        Match match = matchRepository.findById(command.matchId())
+                        .orElseThrow(MatchNotFoundException::new);
+        match.setStatus(command.status());
+        matchRepository.save(match);
     }
 
     private void updateTeamPlayerCount(Team team){
@@ -133,11 +120,22 @@ public class MatchServiceImpl implements MatchService {
         updateTeamRating(team);
     }
 
+    private boolean isMatchFull(Match match){
+        int totalPlayerCnt = match.getTeam1().getPlayerCount() + match.getTeam2().getPlayerCount();
+        return match.getMatchType().isSingle() ? totalPlayerCnt == 2 : totalPlayerCnt == 4;
+    }
+
     @Override
     @Transactional
     public void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
+
+        // 모집 안된 경기만 선수 등록 가능
+        if (!match.getStatus().equals(MatchStatus.CREATED)) {
+            throw new InvalidMatchStatusException();
+        }
+
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
         Team team;
@@ -158,7 +156,11 @@ public class MatchServiceImpl implements MatchService {
             throw new TeamFullException();
         }
 
+        // 경기 모집 완료 시 경기 상태 변경
         updateTeam(team);
+        if (isMatchFull(match) && match.getManager() != null){
+            match.setStatus(MatchStatus.RESERVED);
+        }
         teamRepository.save(team);
     }
 
@@ -186,6 +188,10 @@ public class MatchServiceImpl implements MatchService {
             throw new TeamPlayerNotFoundException();
         }
 
+        // 모집 완료된 경기에서 선수 취소 시 경기 상태 변경
+        if (match.getStatus() == MatchStatus.RESERVED){
+            match.setStatus(MatchStatus.CREATED);
+        }
         updateTeam(team);
         teamRepository.save(team);
     }
@@ -222,10 +228,16 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void allocateManager(Long matchId, Long managerId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(MatchNotFoundException::new);
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
-        matchRepository.setManager(matchId, manager);
+        match.setManager(manager);
+        if (isMatchFull(match)){
+            match.setStatus(MatchStatus.RESERVED);
+        }
+        matchRepository.save(match);
     }
 
     @Override
