@@ -34,8 +34,8 @@ public class MatchController {
             @RequestParam(required = false) String matchTypes,
             @RequestParam(required = false) String statuses,
             @RequestParam(required = false) String regions,
-            @RequestParam Integer page,
-            @RequestParam Integer size
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
         Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
         MatchSearchRequest request = new MatchSearchRequest(keyword, rankType, matchTypes, statuses, regions, page, size);

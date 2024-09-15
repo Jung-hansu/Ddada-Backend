@@ -39,7 +39,11 @@ public class ManagerController {
 
     @Operation(summary = "매니저 할당 경기 리스트 조회", description = "매니저에게 할당된 경기 리스트를 조회하는 api입니다.")
     @GetMapping("/matches")
-    public CommonResponse<Page<MatchSimpleResponse>> getAllocatedMatches(@RequestParam("page") Integer page, @RequestParam("size") Integer size){
+    public CommonResponse<Page<MatchSimpleResponse>> getAllocatedMatches(
+            @RequestParam String statuses,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ){
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("매니저 경기 리스트 조회 >>>> 매니저 ID: {}", managerId);
