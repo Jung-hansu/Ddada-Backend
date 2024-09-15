@@ -3,7 +3,6 @@ package ssafy.ddada.api.court.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.time.LocalDate;
