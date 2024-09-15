@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.member.manager.request.ManagerSearchMatchRequest;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
@@ -22,7 +23,7 @@ import ssafy.ddada.domain.match.service.MatchService;
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
 public class ManagerController {
-
+//TODO: 진입 전에 Manager 로그인 여부 판단하는 필터 적용하기
     private final ManagerService managerService;
     private final MatchService matchService;
 
@@ -40,15 +41,18 @@ public class ManagerController {
     @Operation(summary = "매니저 할당 경기 리스트 조회", description = "매니저에게 할당된 경기 리스트를 조회하는 api입니다.")
     @GetMapping("/matches")
     public CommonResponse<Page<MatchSimpleResponse>> getAllocatedMatches(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "false") Boolean todayOnly,
             @RequestParam String statuses,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ){
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
+        ManagerSearchMatchRequest request = new ManagerSearchMatchRequest(managerId, keyword, todayOnly, statuses, page, size);
         log.info("매니저 경기 리스트 조회 >>>> 매니저 ID: {}", managerId);
 
-        Page<MatchSimpleResponse> response = matchService.getMatchesByManagerId(managerId, page, size);
+        Page<MatchSimpleResponse> response = matchService.getMatchesByManagerId(request.toCommand());
         return CommonResponse.ok(response);
     }
 
