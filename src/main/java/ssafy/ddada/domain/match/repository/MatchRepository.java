@@ -4,12 +4,10 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
-import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 
@@ -39,14 +37,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             @Param("matchTypes") Set<MatchType> matchTypes,
             @Param("statuses") Set<MatchStatus> statuses
     );
-
-    @Modifying
-    @Query("UPDATE Match m SET m.status = :matchStatus WHERE m.id = :matchId")
-    void setMatchStatus(@Param("matchId") Long matchId, @Param("matchStatus") MatchStatus matchStatus);
-
-    @Modifying
-    @Query("UPDATE Match m SET m.manager = :manager WHERE m.id = :matchId")
-    void setManager(@Param("matchId") Long matchId, @Param("manager") Manager manager);
 
     @Query("SELECT m " +
             "FROM Match m JOIN FETCH m.court JOIN FETCH m.manager mg " +
