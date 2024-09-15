@@ -48,6 +48,7 @@ public class Match extends BaseMatchEntity {
     @Column(nullable = false)
     private MatchStatus status;
 
+    @Column(nullable = false)
     private RankType rankType;
 
     @Column(nullable = false)
