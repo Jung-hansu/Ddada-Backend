@@ -27,7 +27,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     @Query("""
         SELECT m
-        FROM Match m JOIN FETCH m.court c
+        FROM Match m JOIN FETCH m.court c JOIN FETCH m.team1 JOIN FETCH m.team2
         WHERE (:keyword IS NULL OR c.name LIKE CONCAT('%', :keyword, '%') OR c.address LIKE CONCAT('%', :keyword, '%')) AND
             (:rankType IS NULL OR m.rankType = :rankType) AND
             (:matchTypes IS NULL OR m.matchType IN :matchTypes) AND
