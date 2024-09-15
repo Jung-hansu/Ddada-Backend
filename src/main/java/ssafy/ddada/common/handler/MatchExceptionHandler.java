@@ -19,6 +19,13 @@ public class MatchExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
+    @ExceptionHandler(InvalidMatchTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidMatchTypeException(InvalidMatchTypeException e) {
+        log.error("InvalidMatchTypeException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
     @ExceptionHandler(InvalidTeamNumberException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<?> handleInvalidTeamNumberException(InvalidTeamNumberException e) {
