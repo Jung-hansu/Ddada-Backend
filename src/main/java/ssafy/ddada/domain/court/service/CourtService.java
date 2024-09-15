@@ -8,7 +8,7 @@ import ssafy.ddada.domain.court.command.CourtSearchCommand;
 
 public interface CourtService {
 
-    Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand courtSearchCommand);
+    Page<CourtSimpleResponse> getCourtsByKeywordAndRegions(CourtSearchCommand courtSearchCommand);
     CourtDetailResponse getCourtById(Long courtId);
 
     void createBadmintonCourt(CourtCreateRequest request);
