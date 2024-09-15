@@ -13,9 +13,6 @@ import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.domain.court.entity.Region;
-import ssafy.ddada.domain.match.entity.MatchStatus;
-import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.service.MatchService;
 import ssafy.ddada.domain.member.common.MemberRole;
 
@@ -33,7 +30,7 @@ public class MatchController {
     @GetMapping
     public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String rankType,
+            @RequestParam(defaultValue = "친선") String rankType,
             @RequestParam(required = false) String matchTypes,
             @RequestParam(required = false) String statuses,
             @RequestParam(required = false) String regions,
@@ -41,11 +38,10 @@ public class MatchController {
             @RequestParam Integer size
     ) {
         Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
-        MemberRole memberRole = SecurityUtil.getLoginMemberRole().orElse(null);
         MatchSearchRequest request = new MatchSearchRequest(keyword, rankType, matchTypes, statuses, regions, page, size);
-        log.info("경기 검색 결과 조회 >>>> 멤버 ID: {}, 멤버 역할: {}, 검색어: {}, 랭크 타입: {}, 경기 타입: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", memberId, memberRole, keyword, rankType, matchTypes, statuses, page, size);
+        log.info("경기 검색 결과 조회 >>>> 멤버 ID: {}, 검색어: {}, 랭크 타입: {}, 경기 타입: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", memberId, keyword, rankType, matchTypes, statuses, page, size);
 
-        Page<MatchSimpleResponse> response = matchService.getFilteredMatches(memberId, memberRole, request.toCommand());
+        Page<MatchSimpleResponse> response = matchService.getFilteredMatches(memberId, request.toCommand());
         return CommonResponse.ok(response);
     }
 
