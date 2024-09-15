@@ -27,7 +27,7 @@ public class CourtServiceImpl implements CourtService {
     private final S3Util s3Util;  // S3Util 주입
 
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeywordAndRegions(CourtSearchCommand command) {
+    public Page<CourtSimpleResponse> getFilteredCourts(CourtSearchCommand command) {
         List<Court> courts = courtRepository.findCourtsByKeywordAndRegion(command.keyword(), command.regions());
 
         return new PageImpl<>(courts, command.pageable(), courts.size())

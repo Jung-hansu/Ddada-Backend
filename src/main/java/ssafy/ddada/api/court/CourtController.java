@@ -34,7 +34,7 @@ public class CourtController {
         CourtSearchRequest request = new CourtSearchRequest(keyword, regions, page, size);
         log.info("시설 검색 결과 조회 >>>> 검색어: {}, 검색 지역: {}, 페이지 번호: {}, 페이지 크기: {}", request.keyword(), request.regions(), request.page(), request.size());
 
-        Page<CourtSimpleResponse> response = courtService.getCourtsByKeywordAndRegions(request.toCommand());
+        Page<CourtSimpleResponse> response = courtService.getFilteredCourts(request.toCommand());
         return CommonResponse.ok(response);
     }
 
