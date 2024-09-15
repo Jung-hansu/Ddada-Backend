@@ -13,4 +13,8 @@ public class ParameterUtil {
         return str == null || str.trim().isEmpty() ? null : str;
     }
 
+    public static boolean nullToFalse(Boolean bool){
+        return bool != null && bool;
+    }
+
 }
