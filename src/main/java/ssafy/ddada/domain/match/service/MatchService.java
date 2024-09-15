@@ -7,7 +7,7 @@ import ssafy.ddada.domain.member.common.MemberRole;
 
 public interface MatchService {
 
-    Page<MatchSimpleResponse> getMatchesByKeyword(Long memberId, MemberRole role, MatchSearchCommand command);
+    Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MemberRole role, MatchSearchCommand command);
     void createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchById(Long matchId);
     SetDetailResponse getSetById(Long matchId, Integer setNumber);

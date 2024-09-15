@@ -34,9 +34,9 @@ public enum Region {
 
     private final String korValue;
 
-    public static Region of(String name) {
+    public static Region fromValue(String value) {
         return Stream.of(Region.values())
-                .filter(region -> region.getKorValue().equals(name))
+                .filter(region -> region.getKorValue().equals(value))
                 .findFirst()
                 .orElseThrow(InvalidRegionException::new);
     }
@@ -46,7 +46,7 @@ public enum Region {
             return null;
         }
         return Stream.of(regions.split(","))
-                .map(Region::of)
+                .map(Region::fromValue)
                 .collect(Collectors.toSet());
     }
 
