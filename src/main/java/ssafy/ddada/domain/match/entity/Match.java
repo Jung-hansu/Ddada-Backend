@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Entity
@@ -73,13 +72,6 @@ public class Match extends BaseMatchEntity {
 
     public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
         return new Match(court, team1, team2, matchType, matchDate, matchTime);
-    }
-
-    public boolean isReserved(Long playerId){
-        return Objects.equals(team1.getPlayer1().getId(), playerId) ||
-                Objects.equals(team1.getPlayer2().getId(), playerId) ||
-                Objects.equals(team2.getPlayer1().getId(), playerId) ||
-                Objects.equals(team2.getPlayer2().getId(), playerId);
     }
 
 }
