@@ -53,9 +53,9 @@ public class AuthController {
 
     @Operation(summary = "ping", description = "인증 서버가 정상적으로 동작하는지 확인합니다.")
     @GetMapping("/ping")
-    public CommonResponse ping() {
+    public CommonResponse<?> ping() {
         log.debug(">>> loginMemberId : {}", SecurityUtil.getLoginMemberId());
-        return CommonResponse.ok("pong");
+        return CommonResponse.ok("pong", null);
     }
 
     @Operation(summary = "SMS 인증 코드 전송", description = "사용자에게 인증 코드를 포함한 SMS를 전송합니다.")
@@ -76,7 +76,7 @@ public class AuthController {
 
         // 메시지를 if 문 밖에서 선언하고 할당하도록 변경
         String message;
-        if (result == true) {
+        if (result) {
             message = "인증에 성공했습니다.";
         } else {
             message = "인증에 실패했습니다.";

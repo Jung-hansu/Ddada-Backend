@@ -12,6 +12,20 @@ import ssafy.ddada.common.exception.*;
 @RestControllerAdvice
 public class MatchExceptionHandler {
 
+    @ExceptionHandler(InvalidRankTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidRankTypeException(InvalidRankTypeException e) {
+        log.error("InvalidRankTypeException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(InvalidMatchTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<?> handleInvalidMatchTypeException(InvalidMatchTypeException e) {
+        log.error("InvalidMatchTypeException occurs", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
     @ExceptionHandler(InvalidMatchStatusException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<?> handleInvalidMatchStatusException(InvalidMatchStatusException e) {
@@ -26,16 +40,16 @@ public class MatchExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(InvalidTeamPlayerNumberException.class)
+    @ExceptionHandler(TeamFullException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse<?> handleInvalidTeamPlayerNumberException(InvalidTeamPlayerNumberException e) {
+    public CommonResponse<?> handleInvalidTeamPlayerNumberException(TeamFullException e) {
         log.error("InvalidTeamPlayerNumberException occurs", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
     @ExceptionHandler(InvalidSetNumberException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse<?> handleInvalidSetNumberException(InvalidTeamPlayerNumberException e) {
+    public CommonResponse<?> handleInvalidSetNumberException(TeamFullException e) {
         log.error("InvalidSetNumberException occurs", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
@@ -51,6 +65,13 @@ public class MatchExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonResponse<?> handleTeamNotFoundException(TeamNotFoundException e) {
         log.error("TeamNotFoundException occurs", e);
+        return CommonResponse.notFound(e.getErrorCode());
+    }
+
+    @ExceptionHandler(TeamPlayerNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse<?> handleTeamPlayerNotFoundException(TeamPlayerNotFoundException e) {
+        log.error("TeamPlayerNotFoundException occurs", e);
         return CommonResponse.notFound(e.getErrorCode());
     }
 

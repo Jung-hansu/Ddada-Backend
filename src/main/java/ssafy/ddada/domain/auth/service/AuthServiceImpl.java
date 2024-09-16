@@ -151,7 +151,8 @@ public class AuthServiceImpl implements AuthService {
 
 
     public MemberTypeResponse getMemberType() {
-        MemberRole memberType = SecurityUtil.getLoginMemberRole();
+        MemberRole memberType = SecurityUtil.getLoginMemberRole()
+                .orElseThrow(NotAuthenticatedException::new);
         return MemberTypeResponse.of(memberType);
     }
 

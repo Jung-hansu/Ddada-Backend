@@ -1,10 +1,7 @@
 package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
@@ -36,6 +33,7 @@ public class Match extends BaseMatchEntity {
     @JoinColumn(name = "team2_id")
     private Team team2;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Manager manager;
@@ -46,8 +44,12 @@ public class Match extends BaseMatchEntity {
 
     private Integer team2SetScore;
 
+    @Setter
     @Column(nullable = false)
     private MatchStatus status;
+
+    @Column(nullable = false)
+    private RankType rankType;
 
     @Column(nullable = false)
     private MatchType matchType;

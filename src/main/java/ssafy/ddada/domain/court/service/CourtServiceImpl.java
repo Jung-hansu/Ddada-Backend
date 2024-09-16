@@ -9,14 +9,14 @@ import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.CourtNotFoundException;
-import ssafy.ddada.common.util.ParameterUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.court.entity.Facility;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
 import java.util.List;
+
+import static ssafy.ddada.common.util.ParameterUtil.isEmptyString;
 
 @Service
 @RequiredArgsConstructor
@@ -26,37 +26,19 @@ public class CourtServiceImpl implements CourtService {
     private final CourtRepository courtRepository;
     private final S3Util s3Util;  // S3Util 주입
 
-    private boolean containsFacility(Long whole, Long part){
-        return whole != null && (whole & part) == part;
-    }
-
     @Override
-    public Page<CourtSimpleResponse> getCourtsByKeyword(CourtSearchCommand command) {
-        List<Court> courts;
+    public Page<CourtSimpleResponse> getFilteredCourts(CourtSearchCommand command) {
+        List<Court> courts = courtRepository.findCourtsByKeywordAndRegion(command.keyword(), command.regions());
 
-        if (ParameterUtil.isEmptyString(command.keyword())) {
-            courts = courtRepository.findAllCourts();
-        } else {
-            courts = courtRepository.findCourtsByKeyword(command.keyword());
-        }
-
-        if (!ParameterUtil.isNullOrZero(command.facilityBits())) {
-            courts = courts.stream()
-                    .filter(court -> containsFacility(court.getFacilityBits(), command.facilityBits()))
-                    .toList();
-        }
-
-        List<CourtSimpleResponse> courtSimpleResponses = courts.stream()
+        return new PageImpl<>(courts, command.pageable(), courts.size())
                 .map(court -> {
                     String presignedUrl = null;
-                    if (court.getImage() != null) {
+
+                    if (isEmptyString(court.getImage())) {
                         presignedUrl = s3Util.getPresignedUrlFromS3(court.getImage());  // S3Util의 메서드 사용
                     }
                     return CourtSimpleResponse.from(court, presignedUrl);
-                })
-                .toList();
-
-        return new PageImpl<>(courtSimpleResponses, command.pageable(), courtSimpleResponses.size());
+                });
     }
 
     @Override
@@ -69,17 +51,17 @@ public class CourtServiceImpl implements CourtService {
     }
 
     public void createBadmintonCourt(CourtCreateRequest request) {
-        Court court = Court.createCourt(
-                request.name(),
-                request.address(),
-                request.contactNumber(),
-                request.description(),
-                null,
-                request.url(),
-                Facility.setToBits(request.facilities())
+        Court court = courtRepository.save(
+                Court.createCourt(
+                        request.name(),
+                        request.address(),
+                        request.contactNumber(),
+                        request.description(),
+                        null,
+                        request.url(),
+                        request.region()
+                )
         );
-
-        courtRepository.save(court);
 
         // 이미지 업로드 로직 변경
         String imageUrl = (request.image() == null || request.image().isEmpty())
