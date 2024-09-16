@@ -5,13 +5,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.member.manager.request.ManagerSearchMatchRequest;
+import ssafy.ddada.api.member.manager.request.ManagerSignupRequest;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.common.exception.NotAuthenticatedException;
+import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.manager.service.ManagerService;
@@ -86,4 +89,13 @@ public class ManagerController {
         return CommonResponse.ok("저장되었습니다.", null);
     }
 
+    @Operation(summary = "매니저 회원가입", description = "매니저 회원가입 api입니다.")
+    @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
+    public CommonResponse<?> signup(
+            @ModelAttribute @Validated ManagerSignupRequest request
+    ) {
+        ManagerSignupResponse response = managerService.signupManager(request.toCommand());
+
+        return CommonResponse.ok(response);
+    }
 }
