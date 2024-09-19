@@ -1,6 +1,6 @@
 package ssafy.ddada.domain.court.entity;
 
-import ssafy.ddada.common.exception.InvalidFacilityException;
+import ssafy.ddada.common.exception.Exception.Court.InvalidFacilityException;
 import ssafy.ddada.common.util.ParameterUtil;
 
 import java.util.Arrays;

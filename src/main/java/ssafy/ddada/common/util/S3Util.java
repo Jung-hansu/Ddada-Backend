@@ -11,9 +11,9 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
-import ssafy.ddada.common.exception.PresignedUrlGenerationFailException;
-import ssafy.ddada.common.exception.S3UploadFailedException;
-import ssafy.ddada.common.exception.NotAllowedExtensionException;
+import ssafy.ddada.common.exception.Exception.S3.PresignedUrlGenerationFailException;
+import ssafy.ddada.common.exception.Exception.S3.S3UploadFailedException;
+import ssafy.ddada.common.exception.Exception.S3.ExtensionNotAllowedException;
 import ssafy.ddada.common.properties.S3Properties;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class S3Util {
         }
 
         if (!allowedExtensions.contains(extension)) {
-            throw new NotAllowedExtensionException();
+            throw new ExtensionNotAllowedException();
         }
 
         return location + memberId + extension;

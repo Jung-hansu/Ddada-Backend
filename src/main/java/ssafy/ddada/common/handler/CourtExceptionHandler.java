@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.CourtNotFoundException;
-import ssafy.ddada.common.exception.InvalidFacilityException;
+import ssafy.ddada.common.exception.Exception.Court.CourtNotFoundException;
+import ssafy.ddada.common.exception.Exception.Court.InvalidFacilityException;
 
 @Slf4j
 @RestControllerAdvice

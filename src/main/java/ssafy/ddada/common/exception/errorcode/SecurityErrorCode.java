@@ -11,8 +11,8 @@ import static ssafy.ddada.api.StatusCode.UNAUTHORIZED;
 public enum SecurityErrorCode implements BaseErrorCode {
     INVALID_TOKEN(UNAUTHORIZED, "TOKEN_401_1", "토큰이 유효하지않습니다."),
     INVALID_SIGNATURE_TOKEN(UNAUTHORIZED, "TOKEN_401_2", "토큰의 Signature가 일치하지 않습니다."),
-    INCORRECT_ISSUER_TOKEN(UNAUTHORIZED, "TOKEN_401_3", "토큰 발급처가 일치하지 않습니다."),
-    EXPIRED_TOKEN(UNAUTHORIZED, "TOKEN_401_4", "토큰이 만료되었습니다."),
+    ISSUER_TOKEN_INCORRECT(UNAUTHORIZED, "TOKEN_401_3", "토큰 발급처가 일치하지 않습니다."),
+    TOKEN_EXPIRED(UNAUTHORIZED, "TOKEN_401_4", "토큰이 만료되었습니다."),
     NOT_MATCHED_TOKEN_TYPE(UNAUTHORIZED, "TOKEN_401_5", "토큰의 타입이 일치하지 않아 디코딩할 수 없습니다."),
     NOT_AUTHENTIATED_ERROR(UNAUTHORIZED, "SECURITY_401_6", "사용자가 인증되지 않았습니다."),
 

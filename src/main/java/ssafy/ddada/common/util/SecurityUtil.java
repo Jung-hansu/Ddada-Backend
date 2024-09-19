@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import ssafy.ddada.common.exception.NotAuthenticatedException;
+import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException;
 import ssafy.ddada.domain.member.common.MemberRole;
 
-import java.lang.reflect.Member;
 import java.util.Collection;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)

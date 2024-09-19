@@ -6,23 +6,23 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.exception.Exception.S3.*;
 
 @RestControllerAdvice
 @Slf4j
 public class S3ExceptionHandler {
 
-    @ExceptionHandler(NotAllowedExtensionException.class)
+    @ExceptionHandler(ExtensionNotAllowedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleNotAllowedExtension(NotAllowedExtensionException e) {
+    public CommonResponse handleNotAllowedExtension(ExtensionNotAllowedException e) {
         log.error("NotAllowedExtension Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(TooLargeImageException.class)
+    @ExceptionHandler(ImageTooLargeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleImageTooLargeException(TooLargeImageException e) {
-        log.error("TooLargeImageException Error", e);
+    public CommonResponse handleImageTooLargeException(ImageTooLargeException e) {
+        log.error("ImageTooLargeException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
