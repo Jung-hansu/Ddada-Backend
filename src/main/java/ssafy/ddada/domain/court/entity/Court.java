@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class Court extends BaseCourtEntity {
     @Enumerated(EnumType.STRING)
     private Region region;
 
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 

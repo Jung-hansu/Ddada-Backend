@@ -2,6 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
@@ -16,11 +17,13 @@ public class Team extends BaseMatchEntity {
     @Column(name = "team_id")
     private Long id;
 
-    @ManyToOne
+    @BatchSize(size = 10)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player1_id")
     private Player player1;
 
-    @ManyToOne
+    @BatchSize(size = 10)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player2_id")
     private Player player2;
 
