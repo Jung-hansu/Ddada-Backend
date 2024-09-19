@@ -15,6 +15,7 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 import static ssafy.ddada.common.util.ParameterUtil.isEmptyString;
 
@@ -68,6 +69,7 @@ public class CourtServiceImpl implements CourtService {
                 ? "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg"
                 : s3Util.uploadImageToS3(request.image(), court.getId(), "courtImg/");  // S3Util의 메서드 사용
 
+        Objects.requireNonNull(imageUrl);
         court.setImage(imageUrl);
         courtRepository.save(court);
     }
