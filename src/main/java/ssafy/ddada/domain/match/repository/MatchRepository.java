@@ -60,7 +60,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"court", "manager", "team1", "team2", "sets"})
+    @EntityGraph(attributePaths = {"court", "manager", "team1", "team1.player1", "team1.player2", "team2", "team2.player1", "team2.player2", "sets"})
     @Query("""
         SELECT m
         FROM Match m
