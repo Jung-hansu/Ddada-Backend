@@ -5,6 +5,8 @@ import org.springframework.data.domain.PageRequest;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Region;
 
+import static ssafy.ddada.common.util.ParameterUtil.blankToNull;
+
 @Schema(description = "시설 검색 요청 DTO")
 public record CourtSearchRequest (
         @Schema(description = "검색 키워드", example = "문화체육관")
@@ -18,7 +20,7 @@ public record CourtSearchRequest (
 ) {
         public CourtSearchCommand toCommand() {
                 return new CourtSearchCommand(
-                        keyword,
+                        blankToNull(keyword),
                         Region.toRegionSet(regions),
                         PageRequest.of(page, size)
                 );
