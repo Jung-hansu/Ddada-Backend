@@ -13,7 +13,7 @@ import java.time.LocalTime;
 public record MatchCreateRequest(
         @Schema(description = "시설 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "시설 ID는 필수입니다.")
-        Long court_id,
+        Long courtId,
 
         @Schema(description = "랭크 타입", example = "RANK", requiredMode = Schema.RequiredMode.REQUIRED)
         RankType rankType,
@@ -28,6 +28,6 @@ public record MatchCreateRequest(
         LocalTime time
 ) {
     public MatchCreateCommand toCommand(){
-        return new MatchCreateCommand(court_id, rankType, matchType, date, time);
+        return new MatchCreateCommand(courtId, rankType, matchType, date, time);
     }
 }
