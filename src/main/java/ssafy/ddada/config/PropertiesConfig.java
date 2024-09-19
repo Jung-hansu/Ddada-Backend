@@ -13,6 +13,7 @@ import ssafy.ddada.common.properties.*;
         S3Properties.class,
         GmailSmtpProperties.class,
         CoolSmsProperties.class
+
 })
 public class PropertiesConfig {
 }

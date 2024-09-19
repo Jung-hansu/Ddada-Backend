@@ -11,10 +11,9 @@ import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.common.exception.NotAuthenticatedException;
+import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.match.service.MatchService;
-import ssafy.ddada.domain.member.common.MemberRole;
 
 @Slf4j
 @RestController

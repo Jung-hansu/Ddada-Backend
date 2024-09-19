@@ -11,7 +11,7 @@ import ssafy.ddada.domain.auth.command.LogoutCommand;
 import ssafy.ddada.domain.auth.command.VerifyCommand;
 
 public interface AuthService {
-    AuthResponse login(LoginCommand command) throws InvalidCredentialsException;
+    AuthResponse login(LoginCommand command);
     AuthResponse refresh(TokenRefreshRequest refreshToken);
     void logout(LogoutCommand command);
     void sendSms(SmsRequest smsRequest);

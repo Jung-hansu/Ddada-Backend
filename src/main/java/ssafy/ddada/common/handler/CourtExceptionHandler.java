@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.CourtNotFoundException;
-import ssafy.ddada.common.exception.InvalidRegionException;
+import ssafy.ddada.common.exception.exception.court.CourtNotFoundException;
+import ssafy.ddada.common.exception.exception.court.InvalidRegionException;
 
 @Slf4j
 @RestControllerAdvice

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.exception.exception.player.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -25,32 +25,18 @@ public class PlayerExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(TempMemberNotFoundException.class)
+    @ExceptionHandler(TempPlayerNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleNotFoundTempMember(TempMemberNotFoundException e) {
-        log.error("TempMemberNotFoundException Error", e);
+    public CommonResponse handleNotFoundTempPlayer(TempPlayerNotFoundException e) {
+        log.error("TempPlayerNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(MemberAlreadyDeletedException.class)
+    @ExceptionHandler(PlayerAlreadyDeletedException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public CommonResponse handleMemberAlreadyDeletedException(MemberAlreadyDeletedException e) {
-        log.error("MemberAlreadyDeletedException Error", e);
+    public CommonResponse handleMemberAlreadyDeletedException(PlayerAlreadyDeletedException e) {
+        log.error("PlayerAlreadyDeletedException Error", e);
         return CommonResponse.conflict(e.getErrorCode());
-    }
-
-    @ExceptionHandler(NotAllowedExtensionException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleNotAllowedExtension(NotAllowedExtensionException e) {
-        log.error("NotAllowedExtension Error", e);
-        return CommonResponse.badRequest(e.getErrorCode());
-    }
-
-    @ExceptionHandler(TooLargeImageException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleImageTooLargeException(TooLargeImageException e) {
-        log.error("TooLargeImageException Error", e);
-        return CommonResponse.badRequest(e.getErrorCode());
     }
 
     @ExceptionHandler(MessageSendingException.class)
@@ -86,5 +72,26 @@ public class PlayerExceptionHandler {
     public CommonResponse handlePhoneNumberNotFoundException(PhoneNumberNotFoundException e) {
         log.error("PhoneNumberNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(KakaoMailPlayerNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonResponse handleKakaoMailPlayerNotFoundException(KakaoMailPlayerNotFoundException e) {
+        log.error("KakaoMailPlayerNotFoundException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(EmailDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public CommonResponse handleEmailDuplicateException(EmailDuplicateException e) {
+        log.error("EmailDuplicateException Error", e);
+        return CommonResponse.conflict(e.getErrorCode());
+    }
+
+    @ExceptionHandler(NickNameDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public CommonResponse handleNickNameDuplicateException(NickNameDuplicateException e) {
+        log.error("NickNameDuplicateException Error", e);
+        return CommonResponse.conflict(e.getErrorCode());
     }
 }

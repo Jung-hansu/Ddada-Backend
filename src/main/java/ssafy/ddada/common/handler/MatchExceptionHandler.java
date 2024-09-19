@@ -6,7 +6,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.exception.exception.match.*;
+import ssafy.ddada.common.exception.exception.match.InvalidMatchTypeException;
+import ssafy.ddada.common.exception.exception.match.InvalidRankTypeException;
+import ssafy.ddada.common.exception.exception.match.TeamFullException;
+import ssafy.ddada.common.exception.exception.match.TeamPlayerNotFoundException;
 
 @Slf4j
 @RestControllerAdvice

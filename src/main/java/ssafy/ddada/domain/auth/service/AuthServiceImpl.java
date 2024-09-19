@@ -2,7 +2,6 @@ package ssafy.ddada.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,15 +12,19 @@ import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
-import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.exception.exception.player.LoginTypeNotSupportedException;
+import ssafy.ddada.common.exception.exception.player.*;
+import ssafy.ddada.common.exception.exception.security.InvalidTokenException;
+import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.exception.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.entity.Player;
@@ -54,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse login(LoginCommand command) throws InvalidCredentialsException {
+    public AuthResponse login(LoginCommand command) {
         LoginTokenModel tokens;
         log.info(">>> loginType: {}", command.authCode());
 
@@ -62,13 +65,13 @@ public class AuthServiceImpl implements AuthService {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
-                if (notRegisteredMember(userInfo)) {
+                if (notRegisteredPlayer(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
 
                 MemberInterface kakaoMember = findMemberByEmail(userInfo.email())
-                        .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + userInfo.email()));
+                        .orElseThrow(KakaoMailPlayerNotFoundException::new);
 
                 tokens = generateTokens(kakaoMember);
                 jwtProcessor.saveRefreshToken(tokens);
@@ -101,18 +104,23 @@ public class AuthServiceImpl implements AuthService {
     public void logout(LogoutCommand command) {
         jwtProcessor.expireToken(command.accessToken());
     }
+
     @Transactional
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
         MemberInterface member = findMemberById(decodedJwtToken)
                 .orElseThrow(InvalidTokenException::new);
+        try {
+            String newAccessToken = jwtProcessor.generateAccessToken(member);
+            String newRefreshToken = jwtProcessor.generateRefreshToken(member);
+            jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
+            return AuthResponse.of(newAccessToken, newRefreshToken);
+        }
+        catch (Exception e) {
+            throw new TokenSaveFailedException();
+        }
 
-        String newAccessToken = jwtProcessor.generateAccessToken(member);
-        String newRefreshToken = jwtProcessor.generateRefreshToken(member);
-
-        jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
-        return AuthResponse.of(newAccessToken, newRefreshToken);
     }
     @Transactional
     public void sendSms(SmsRequest smsRequest) {
@@ -129,32 +137,18 @@ public class AuthServiceImpl implements AuthService {
 
     public Boolean verifyCertificationCode(VerifyCommand command) {
         String storedCode = redisTemplate.opsForValue().get(command.userInfo());
-        if (storedCode == null) {
+        if (!storedCode.equals(command.certificationCode())) {
             throw new VerificationException();
         }
-
-        Player player;
-        if (command.userInfo().contains("@")) {
-            player = playerRepository.findByEmail(command.userInfo())
-                    .orElseThrow(EmailNotFoundException::new);
-        } else {
-            player = playerRepository.findByNumber(command.userInfo())
-                    .orElseThrow(PhoneNumberNotFoundException::new);
-        }
-
-        String accessToken = jwtProcessor.generateAccessToken(player);
-        String refreshToken = jwtProcessor.generateRefreshToken(player);
-        jwtProcessor.saveRefreshToken(accessToken, refreshToken);
-
-        return storedCode.equals(command.certificationCode());
+        return true;
     }
-
 
     public MemberTypeResponse getMemberType() {
         MemberRole memberType = SecurityUtil.getLoginMemberRole()
                 .orElseThrow(NotAuthenticatedException::new);
         return MemberTypeResponse.of(memberType);
     }
+
 
     public void sendEmail(GmailSendCommand gmailSendCommand) {
         String title = "DDADA 이메일 인증";
@@ -180,32 +174,24 @@ public class AuthServiceImpl implements AuthService {
         return message;
     }
 
-    private Boolean notRegisteredMember(UserInfo userInfo) {
+    private Boolean notRegisteredPlayer(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
 
         if (playerRepository.existsByEmail(userInfo.email()) ||
                 courtAdminRepository.existsByEmail(userInfo.email()) ||
                 managerRepository.existsByEmail(userInfo.email())) {
-            return isTempMember(findMemberByEmail(userInfo.email())
+            return isTempPlayer(findMemberByEmail(userInfo.email())
                     .orElseThrow(AbnormalLoginProgressException::new));
         }
 
-        playerRepository.save(Player.createTempMember(userInfo.email()));
+        playerRepository.save(Player.createTempPlayer(userInfo.email()));
         return true;
     }
 
     private Optional<MemberInterface> findMemberByEmail(String email) {
-        if (playerRepository.existsByEmail(email)) {
-            return Optional.ofNullable(playerRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        } else if (courtAdminRepository.existsByEmail(email)) {
-            return Optional.ofNullable(courtAdminRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        } else if (managerRepository.existsByEmail(email)) {
-            return Optional.ofNullable(managerRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email)));
-        }
-        return Optional.empty();
+        return playerRepository.findByEmail(email).map(member -> (MemberInterface) member)
+                .or(() -> courtAdminRepository.findByEmail(email).map(member -> (MemberInterface) member))
+                .or(() -> managerRepository.findByEmail(email).map(member -> (MemberInterface) member));
     }
 
     private LoginTokenModel generateTokens(MemberInterface member) {
@@ -214,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
         return new LoginTokenModel(accessToken, refreshToken);
     }
 
-    private Boolean isTempMember(Object member) {
+    private Boolean isTempPlayer(Object member) {
         if (member instanceof Player) {
             return ((Player) member).getNickname() == null;
         }

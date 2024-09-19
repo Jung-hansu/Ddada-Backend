@@ -61,7 +61,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
         this.role = role;
     }
 
-    public static Player createTempMember(String email) {
+    public static Player createTempPlayer(String email) {
         return new Player(
                 email,
                 null,  // 성별 기본값 설정

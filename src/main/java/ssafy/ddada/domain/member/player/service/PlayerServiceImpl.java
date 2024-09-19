@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
-import ssafy.ddada.common.exception.*;
+import ssafy.ddada.common.exception.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.exception.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
@@ -59,14 +61,15 @@ public class PlayerServiceImpl implements PlayerService {
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
 
         Player signupPlayer = tempPlayer.signupMember(signupCommand, imageUrl, encodedPassword);
-
-        String accessToken = jwtProcessor.generateAccessToken(signupPlayer);
-        String refreshToken = jwtProcessor.generateRefreshToken(signupPlayer);
-        jwtProcessor.saveRefreshToken(accessToken, refreshToken);
-
-        return PlayerSignupResponse.of(accessToken, refreshToken);
+        try {
+            String accessToken = jwtProcessor.generateAccessToken(signupPlayer);
+            String refreshToken = jwtProcessor.generateRefreshToken(signupPlayer);
+            jwtProcessor.saveRefreshToken(accessToken, refreshToken);
+            return PlayerSignupResponse.of(accessToken, refreshToken);
+        } catch (Exception e) {
+            throw new TokenSaveFailedException();
+        }
     }
-
 
     @Override
     public PlayerDetailResponse getMemberDetail() {

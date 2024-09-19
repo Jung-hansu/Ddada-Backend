@@ -2,7 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ssafy.ddada.common.exception.InvalidRankTypeException;
+import ssafy.ddada.common.exception.exception.match.InvalidRankTypeException;
 
 import java.util.stream.Stream;
 
