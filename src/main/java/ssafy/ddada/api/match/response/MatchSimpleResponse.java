@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
-import ssafy.ddada.domain.match.entity.MatchType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,18 +18,22 @@ public record MatchSimpleResponse(
         LocalTime time,
         @Schema(description = "경기 상태")
         MatchStatus status,
+        @Schema(description = "랭크 타입")
+        String rankType,
         @Schema(description = "경기 타입")
-        MatchType type,
+        String matchType,
         @Schema(description = "경기 평균 레이팅")
         Integer rating,
         @Schema(description = "팀1 인원 수")
         Integer team1PlayerCount,
         @Schema(description = "팀2 인원 수")
         Integer team2PlayerCount,
+        @Schema(description = "예약 여부")
+        boolean isReserved,
         @Schema(description = "시설 정보")
         CourtSimpleResponse court
 ) {
-        public static MatchSimpleResponse from(Match match){
+        public static MatchSimpleResponse from(Match match, boolean isReserved){
                 int team1PlayerCount = match.getTeam1().getPlayerCount();
                 int team2PlayerCount = match.getTeam2().getPlayerCount();
                 int team1Rating = match.getTeam1().getRating();
@@ -43,10 +46,12 @@ public record MatchSimpleResponse(
                         match.getMatchDate(),
                         match.getMatchTime(),
                         match.getStatus(),
-                        match.getMatchType(),
+                        match.getRankType().getValue(),
+                        match.getMatchType().getValue(),
                         rating,
                         team1PlayerCount,
                         team2PlayerCount,
+                        isReserved,
                         CourtSimpleResponse.onMatchListFrom(match.getCourt())
                 );
         }

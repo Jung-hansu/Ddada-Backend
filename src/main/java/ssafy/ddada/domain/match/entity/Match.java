@@ -1,10 +1,7 @@
 package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
@@ -36,6 +33,7 @@ public class Match extends BaseMatchEntity {
     @JoinColumn(name = "team2_id")
     private Team team2;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Manager manager;
@@ -46,8 +44,12 @@ public class Match extends BaseMatchEntity {
 
     private Integer team2SetScore;
 
+    @Setter
     @Column(nullable = false)
     private MatchStatus status;
+
+    @Column(nullable = false)
+    private RankType rankType;
 
     @Column(nullable = false)
     private MatchType matchType;
@@ -60,18 +62,19 @@ public class Match extends BaseMatchEntity {
     @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Set> sets = new ArrayList<>();
 
-    public Match(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
+    public Match(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
         this.court = court;
         this.team1 = team1;
         this.team2 = team2;
         this.status = MatchStatus.RESERVED;
+        this.rankType = rankType;
         this.matchType = matchType;
         this.matchDate = matchDate;
         this.matchTime = matchTime;
     }
 
-    public static Match createNewMatch(Court court, Team team1, Team team2, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
-        return new Match(court, team1, team2, matchType, matchDate, matchTime);
+    public static Match createNewMatch(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
+        return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
     }
 
 }

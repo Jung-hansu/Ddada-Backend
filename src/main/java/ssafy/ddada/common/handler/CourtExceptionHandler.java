@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.common.exception.Exception.Court.CourtNotFoundException;
-import ssafy.ddada.common.exception.Exception.Court.InvalidFacilityException;
+import ssafy.ddada.common.exception.InvalidRegionException;
 
 @Slf4j
 @RestControllerAdvice
 public class CourtExceptionHandler {
 
-    @ExceptionHandler(InvalidFacilityException.class)
+    @ExceptionHandler(InvalidRegionException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse<?> handleInvalidFacilityException(InvalidFacilityException e) {
-        log.error("InvalidFacilityException occurs", e);
+    public CommonResponse<?> handleInvalidRegionException(InvalidRegionException e) {
+        log.error("InvalidRegionException occurs", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 

@@ -9,37 +9,38 @@ import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException
 import ssafy.ddada.domain.member.common.MemberRole;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Slf4j
 public class SecurityUtil {
 
-    public static Long getLoginMemberId() {
+    public static Optional<Long> getLoginMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
-                !(authentication.getPrincipal() instanceof Long)) {
-            throw new NotAuthenticatedException();
+                !(authentication.getPrincipal() instanceof Long memberId)) {
+            return Optional.empty();
         }
-        return (Long) authentication.getPrincipal();
+        return Optional.of(memberId);
     }
 
-    public static MemberRole getLoginMemberRole() {
+    public static Optional<MemberRole> getLoginMemberRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthenticatedException();
+            return Optional.empty();
         }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
         if (authorities.isEmpty()) {
-            throw new NotAuthenticatedException();
+            return Optional.empty();
         }
 
         String role = authorities.iterator().next().getAuthority();
         log.info("authorities: {}", authorities);
         log.info("memberRole: {}", role);
 
-        return MemberRole.fromValue(role);
+        return Optional.of(MemberRole.fromValue(role));
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.common.exception.Exception.Player.MemberNotFoundException;
+import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException;
 import ssafy.ddada.common.exception.Exception.Token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -91,7 +92,8 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command) {
-        Long userId = SecurityUtil.getLoginMemberId();
+        Long userId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Player currentLoggedInPlayer = playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -139,7 +141,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private Player getCurrentLoggedInMember() {
-        Long userId = SecurityUtil.getLoginMemberId();
+        Long userId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         return playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
     }

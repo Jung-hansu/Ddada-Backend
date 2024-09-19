@@ -2,9 +2,7 @@ package ssafy.ddada.api.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;
-import ssafy.ddada.domain.court.entity.Facility;
-
-import java.util.Set;
+import ssafy.ddada.domain.court.entity.Region;
 
 @Schema(description = "배드민턴 코트 생성 요청 DTO")
 public record CourtCreateRequest(
@@ -26,6 +24,6 @@ public record CourtCreateRequest(
         @Schema(description = "코트 홈페이지 URL")
         String url,
 
-        @Schema(description = "코트 편의시설 목록", example = "[\"PARKING\", \"SHOWER\"]")
-        Set<Facility> facilities
+        @Schema(description = "코트 지역", example = "SEOUL")
+        Region region
 ) {}

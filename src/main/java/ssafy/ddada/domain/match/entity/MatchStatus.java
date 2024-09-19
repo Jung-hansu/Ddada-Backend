@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ssafy.ddada.common.exception.Exception.Match.InvalidMatchStatusException;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static ssafy.ddada.common.util.ParameterUtil.isEmptyString;
 
 @Getter
 @RequiredArgsConstructor
@@ -20,11 +23,23 @@ public enum MatchStatus {
     private final String value;
 
     @JsonCreator
-    public static MatchStatus parse(String input) {
+    public static MatchStatus of(String input) {
+        if (isEmptyString(input)){
+            return null;
+        }
         return Stream.of(MatchStatus.values())
                 .filter(status -> status.name().equalsIgnoreCase(input))
                 .findFirst()
                 .orElseThrow(InvalidMatchStatusException::new);
+    }
+
+    public static Set<MatchStatus> toMatchStatusSet(String statuses){
+        if (isEmptyString(statuses)){
+            return null;
+        }
+        return Stream.of(statuses.split(","))
+                .map(MatchStatus::of)
+                .collect(Collectors.toSet());
     }
 
 }

@@ -10,8 +10,8 @@ import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
-import ssafy.ddada.api.match.request.TeamChangePlayerRequest;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.match.service.MatchService;
 
@@ -29,14 +29,18 @@ public class MatchController {
     @GetMapping
     public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam String status,
-            @RequestParam Integer page,
-            @RequestParam Integer size
+            @RequestParam(defaultValue = "친선") String rankType,
+            @RequestParam(required = false) String matchTypes,
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) String regions,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
-        MatchSearchRequest request = new MatchSearchRequest(keyword, status, page, size);
-        log.info("경기 검색 결과 조회 >>>> 검색어: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, status, page, size);
+        Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
+        MatchSearchRequest request = new MatchSearchRequest(keyword, rankType, matchTypes, statuses, regions, page, size);
+        log.info("경기 검색 결과 조회 >>>> 멤버 ID: {}, 검색어: {}, 랭크 타입: {}, 경기 타입: {}, 경기 상태: {}, 페이지 번호: {}, 페이지 크기: {}", memberId, keyword, rankType, matchTypes, statuses, page, size);
 
-        Page<MatchSimpleResponse> response = matchService.getMatchesByKeyword(request.toCommand());
+        Page<MatchSimpleResponse> response = matchService.getFilteredMatches(memberId, request.toCommand());
         return CommonResponse.ok(response);
     }
 
@@ -62,7 +66,8 @@ public class MatchController {
     @Operation(summary = "경기 생성", description = "경기를 생성하는 api입니다.")
     @PostMapping
     public CommonResponse<MatchDetailResponse> createMatch(@RequestBody MatchCreateRequest request) {
-        Long creatorId = SecurityUtil.getLoginMemberId();
+        Long creatorId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         log.info("경기 생성 >>>> 생성인 ID: {}, 경기 정보: {}", creatorId, request);
 
         matchService.createMatch(creatorId, request.toCommand());
@@ -78,34 +83,26 @@ public class MatchController {
         return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", null);
     }
 
-    @Deprecated
-    @Operation(summary = "팀 세부 조회", description = "팀 세부 정보를 조회하는 api입니다.")
-    @GetMapping("/{match_id}/teams/{team_number}")
-    public CommonResponse<TeamDetailResponse> getTeamById(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber) {
-        log.info("팀 세부 조회 >>>> 경기 ID: {}, 팀 번호: {}", matchId, teamNumber);
+    @Operation(summary = "팀 선수 추가", description = "팀 선수를 추가하는 api입니다.")
+    @PatchMapping("/{match_id}/teams/{team_number}")
+    public CommonResponse<?> setTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
 
-        TeamDetailResponse response = matchService.getTeamByTeamNumber(matchId, teamNumber);
-        return CommonResponse.ok(response);
-    }
-
-    @Operation(summary = "팀 선수 변경", description = "팀 선수를 변경하는 api입니다.")
-    @PatchMapping("/{match_id}/teams")
-    public CommonResponse<?> updateTeamPlayer(@PathVariable("match_id") Long matchId, @RequestBody TeamChangePlayerRequest request){
-        log.info("팀 선수 변경 >>> 경기 ID: {}, 요청: {}", matchId, request);
-
-        matchService.updateTeamPlayer(matchId, request.toCommand());
+        matchService.setTeamPlayer(matchId, playerId, teamNumber);
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
+    @Operation(summary = "팀 선수 제거", description = "팀 선수를 제거하는 api입니다.")
+    @DeleteMapping("/{match_id}/teams/{team_number}")
+    public CommonResponse<?> unsetTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
 
-    @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
-    @PatchMapping("/matches/{match_id}")
-    public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
-        Long managerId = SecurityUtil.getLoginMemberId();
-        log.info("매니저 경기 할당 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
-
-        matchService.allocateManager(matchId, managerId);
-        return CommonResponse.ok("경기에 성공적으로 할당되었습니다.", null);
+        matchService.unsetTeamPlayer(matchId, playerId, teamNumber);
+        return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
 }

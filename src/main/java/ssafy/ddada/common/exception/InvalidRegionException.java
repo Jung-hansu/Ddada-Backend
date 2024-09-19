@@ -1,10 +1,10 @@
-package ssafy.ddada.common.exception.Exception.Court;
+package ssafy.ddada.common.exception;
 
 import ssafy.ddada.common.exception.Exception.BaseException;
 import ssafy.ddada.common.exception.errorcode.CourtErrorCode;
 
-public class InvalidFacilityException extends BaseException {
-    public InvalidFacilityException() {
+public class InvalidRegionException extends BaseException {
+    public InvalidRegionException() {
         super(CourtErrorCode.INVALID_REGION);
     }
 }

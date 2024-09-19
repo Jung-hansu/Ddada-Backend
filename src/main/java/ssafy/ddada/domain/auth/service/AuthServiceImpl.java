@@ -15,6 +15,7 @@ import ssafy.ddada.common.client.response.KakaoTokenInfo;
 import ssafy.ddada.common.exception.Exception.Player.LoginTypeNotSupportedException;
 import ssafy.ddada.common.exception.Exception.Player.*;
 import ssafy.ddada.common.exception.Exception.Security.InvalidTokenException;
+import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException;
 import ssafy.ddada.common.exception.Exception.Token.TokenSaveFailedException;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -22,8 +23,8 @@ import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.entity.Player;
@@ -142,6 +143,13 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    public MemberTypeResponse getMemberType() {
+        MemberRole memberType = SecurityUtil.getLoginMemberRole()
+                .orElseThrow(NotAuthenticatedException::new);
+        return MemberTypeResponse.of(memberType);
+    }
+
+
     public void sendEmail(GmailSendCommand gmailSendCommand) {
         String title = "DDADA 이메일 인증";
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
@@ -154,11 +162,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.error("이메일 발송 오류");
         }
-    }
-
-    public MemberTypeResponse getMemberType() {
-        MemberRole memberType = SecurityUtil.getLoginMemberRole();
-        return MemberTypeResponse.of(memberType);
     }
 
     // 발신할 이메일 데이터 세팅
