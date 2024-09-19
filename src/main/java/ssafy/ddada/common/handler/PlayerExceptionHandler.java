@@ -25,10 +25,10 @@ public class PlayerExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(TempMemberNotFoundException.class)
+    @ExceptionHandler(TempPlayerNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse handleNotFoundTempMember(TempMemberNotFoundException e) {
-        log.error("TempMemberNotFoundException Error", e);
+    public CommonResponse handleNotFoundTempPlayer(TempPlayerNotFoundException e) {
+        log.error("TempPlayerNotFoundException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 

@@ -2,7 +2,6 @@ package ssafy.ddada.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -62,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
-                if (notRegisteredMember(userInfo)) {
+                if (notRegisteredPlayer(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
@@ -169,17 +168,17 @@ public class AuthServiceImpl implements AuthService {
         return message;
     }
 
-    private Boolean notRegisteredMember(UserInfo userInfo) {
+    private Boolean notRegisteredPlayer(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
 
         if (playerRepository.existsByEmail(userInfo.email()) ||
                 courtAdminRepository.existsByEmail(userInfo.email()) ||
                 managerRepository.existsByEmail(userInfo.email())) {
-            return isTempMember(findMemberByEmail(userInfo.email())
+            return isTempPlayer(findMemberByEmail(userInfo.email())
                     .orElseThrow(AbnormalLoginProgressException::new));
         }
 
-        playerRepository.save(Player.createTempMember(userInfo.email()));
+        playerRepository.save(Player.createTempPlayer(userInfo.email()));
         return true;
     }
 
@@ -195,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
         return new LoginTokenModel(accessToken, refreshToken);
     }
 
-    private Boolean isTempMember(Object member) {
+    private Boolean isTempPlayer(Object member) {
         if (member instanceof Player) {
             return ((Player) member).getNickname() == null;
         }
