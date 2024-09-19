@@ -44,14 +44,14 @@ public record CourtDetailResponse(
         );
     }
 
-    public static CourtDetailResponse from(Court court, String presignedUrl){
+    public static CourtDetailResponse from(Court court){
         return new CourtDetailResponse(
                 court.getId(),
                 court.getName(),
                 court.getAddress(),
                 court.getContactNumber(),
                 court.getDescription(),
-                presignedUrl,
+                court.getImage(),
                 court.getUrl(),
                 court.getMatches()
                         .stream()
