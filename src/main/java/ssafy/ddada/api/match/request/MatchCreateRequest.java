@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import ssafy.ddada.domain.match.command.MatchCreateCommand;
 import ssafy.ddada.domain.match.entity.MatchType;
+import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,7 +15,10 @@ public record MatchCreateRequest(
         @NotNull(message = "시설 ID는 필수입니다.")
         Long court_id,
 
-        @Schema(description = "경기 타입", example = "RANK_FEMALE_DOUBLE", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "랭크 타입", example = "RANK", requiredMode = Schema.RequiredMode.REQUIRED)
+        RankType rankType,
+
+        @Schema(description = "경기 타입", example = "FEMALE_DOUBLE", requiredMode = Schema.RequiredMode.REQUIRED)
         MatchType matchType,
 
         @Schema(description = "경기 일자", example = "2024-09-06", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -24,6 +28,6 @@ public record MatchCreateRequest(
         LocalTime time
 ) {
     public MatchCreateCommand toCommand(){
-        return new MatchCreateCommand(court_id, matchType, date, time);
+        return new MatchCreateCommand(court_id, rankType, matchType, date, time);
     }
 }
