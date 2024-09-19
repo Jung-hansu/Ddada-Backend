@@ -14,7 +14,7 @@ import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
-import ssafy.ddada.common.exception.Exception.Security.NotAuthenticatedException;
+import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.manager.service.ManagerService;

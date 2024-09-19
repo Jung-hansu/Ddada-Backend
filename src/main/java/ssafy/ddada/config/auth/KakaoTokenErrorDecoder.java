@@ -7,7 +7,7 @@ import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ssafy.ddada.api.auth.response.KakaoErrorResponse;
-import ssafy.ddada.common.exception.Exception.Common.KakaoTokenException;
+import ssafy.ddada.common.exception.exception.common.KakaoTokenException;
 
 import java.io.IOException;
 

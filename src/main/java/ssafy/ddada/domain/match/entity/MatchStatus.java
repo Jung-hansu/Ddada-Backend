@@ -3,7 +3,7 @@ package ssafy.ddada.domain.match.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ssafy.ddada.common.exception.Exception.Match.InvalidMatchStatusException;
+import ssafy.ddada.common.exception.exception.match.InvalidMatchStatusException;
 
 import java.util.Set;
 import java.util.stream.Collectors;

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.Exception.Manager.ManagerNotFoundException;
+import ssafy.ddada.common.exception.exception.manager.ManagerNotFoundException;
 
 @Slf4j
 @RestControllerAdvice
