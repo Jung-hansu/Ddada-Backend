@@ -38,12 +38,12 @@ public record CourtSimpleResponse(
         );
     }
 
-    public static CourtSimpleResponse from(Court court, String presignedUrl) {
+    public static CourtSimpleResponse from(Court court) {
         return new CourtSimpleResponse(
                 court.getId(),
                 court.getName(),
                 court.getAddress(),
-                presignedUrl,  // presigned URL을 사용
+                court.getImage(),
                 court.getRegion().getKorValue(),
                 court.getMatches()
                         .stream()

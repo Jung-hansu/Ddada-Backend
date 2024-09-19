@@ -16,6 +16,9 @@ public record PlayerSimpleResponse(
         Integer rating
 ) {
     public static PlayerSimpleResponse from(Player player) {
+        if(player == null){
+            return null;
+        }
         return new PlayerSimpleResponse(
                 player.getId(),
                 player.getNickname(),

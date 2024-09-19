@@ -9,8 +9,8 @@ public interface MatchService {
 
     Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command);
     void createMatch(Long creatorId, MatchCreateCommand command);
-    MatchDetailResponse getMatchById(Long matchId);
-    SetDetailResponse getSetById(Long matchId, Integer setNumber);
+    MatchDetailResponse getMatchByIdWithInfos(Long matchId);
+    SetDetailResponse getSetsByIdWithInfos(Long matchId, Integer setNumber);
     void updateMatchStatus(MatchStatusChangeCommand command);
 
     // Team 관련 메소드

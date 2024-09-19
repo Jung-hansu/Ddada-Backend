@@ -17,9 +17,9 @@ public enum RankType {
 
     private final String value;
 
-    public static RankType fromValue(String value) {
+    public static RankType of(String value) {
         return Stream.of(values())
-                .filter(rankType -> rankType.value.equalsIgnoreCase(value))
+                .filter(rankType -> rankType.name().equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(InvalidRankTypeException::new);
     }
@@ -28,6 +28,6 @@ public enum RankType {
         if (isEmptyString(rankType)){
             return null;
         }
-        return fromValue(rankType);
+        return of(rankType);
     }
 }

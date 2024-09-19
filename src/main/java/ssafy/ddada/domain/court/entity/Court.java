@@ -56,4 +56,11 @@ public class Court extends BaseCourtEntity {
     public static Court createCourt(String name, String address, String contactNumber, String description, String image, String url, Region region) {
         return new Court(name, address, contactNumber, description, image, url, region);
     }
+
+    @PrePersist
+    public void prePersist(){
+        if (image == null){
+            image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+        }
+    }
 }

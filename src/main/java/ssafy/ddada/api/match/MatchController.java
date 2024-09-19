@@ -49,7 +49,7 @@ public class MatchController {
     public CommonResponse<MatchDetailResponse> getMatchById(@PathVariable("match_id") Long matchId) {
         log.info("경기 세부 정보 조회 >>>> 경기 ID: {}", matchId);
 
-        MatchDetailResponse response = matchService.getMatchById(matchId);
+        MatchDetailResponse response = matchService.getMatchByIdWithInfos(matchId);
         return CommonResponse.ok(response);
     }
 
@@ -58,7 +58,7 @@ public class MatchController {
     public CommonResponse<SetDetailResponse> getSetById(@PathVariable("match_id") Long matchId, @PathVariable("set_number") Integer setNumber) {
         log.info("세트 세부 조회 >>>> 경기 ID: {}, 세트 ID: {}", matchId, setNumber);
 
-        SetDetailResponse response = matchService.getSetById(matchId, setNumber);
+        SetDetailResponse response = matchService.getSetsByIdWithInfos(matchId, setNumber);
         return CommonResponse.ok(response);
     }
 

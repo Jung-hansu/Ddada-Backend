@@ -21,20 +21,20 @@ public class Match extends BaseMatchEntity {
     @Column(name = "match_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "court_id", nullable = false)
     private Court court;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team1_id")
     private Team team1;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team2_id")
     private Team team2;
 
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Manager manager;
 
@@ -46,12 +46,15 @@ public class Match extends BaseMatchEntity {
 
     @Setter
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MatchStatus status;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private RankType rankType;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MatchType matchType;
 
     @Column(nullable = false)

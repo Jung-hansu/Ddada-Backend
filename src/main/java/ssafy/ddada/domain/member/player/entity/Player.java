@@ -38,6 +38,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
 
     private String number;
 
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     private LocalDate birth;

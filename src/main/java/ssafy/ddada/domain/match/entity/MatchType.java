@@ -24,9 +24,9 @@ public enum MatchType {
     private final Gender genderType;
     private final boolean isSingle;
 
-    public static MatchType fromValue(String value){
+    public static MatchType of(String value){
         return Stream.of(values())
-                .filter(matchType -> matchType.value.equals(value))
+                .filter(matchType -> matchType.name().equals(value))
                 .findFirst()
                 .orElseThrow(InvalidMatchTypeException::new);
     }
@@ -36,7 +36,7 @@ public enum MatchType {
             return null;
         }
         return Stream.of(matchTypes.split(","))
-                .map(MatchType::fromValue)
+                .map(MatchType::of)
                 .collect(Collectors.toSet());
     }
 

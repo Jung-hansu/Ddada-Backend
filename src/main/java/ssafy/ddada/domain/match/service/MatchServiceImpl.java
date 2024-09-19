@@ -61,29 +61,25 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public MatchDetailResponse getMatchById(Long matchId) {
-        Match match = matchRepository.findById(matchId)
+    public MatchDetailResponse getMatchByIdWithInfos(Long matchId) {
+        Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         return MatchDetailResponse.from(match);
     }
 
     @Override
-    public SetDetailResponse getSetById(Long matchId, Integer setNumber) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(MatchNotFoundException::new);
-        List<Set> set = match.getSets();
+    public SetDetailResponse getSetsByIdWithInfos(Long matchId, Integer setNumber) {
+        Set set = matchRepository.findSetsByIdWithInfos(matchId, setNumber)
+                .orElseThrow(InvalidSetNumberException::new);
 
-        if (setNumber <= 0 || setNumber > set.size()) {
-            throw new InvalidSetNumberException();
-        }
-        return SetDetailResponse.from(set.get(setNumber - 1));
+        return SetDetailResponse.from(set);
     }
 
     @Override
     @Transactional
     public void updateMatchStatus(MatchStatusChangeCommand command) {
         Match match = matchRepository.findById(command.matchId())
-                        .orElseThrow(MatchNotFoundException::new);
+                .orElseThrow(MatchNotFoundException::new);
         match.setStatus(command.status());
         matchRepository.save(match);
     }
@@ -202,7 +198,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void createMatch(Long creatorId, MatchCreateCommand command) {
-        Court court = courtRepository.findById(command.court_id())
+        Court court = courtRepository.findById(command.courtId())
                 .orElseThrow(CourtNotFoundException::new);
         Player creator = playerRepository.findById(creatorId)
                 .orElseThrow(MemberNotFoundException::new);
