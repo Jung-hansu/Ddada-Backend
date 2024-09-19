@@ -2,6 +2,7 @@ package ssafy.ddada.api.court.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Region;
 
@@ -22,7 +23,7 @@ public record CourtSearchRequest (
                 return new CourtSearchCommand(
                         blankToNull(keyword),
                         Region.toRegionSet(regions),
-                        PageRequest.of(page, size)
+                        PageRequest.of(page, size, Sort.by("id").descending())
                 );
         }
 }
