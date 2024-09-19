@@ -11,6 +11,9 @@ public record ManagerSimpleResponse (
         String nickname
 ){
     public static ManagerSimpleResponse from(Manager manager){
+        if (manager == null) {
+            return null;
+        }
         return new ManagerSimpleResponse(manager.getId(), manager.getNickname());
     }
 }
