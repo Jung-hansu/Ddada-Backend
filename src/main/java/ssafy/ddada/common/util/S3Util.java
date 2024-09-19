@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import ssafy.ddada.common.exception.PresignedUrlGenerationFailException;
+import ssafy.ddada.common.exception.S3UploadFailedException;
 import ssafy.ddada.common.exception.NotAllowedExtensionException;
 import ssafy.ddada.common.properties.S3Properties;
 
@@ -55,7 +57,7 @@ public class S3Util {
             amazonS3Client.putObject(new PutObjectRequest(s3Properties.s3().bucket(), fileName, image.getInputStream(), null));
             return amazonS3Client.getUrl(s3Properties.s3().bucket(), fileName).toString();
         } catch (IOException e) {
-            throw new RuntimeException("이미지 업로드에 실패했습니다.", e);
+            throw new S3UploadFailedException();
         }
     }
 
@@ -82,7 +84,7 @@ public class S3Util {
             return presignedUrl.toString();
         } catch (Exception e) {
             log.error("Presigned URL 생성 중 오류 발생: {}", e.getMessage(), e);
-            throw new RuntimeException("Presigned URL 생성 실패", e);
+            throw new PresignedUrlGenerationFailException();
         }
     }
 }

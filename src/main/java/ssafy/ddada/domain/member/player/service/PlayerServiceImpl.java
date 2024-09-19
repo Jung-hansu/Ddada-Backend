@@ -59,14 +59,15 @@ public class PlayerServiceImpl implements PlayerService {
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
 
         Player signupPlayer = tempPlayer.signupMember(signupCommand, imageUrl, encodedPassword);
-
-        String accessToken = jwtProcessor.generateAccessToken(signupPlayer);
-        String refreshToken = jwtProcessor.generateRefreshToken(signupPlayer);
-        jwtProcessor.saveRefreshToken(accessToken, refreshToken);
-
-        return PlayerSignupResponse.of(accessToken, refreshToken);
+        try {
+            String accessToken = jwtProcessor.generateAccessToken(signupPlayer);
+            String refreshToken = jwtProcessor.generateRefreshToken(signupPlayer);
+            jwtProcessor.saveRefreshToken(accessToken, refreshToken);
+            return PlayerSignupResponse.of(accessToken, refreshToken);
+        } catch (Exception e) {
+            throw new TokenSaveFailedException();
+        }
     }
-
 
     @Override
     public PlayerDetailResponse getMemberDetail() {

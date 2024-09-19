@@ -101,18 +101,23 @@ public class AuthServiceImpl implements AuthService {
     public void logout(LogoutCommand command) {
         jwtProcessor.expireToken(command.accessToken());
     }
+
     @Transactional
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
         MemberInterface member = findMemberById(decodedJwtToken)
                 .orElseThrow(InvalidTokenException::new);
+        try {
+            String newAccessToken = jwtProcessor.generateAccessToken(member);
+            String newRefreshToken = jwtProcessor.generateRefreshToken(member);
+            jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
+            return AuthResponse.of(newAccessToken, newRefreshToken);
+        }
+        catch (Exception e) {
+            throw new TokenSaveFailedException();
+        }
 
-        String newAccessToken = jwtProcessor.generateAccessToken(member);
-        String newRefreshToken = jwtProcessor.generateRefreshToken(member);
-
-        jwtProcessor.renewRefreshToken(request.refreshToken(), newRefreshToken, member);
-        return AuthResponse.of(newAccessToken, newRefreshToken);
     }
     @Transactional
     public void sendSms(SmsRequest smsRequest) {
@@ -129,30 +134,10 @@ public class AuthServiceImpl implements AuthService {
 
     public Boolean verifyCertificationCode(VerifyCommand command) {
         String storedCode = redisTemplate.opsForValue().get(command.userInfo());
-        if (storedCode == null) {
+        if (!storedCode.equals(command.certificationCode())) {
             throw new VerificationException();
         }
-
-        Player player;
-        if (command.userInfo().contains("@")) {
-            player = playerRepository.findByEmail(command.userInfo())
-                    .orElseThrow(EmailNotFoundException::new);
-        } else {
-            player = playerRepository.findByNumber(command.userInfo())
-                    .orElseThrow(PhoneNumberNotFoundException::new);
-        }
-
-        String accessToken = jwtProcessor.generateAccessToken(player);
-        String refreshToken = jwtProcessor.generateRefreshToken(player);
-        jwtProcessor.saveRefreshToken(accessToken, refreshToken);
-
-        return storedCode.equals(command.certificationCode());
-    }
-
-
-    public MemberTypeResponse getMemberType() {
-        MemberRole memberType = SecurityUtil.getLoginMemberRole();
-        return MemberTypeResponse.of(memberType);
+        return true;
     }
 
     public void sendEmail(GmailSendCommand gmailSendCommand) {
@@ -167,6 +152,11 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.error("이메일 발송 오류");
         }
+    }
+
+    public MemberTypeResponse getMemberType() {
+        MemberRole memberType = SecurityUtil.getLoginMemberRole();
+        return MemberTypeResponse.of(memberType);
     }
 
     // 발신할 이메일 데이터 세팅

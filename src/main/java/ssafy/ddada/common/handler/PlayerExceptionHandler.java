@@ -39,20 +39,6 @@ public class PlayerExceptionHandler {
         return CommonResponse.conflict(e.getErrorCode());
     }
 
-    @ExceptionHandler(NotAllowedExtensionException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleNotAllowedExtension(NotAllowedExtensionException e) {
-        log.error("NotAllowedExtension Error", e);
-        return CommonResponse.badRequest(e.getErrorCode());
-    }
-
-    @ExceptionHandler(TooLargeImageException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse handleImageTooLargeException(TooLargeImageException e) {
-        log.error("TooLargeImageException Error", e);
-        return CommonResponse.badRequest(e.getErrorCode());
-    }
-
     @ExceptionHandler(MessageSendingException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse handleMessageSendingException(MessageSendingException e) {

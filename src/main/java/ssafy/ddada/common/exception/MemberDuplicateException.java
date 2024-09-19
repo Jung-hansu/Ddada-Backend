@@ -4,6 +4,6 @@ import ssafy.ddada.common.exception.errorcode.PlayerErrorCode;
 
 public class MemberDuplicateException extends BaseException{
     public MemberDuplicateException() {
-        super(PlayerErrorCode.MEMBER_DUPLICATE);
+        super(PlayerErrorCode.PLAYER_DUPLICATE);
     }
 }

@@ -1,9 +1,9 @@
 package ssafy.ddada.common.exception;
 
-import ssafy.ddada.common.exception.errorcode.PlayerErrorCode;
+import ssafy.ddada.common.exception.errorcode.S3ErrorCode;
 
 public class NotAllowedExtensionException extends BaseException {
     public NotAllowedExtensionException() {
-        super(PlayerErrorCode.EXTENSION_NOT_ALLOWED);
+        super(S3ErrorCode.EXTENSION_NOT_ALLOWED);
     }
 }
