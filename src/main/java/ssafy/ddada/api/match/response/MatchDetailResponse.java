@@ -7,6 +7,7 @@ import ssafy.ddada.api.member.manager.response.ManagerSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchType;
+import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -32,8 +33,10 @@ public record MatchDetailResponse(
         Integer team2SetScore,
         @Schema(description = "경기 상태")
         MatchStatus status,
+        @Schema(description = "랭크 타입")
+        RankType rankType,
         @Schema(description = "경기 타입")
-        MatchType type,
+        MatchType matchType,
         @Schema(description = "경기 일자")
         LocalDate date,
         @Schema(description = "경기 시간")
@@ -54,6 +57,7 @@ public record MatchDetailResponse(
                 match.getTeam1SetScore(),
                 match.getTeam2SetScore(),
                 match.getStatus(),
+                match.getRankType(),
                 match.getMatchType(),
                 match.getMatchDate(),
                 match.getMatchTime(),
