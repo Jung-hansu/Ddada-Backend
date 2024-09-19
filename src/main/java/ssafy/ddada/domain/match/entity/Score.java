@@ -2,7 +2,6 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 @Getter
 @Entity
@@ -15,16 +14,15 @@ public class Score extends BaseMatchEntity {
     @Column(name = "score_id")
     private Long id;
 
-    @BatchSize(size = 10)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "set_id", nullable = false)
     private Set set;
 
-    private String earnedMember;
+    private Integer earnedMember;
 
-    private String missedMember1;
+    private Integer missedMember1;
 
-    private String missedMember2;
+    private Integer missedMember2;
 
     @Column(nullable = false)
     private Integer scoreNumber;
@@ -35,7 +33,7 @@ public class Score extends BaseMatchEntity {
     @Enumerated(EnumType.STRING)
     private MissedType missedType;
 
-    public Score(Set set, String earnedMember, String missedMember1, String missedMember2, Integer scoreNumber, EarnedType earnedType, MissedType missedType) {
+    public Score(Set set, Integer earnedMember, Integer missedMember1, Integer missedMember2, Integer scoreNumber, EarnedType earnedType, MissedType missedType) {
         this.set = set;
         this.earnedMember = earnedMember;
         this.missedMember1 = missedMember1;

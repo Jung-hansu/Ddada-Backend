@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.util.List;
@@ -41,7 +40,6 @@ public class Court extends BaseCourtEntity {
     @Enumerated(EnumType.STRING)
     private Region region;
 
-    @BatchSize(size = 10)
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 
@@ -57,5 +55,12 @@ public class Court extends BaseCourtEntity {
 
     public static Court createCourt(String name, String address, String contactNumber, String description, String image, String url, Region region) {
         return new Court(name, address, contactNumber, description, image, url, region);
+    }
+
+    @PrePersist
+    public void prePersist(){
+        if (image == null){
+            image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+        }
     }
 }

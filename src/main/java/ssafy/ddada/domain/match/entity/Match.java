@@ -2,7 +2,6 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
@@ -22,23 +21,19 @@ public class Match extends BaseMatchEntity {
     @Column(name = "match_id")
     private Long id;
 
-    @BatchSize(size = 10)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "court_id", nullable = false)
     private Court court;
 
-    @BatchSize(size = 10)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team1_id")
     private Team team1;
 
-    @BatchSize(size = 10)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team2_id")
     private Team team2;
 
     @Setter
-    @BatchSize(size = 10)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Manager manager;
@@ -67,7 +62,6 @@ public class Match extends BaseMatchEntity {
 
     private LocalTime matchTime;
 
-    @BatchSize(size = 10)
     @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Set> sets = new ArrayList<>();
 
