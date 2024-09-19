@@ -10,11 +10,11 @@ public record ScoreDetailResponse(
         @Schema(description = "득점 번호(정렬 기준)")
         Integer scoreNumber,
         @Schema(description = "득점 선수 번호")
-        String earnedMember,
+        Integer earnedMember,
         @Schema(description = "실점 선수 번호1")
-        String missedMember1,
+        Integer missedMember1,
         @Schema(description = "실점 선수 번호2")
-        String missedMember2,
+        Integer missedMember2,
         @Schema(description = "득점 방식")
         EarnedType earnedType,
         @Schema(description = "실점 방식")
