@@ -209,6 +209,7 @@ public class MatchServiceImpl implements MatchService {
                 court,
                 team1,
                 team2,
+                command.rankType(),
                 command.matchType(),
                 command.matchDate(),
                 command.matchTime()
