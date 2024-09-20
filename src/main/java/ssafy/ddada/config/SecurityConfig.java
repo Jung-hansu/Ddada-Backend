@@ -52,7 +52,6 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.accessDeniedHandler(customAccessDeniedHandler) // 권한이 없을 때 처리
                                 .authenticationEntryPoint(customAuthenticationEntryPoint)) // 인증되지 않았을 때 처리
-                .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
                 .build();
     }
 
