@@ -2,7 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ssafy.ddada.common.exception.exception.match.InvalidMatchTypeException;
+import ssafy.ddada.common.exception.match.InvalidMatchTypeException;
 import ssafy.ddada.domain.member.common.Gender;
 
 import java.util.Set;

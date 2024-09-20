@@ -34,7 +34,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
     @Column(unique = true)
     private String nickname;
 
-    private String profileImg;
+    private String image;
 
     private String number;
 
@@ -48,13 +48,13 @@ public class Player extends BaseMemberEntity implements MemberInterface {
     private Integer rating;
 
     // 명시적인 생성자 추가 (null 값 허용)
-    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String profileImg, String number, String description, Integer rating, MemberRole role) {
+    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String image, String number, String description, Integer rating, MemberRole role) {
         this.email = email;
         this.gender = gender;
         this.birth = birth;
         this.nickname = nickname;
         this.password = password;
-        this.profileImg = profileImg;
+        this.image = image;
         this.number = number;
         this.description = description;
         this.rating = rating;
@@ -81,7 +81,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
         this.email = signupCommand.email();
         this.password = password;
         this.nickname = signupCommand.nickname();
-        this.profileImg = imageUrl;
+        this.image = imageUrl;
         this.number = signupCommand.number();
         this.gender = signupCommand.gender();
         this.birth = signupCommand.birth();
@@ -96,7 +96,7 @@ public class Player extends BaseMemberEntity implements MemberInterface {
 
     public void updateProfile(String nickname, String profileImagePath) {
         this.nickname = nickname;
-        this.profileImg = profileImagePath;
+        this.image = profileImagePath;
     }
 
     // 저장 전에 기본 role 설정
@@ -104,6 +104,9 @@ public class Player extends BaseMemberEntity implements MemberInterface {
     public void prePersist() {
         if (this.role == null) {
             this.role = MemberRole.PLAYER;  // 기본값 설정
+        }
+        if (image == null){
+            image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
         }
     }
 }

@@ -1,6 +1,6 @@
 package ssafy.ddada.config.auth;
 
-import ssafy.ddada.common.exception.exception.common.PublicKeyGenerationException;
+import ssafy.ddada.common.exception.other.PublicKeyGenerationException;
 
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
