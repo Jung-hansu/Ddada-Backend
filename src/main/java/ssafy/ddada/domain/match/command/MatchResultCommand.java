@@ -9,16 +9,16 @@ public record MatchResultCommand(
         Integer winnerTeamNumber,
         Integer team1SetScore,
         Integer team2SetScore,
-        List<SetInfoCommand> sets
+        List<SetResultCommand> sets
 ) {
-    public record SetInfoCommand(
+    public record SetResultCommand(
             Integer setNumber,
             Integer setWinnerTeamNumber,
             Integer team1Score,
             Integer team2Score,
-            List<ScoreInfoCommand> scores
+            List<ScoreResultCommand> scores
     ) {
-        public record ScoreInfoCommand(
+        public record ScoreResultCommand(
                 Integer scoreNumber,
                 Integer earnedPlayer,
                 Integer missedPlayer1,
