@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
@@ -23,7 +23,6 @@ import ssafy.ddada.domain.match.service.MatchService;
 
 @Slf4j
 @RestController
-@Secured("ROLE_MANAGER")
 @RequiredArgsConstructor
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
@@ -32,6 +31,7 @@ public class ManagerController {
     private final ManagerService managerService;
     private final MatchService matchService;
 
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "매니저 세부 조회", description = "매니저 세부 정보를 조회하는 api입니다.")
     @GetMapping
     public CommonResponse<ManagerDetailResponse> getManager(){
@@ -43,6 +43,7 @@ public class ManagerController {
         return CommonResponse.ok(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "매니저 할당 경기 리스트 조회", description = "매니저에게 할당된 경기 리스트를 조회하는 api입니다.")
     @GetMapping("/matches")
     public CommonResponse<Page<MatchSimpleResponse>> getAllocatedMatches(
@@ -61,6 +62,7 @@ public class ManagerController {
         return CommonResponse.ok(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
     @PatchMapping("/matches/{match_id}")
     public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
@@ -78,9 +80,11 @@ public class ManagerController {
         return CommonResponse.ok("경기에 성공적으로 할당되었습니다.", null);
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "할당된 경기 저장", description = "경기 종료 후 경기 데이터를 저장하는 api입니다.")
     @PutMapping("/matches/{match_id}")
     public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
+//        TODO: 이건 매니저 검사용으로만 쓰기. managerId는 비즈니스 로직상 안씀
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("할당된 경기 저장 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);

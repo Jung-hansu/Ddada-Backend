@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
@@ -35,6 +36,7 @@ public class PlayerController {
         return CommonResponse.ok(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
     @PatchMapping(value="")
     public CommonResponse<PlayerDeleteResponse> deleteMember() {
@@ -42,6 +44,7 @@ public class PlayerController {
         return CommonResponse.ok(PlayerDeleteResponse.of(message));
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
     @GetMapping("/nickname")
     public CommonResponse<String> checkNickname(
@@ -57,6 +60,7 @@ public class PlayerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 정보 조회", description = "회원 정보를 조회하는 API입니다.")
     @GetMapping("/profile")
     public CommonResponse<PlayerDetailResponse> getMemberDetail(
@@ -65,6 +69,7 @@ public class PlayerController {
         return CommonResponse.ok(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정하는 API입니다.")
     @PutMapping(value = "/profile", consumes = { "multipart/form-data" })
     public CommonResponse<PlayerDetailResponse> updateMemberProfile(

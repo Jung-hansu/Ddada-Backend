@@ -123,7 +123,7 @@ public class JwtProcessor {
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + time))
                 .claim("type", type)
-                .claim("role", role.getValue())
+                .claim("role", role.name())
                 .signWith(getSecretKey())
                 .compact();
     }

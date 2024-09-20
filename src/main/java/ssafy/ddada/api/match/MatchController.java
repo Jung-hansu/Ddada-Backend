@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
@@ -62,7 +63,7 @@ public class MatchController {
         return CommonResponse.ok(response);
     }
 
-//    TODO: login 해야만 볼 수 있도록 Filter 추가하기
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "경기 생성", description = "경기를 생성하는 api입니다.")
     @PostMapping
     public CommonResponse<MatchDetailResponse> createMatch(@RequestBody MatchCreateRequest request) {
@@ -74,6 +75,7 @@ public class MatchController {
         return CommonResponse.created("경기가 성공적으로 생성되었습니다.", null);
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
     @PatchMapping("/status")
     public CommonResponse<?> updateMatchStatus(@RequestBody MatchStatusChangeRequest request){
@@ -83,6 +85,7 @@ public class MatchController {
         return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", null);
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "팀 선수 추가", description = "팀 선수를 추가하는 api입니다.")
     @PatchMapping("/{match_id}/teams/{team_number}")
     public CommonResponse<?> setTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
@@ -94,6 +97,7 @@ public class MatchController {
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "팀 선수 제거", description = "팀 선수를 제거하는 api입니다.")
     @DeleteMapping("/{match_id}/teams/{team_number}")
     public CommonResponse<?> unsetTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
