@@ -2,6 +2,7 @@ package ssafy.ddada.api.match.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.match.command.MatchSearchCommand;
 import ssafy.ddada.domain.match.entity.MatchStatus;
@@ -33,7 +34,7 @@ public record MatchSearchRequest(
                 MatchType.toMatchTypeSet(matchTypes),
                 MatchStatus.toMatchStatusSet(statuses),
                 Region.toRegionSet(regions),
-                PageRequest.of(page, size)
+                PageRequest.of(page, size, Sort.by("id").descending())
         );
     }
 }

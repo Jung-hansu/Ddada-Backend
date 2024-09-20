@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
@@ -22,6 +23,7 @@ import ssafy.ddada.domain.match.service.MatchService;
 
 @Slf4j
 @RestController
+@Secured("ROLE_MANAGER")
 @RequiredArgsConstructor
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
@@ -79,13 +81,11 @@ public class ManagerController {
     @Operation(summary = "할당된 경기 저장", description = "경기 종료 후 경기 데이터를 저장하는 api입니다.")
     @PutMapping("/matches/{match_id}")
     public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
-//        TODO: 이건 매니저 검사용으로만 쓰기. managerId는 비즈니스 로직상 안씀
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("할당된 경기 저장 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
 
-//        TODO: 경기 Request 받아 저장 기능 만들기
-        matchService.saveMatch(matchId, request.toCommand());
+        matchService.saveMatch(matchId, managerId, request.toCommand());
         return CommonResponse.ok("저장되었습니다.", null);
     }
 

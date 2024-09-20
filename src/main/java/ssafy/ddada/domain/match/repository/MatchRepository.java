@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.entity.Match;
@@ -33,13 +34,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
         WHERE (:keyword IS NULL OR m.court.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR m.court.address LIKE CONCAT('%', CAST(:keyword AS string), '%')) AND
             (:rankType IS NULL OR m.rankType = :rankType) AND
             (:matchTypes IS NULL OR m.matchType IN :matchTypes) AND
-            (:statuses IS NULL OR m.status IN :statuses)
+            (:statuses IS NULL OR m.status IN :statuses) AND
+            (:regions IS NULL OR m.court.region IN :regions)
     """)
     Page<Match> findMatchesByKeywordAndTypeAndStatus(
             @Param("keyword") String keyword,
             @Param("rankType") RankType rankType,
             @Param("matchTypes") Set<MatchType> matchTypes,
             @Param("statuses") Set<MatchStatus> statuses,
+            @Param("regions") Set<Region> regions,
             Pageable pageable
     );
 
