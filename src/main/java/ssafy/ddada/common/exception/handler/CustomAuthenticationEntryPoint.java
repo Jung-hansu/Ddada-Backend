@@ -21,10 +21,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         String jsonResponse = """
                 {
+                    "code": 401,
                     "message": "엑세트 토큰 인증이 필요합니다.",
-                    "status": 401,
-                    "error": "Unauthorized",
-                    "path": "%s"
+                    "result": {
+                        "path": "%s"}
                 }
                 """.formatted(request.getRequestURI());
 

@@ -20,10 +20,10 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         String jsonResponse = """
                 {
+                    "code": 401,
                     "message": "해당 회원이 접근 권한이 없습니다.",
-                    "status": 403,
-                    "error": "Forbidden",
-                    "path": "%s"
+                    "result": {
+                        "path": "%s"}
                 }
                 """.formatted(request.getRequestURI());
 
