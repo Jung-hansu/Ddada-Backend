@@ -8,23 +8,22 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.court.CourtNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
+import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
-import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.match.entity.*;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
-import ssafy.ddada.domain.match.entity.Match;
-import ssafy.ddada.domain.match.entity.Set;
-import ssafy.ddada.domain.match.entity.Team;
 import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.match.repository.TeamRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 @Slf4j
@@ -259,10 +258,77 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.save(match);
     }
 
+    private Score buildScoreFrom(Set set, MatchResultCommand.SetResultCommand.ScoreResultCommand scoreCommand) {
+        return Score.builder()
+                .set(set)
+                .scoreNumber(scoreCommand.scoreNumber())
+                .earnedPlayer(scoreCommand.earnedPlayer())
+                .missedPlayer1(scoreCommand.missedPlayer1())
+                .missedPlayer2(scoreCommand.missedPlayer2())
+                .earnedType(scoreCommand.earnedType())
+                .missedType(scoreCommand.missedType())
+                .build();
+    }
+
+    private Set buildSetFrom(Match match, MatchResultCommand.SetResultCommand setCommand) {
+        Set newSet = Set.builder()
+                .match(match)
+                .setNumber(setCommand.setNumber())
+                .setWinnerTeamNumber(setCommand.setWinnerTeamNumber())
+                .team1Score(setCommand.team1Score())
+                .team2Score(setCommand.team2Score())
+                .build();
+
+        newSet.getScores().addAll(
+                setCommand.scores()
+                        .stream()
+                        .map(scoreCommand -> buildScoreFrom(newSet, scoreCommand))
+                        .sorted(Comparator.comparingInt(Score::getScoreNumber))
+                        .toList()
+        );
+        return newSet;
+    }
+
+    private Match buildMatchFrom(Match match, MatchResultCommand matchCommand) {
+        Match newMatch = Match.builder()
+                .id(match.getId())
+                .court(match.getCourt())
+                .team1(match.getTeam1())
+                .team2(match.getTeam2())
+                .manager(match.getManager())
+                .status(match.getStatus())
+                .rankType(match.getRankType())
+                .matchType(match.getMatchType())
+                .matchDate(match.getMatchDate())
+                .matchTime(match.getMatchTime())
+                .winnerTeamNumber(matchCommand.winnerTeamNumber())
+                .team1SetScore(matchCommand.team1SetScore())
+                .team2SetScore(matchCommand.team2SetScore())
+                .build();
+
+        newMatch.getSets().addAll(
+                matchCommand.sets()
+                        .stream()
+                        .map(setCommand -> buildSetFrom(match, setCommand))
+                        .sorted(Comparator.comparingInt(Set::getSetNumber))
+                        .toList()
+        );
+        return newMatch;
+    }
+
     @Override
     @Transactional
-    public void saveMatch(Long matchId, MatchResultCommand command) {
-//        TODO: 서비스 로직 구현하기
+    public void saveMatch(Long matchId, Long managerId, MatchResultCommand matchCommand) {
+        Match match = matchRepository.findByIdWithInfos(matchId)
+                .orElseThrow(MatchNotFoundException::new);
+        Manager manager = match.getManager();
+
+        if (manager == null || !Objects.equals(manager.getId(), managerId)){
+            throw new UnauthorizedManagerException();
+        }
+
+        Match newMatch = buildMatchFrom(match, matchCommand);
+        matchRepository.save(newMatch);
     }
 
 }
