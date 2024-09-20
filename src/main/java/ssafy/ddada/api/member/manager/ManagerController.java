@@ -27,6 +27,7 @@ import ssafy.ddada.domain.match.service.MatchService;
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
 public class ManagerController {
+//TODO: 진입 전에 Manager 로그인 여부 판단하는 필터 적용하기
     private final ManagerService managerService;
     private final MatchService matchService;
 
@@ -88,8 +89,7 @@ public class ManagerController {
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("할당된 경기 저장 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
 
-//        TODO: 경기 Request 받아 저장 기능 만들기
-        matchService.saveMatch(matchId, request.toCommand());
+        matchService.saveMatch(matchId, managerId, request.toCommand());
         return CommonResponse.ok("저장되었습니다.", null);
     }
 

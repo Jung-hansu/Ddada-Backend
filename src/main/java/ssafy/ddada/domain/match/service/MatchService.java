@@ -20,6 +20,6 @@ public interface MatchService {
     // Manager 관련 메소드
     Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command);
     void allocateManager(Long matchId, Long managerId);
-    void saveMatch(Long matchId, MatchResultCommand command);
+    void saveMatch(Long matchId, Long managerId, MatchResultCommand command);
 
 }

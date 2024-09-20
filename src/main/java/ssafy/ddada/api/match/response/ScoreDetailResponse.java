@@ -23,9 +23,9 @@ public record ScoreDetailResponse(
     public static ScoreDetailResponse from(Score score){
         return new ScoreDetailResponse(
                 score.getScoreNumber(),
-                score.getEarnedMember(),
-                score.getMissedMember1(),
-                score.getMissedMember2(),
+                score.getEarnedPlayer(),
+                score.getMissedPlayer1(),
+                score.getMissedPlayer2(),
                 score.getEarnedType(),
                 score.getMissedType()
         );
