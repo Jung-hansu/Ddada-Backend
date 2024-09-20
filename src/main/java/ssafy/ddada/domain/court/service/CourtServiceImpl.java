@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.court.request.CourtCreateRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
-import ssafy.ddada.common.exception.exception.court.CourtNotFoundException;
+import ssafy.ddada.common.exception.court.CourtNotFoundException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;

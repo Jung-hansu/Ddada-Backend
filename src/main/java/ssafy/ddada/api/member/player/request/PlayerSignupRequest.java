@@ -26,7 +26,7 @@ public class PlayerSignupRequest {
         Gender gender;
 
         @Schema(description = "프로필 이미지 파일", example = "profile.jpg")
-        MultipartFile profileImage;
+        MultipartFile image;
 
         @Schema(description = "생년월일", example = "1993-01-01")
         LocalDate birth;
@@ -42,6 +42,6 @@ public class PlayerSignupRequest {
 
 
         public MemberSignupCommand toCommand() {
-                return new MemberSignupCommand(nickname, email, gender, password, birth, profileImage, description, number);
+                return new MemberSignupCommand(nickname, email, gender, password, birth, image, description, number);
         }
 }
