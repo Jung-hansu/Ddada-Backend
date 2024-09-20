@@ -6,14 +6,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
-import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
-public class CourtAdmin extends BaseMemberEntity implements MemberInterface {
+public class CourtAdmin extends BaseMemberEntity implements Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "court_admin_id")

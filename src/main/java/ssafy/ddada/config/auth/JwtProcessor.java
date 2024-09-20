@@ -12,7 +12,7 @@ import ssafy.ddada.common.exception.security.InvalidTokenException;
 import ssafy.ddada.common.exception.token.TokenTypeNotMatchedException;
 import ssafy.ddada.common.properties.JwtProperties;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
 import ssafy.ddada.domain.redis.RefreshTokenRedisRepository;
@@ -69,7 +69,7 @@ public class JwtProcessor {
                 .orElseThrow(InvalidTokenException::new);
     }
 
-    public void renewRefreshToken(String oldRefreshToken, String newRefreshToken, MemberInterface member) {
+    public void renewRefreshToken(String oldRefreshToken, String newRefreshToken, Member member) {
         refreshTokenRedisRepository.save(newRefreshToken, String.valueOf(member.getId()));
         expireToken(oldRefreshToken);
     }
@@ -95,12 +95,12 @@ public class JwtProcessor {
         return getClaim(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String generateAccessToken(MemberInterface member) {
+    public String generateAccessToken(Member member) {
         log.debug("access token exp : {}", jwtProperties.accessTokenExp());
         return issueToken(member.getId(), member.getRole(), ACCESS_TOKEN, jwtProperties.accessTokenExp());
     }
 
-    public String generateRefreshToken(MemberInterface member) {
+    public String generateRefreshToken(Member member) {
         return issueToken(member.getId(), member.getRole(), REFRESH_TOKEN, jwtProperties.refreshTokenExp());
     }
 
