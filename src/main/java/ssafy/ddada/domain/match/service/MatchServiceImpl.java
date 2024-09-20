@@ -68,6 +68,7 @@ public class MatchServiceImpl implements MatchService {
                 command.rankType(),
                 command.matchTypes(),
                 command.statuses(),
+                command.region(),
                 command.pageable()
         );
 
