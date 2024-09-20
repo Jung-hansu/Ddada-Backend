@@ -8,10 +8,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ssafy.ddada.common.error.exception.security.IssuerTokenIncorrectException;
-import ssafy.ddada.common.error.exception.security.TokenExpiredException;
-import ssafy.ddada.common.error.exception.security.InvalidSignatureTokenException;
-import ssafy.ddada.common.error.exception.security.InvalidTokenException;
+import ssafy.ddada.common.exception.security.IssuerTokenIncorrectException;
+import ssafy.ddada.common.exception.security.TokenExpiredException;
+import ssafy.ddada.common.exception.security.InvalidSignatureTokenException;
+import ssafy.ddada.common.exception.security.InvalidTokenException;
 import ssafy.ddada.domain.auth.command.KakaoLoginCommand;
 
 import java.nio.charset.StandardCharsets;

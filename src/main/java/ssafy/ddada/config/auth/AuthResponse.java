@@ -2,7 +2,7 @@ package ssafy.ddada.config.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.common.error.exception.player.AbnormalLoginProgressException;
+import ssafy.ddada.common.exception.player.AbnormalLoginProgressException;
 
 public record AuthResponse(
         @Schema(description = "액세스 토큰", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNjM2MzQwMjM2LCJleHAiOjE2MzYzNDAyMzZ9.1J7")

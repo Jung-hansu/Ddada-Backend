@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.error.errorcode.GlobalErrorCode;
+import ssafy.ddada.common.exception.errorcode.GlobalErrorCode;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
