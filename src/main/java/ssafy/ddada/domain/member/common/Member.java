@@ -1,6 +1,7 @@
 package ssafy.ddada.domain.member.common;
 
-public interface MemberInterface {
+public interface Member {
     Long getId();
     MemberRole getRole();
+    String getPassword();
 }

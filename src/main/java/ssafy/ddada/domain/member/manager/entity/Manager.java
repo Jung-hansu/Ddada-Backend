@@ -5,13 +5,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
-import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class Manager extends BaseMemberEntity implements MemberInterface {
+public class Manager extends BaseMemberEntity implements Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "manager_id")

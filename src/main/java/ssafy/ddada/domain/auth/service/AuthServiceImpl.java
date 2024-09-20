@@ -23,7 +23,7 @@ import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
-import ssafy.ddada.domain.member.common.MemberInterface;
+import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
@@ -86,11 +86,11 @@ public class AuthServiceImpl implements AuthService {
                 String email = command.email();
                 String password = command.password();
 
-                MemberInterface basicMember = findMemberByEmail(email)
+                Member basicMember = findMemberByEmail(email)
                         .orElseThrow(EmailNotFoundException::new);
 
 
-                if (!passwordEncoder.matches(password, ((Player) basicMember).getPassword())) {
+                if (!passwordEncoder.matches(password, ((Member) basicMember).getPassword())) {
                     throw new PasswordNotMatchException();
                 }
 
@@ -114,7 +114,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse refresh(TokenRefreshRequest request) {
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
-        MemberInterface member = findMemberById(decodedJwtToken)
+        Member member = findMemberById(decodedJwtToken)
                 .orElseThrow(InvalidTokenException::new);
         try {
             String newAccessToken = jwtProcessor.generateAccessToken(member);
@@ -193,13 +193,13 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
-    private Optional<MemberInterface> findMemberByEmail(String email) {
-        return playerRepository.findByEmail(email).map(member -> (MemberInterface) member)
-                .or(() -> courtAdminRepository.findByEmail(email).map(member -> (MemberInterface) member))
-                .or(() -> managerRepository.findByEmail(email).map(member -> (MemberInterface) member));
+    private Optional<Member> findMemberByEmail(String email) {
+        return playerRepository.findByEmail(email).map(member -> (Member) member)
+                .or(() -> courtAdminRepository.findByEmail(email).map(member -> (Member) member))
+                .or(() -> managerRepository.findByEmail(email).map(member -> (Member) member));
     }
 
-    private LoginTokenModel generateTokens(MemberInterface member) {
+    private LoginTokenModel generateTokens(Member member) {
         String accessToken = jwtProcessor.generateAccessToken(member);
         String refreshToken = jwtProcessor.generateRefreshToken(member);
         return new LoginTokenModel(accessToken, refreshToken);
@@ -212,18 +212,18 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
-    private Optional<MemberInterface> findMemberById(DecodedJwtToken decodedJwtToken) {
+    private Optional<Member> findMemberById(DecodedJwtToken decodedJwtToken) {
         String role = decodedJwtToken.role();
         Long id = decodedJwtToken.memberId();
         log.info(">>> role: {}, id: {}", role, id);
 
         return switch (role) {
             case "선수" -> playerRepository.findById(id)
-                    .map(member -> (MemberInterface) member);
+                    .map(member -> (Member) member);
             case "코트관리자" -> courtAdminRepository.findById(id)
-                    .map(courtAdmin -> (MemberInterface) courtAdmin);
+                    .map(courtAdmin -> (Member) courtAdmin);
             case "매니저" -> managerRepository.findById(id)
-                    .map(manager -> (MemberInterface) manager);
+                    .map(manager -> (Member) manager);
             default -> throw new IllegalArgumentException("Unknown role: " + role);
         };
     }
