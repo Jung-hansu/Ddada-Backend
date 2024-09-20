@@ -16,6 +16,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ssafy.ddada.common.exception.handler.CustomAccessDeniedHandler;
+import ssafy.ddada.common.exception.handler.CustomAuthenticationEntryPoint;
 import ssafy.ddada.common.properties.CorsProperties;
 import ssafy.ddada.config.filter.JwtAuthenticationFilter;
 
@@ -30,6 +32,8 @@ public class SecurityConfig {
 
     private final CorsProperties corsProperties;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,7 +48,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(AUTHENTICATED_ONLY).authenticated()
                         .anyRequest().permitAll())
-                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(customAccessDeniedHandler) // 권한이 없을 때 처리
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)) // 인증되지 않았을 때 처리
                 .build();
     }
 
