@@ -9,6 +9,8 @@ import static ssafy.ddada.api.StatusCode.*;
 @AllArgsConstructor
 public enum ManagerErrorCode implements BaseErrorCode{
 
+    UNAUTHORIZED_MANAGER(UNAUTHORIZED, "MANAGER_401_1", "권한이 없습니다."),
+
     MANAGER_NOT_FOUND(NOT_FOUND, "MANAGER_404_1", "존재하지 않는 매니저입니다.");
 
     private final Integer httpStatus;
