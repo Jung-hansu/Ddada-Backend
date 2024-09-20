@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.match.entity.MatchType;
+import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,9 +21,9 @@ public record MatchSimpleResponse(
         @Schema(description = "경기 상태")
         MatchStatus status,
         @Schema(description = "랭크 타입")
-        String rankType,
+        RankType rankType,
         @Schema(description = "경기 타입")
-        String matchType,
+        MatchType matchType,
         @Schema(description = "경기 평균 레이팅")
         Integer rating,
         @Schema(description = "팀1 인원 수")
@@ -46,8 +48,8 @@ public record MatchSimpleResponse(
                         match.getMatchDate(),
                         match.getMatchTime(),
                         match.getStatus(),
-                        match.getRankType().getValue(),
-                        match.getMatchType().getValue(),
+                        match.getRankType(),
+                        match.getMatchType(),
                         rating,
                         team1PlayerCount,
                         team2PlayerCount,

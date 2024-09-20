@@ -25,7 +25,6 @@ import ssafy.ddada.domain.match.repository.TeamRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -41,10 +40,26 @@ public class MatchServiceImpl implements MatchService {
     private final TeamRepository teamRepository;
 
     private boolean isReserved(Match match, Long memberId) {
-        return Objects.equals(match.getTeam1().getPlayer1().getId(), memberId) ||
-                Objects.equals(match.getTeam1().getPlayer2().getId(), memberId) ||
-                Objects.equals(match.getTeam2().getPlayer1().getId(), memberId) ||
-                Objects.equals(match.getTeam2().getPlayer2().getId(), memberId);
+        Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
+        Player B1 = match.getTeam2().getPlayer1(), B2 = match.getTeam2().getPlayer2();
+
+        if (A1 != null && Objects.equals(A1.getId(), memberId)){
+            return true;
+        }
+
+        if (A2 != null && Objects.equals(A2.getId(), memberId)){
+            return true;
+        }
+
+        if (B1 != null && Objects.equals(B1.getId(), memberId)){
+            return true;
+        }
+
+        if (B2 != null && Objects.equals(B2.getId(), memberId)){
+            return true;
+        }
+
+        return false;
     }
 
     @Override

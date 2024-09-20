@@ -25,11 +25,11 @@ public class MatchController {
     private final MatchService matchService;
 
     // TODO: ES 구상하기
-    @Operation(summary = "경기 상태 기반 리스트 조회", description = "키워드 및 경기 상태 기반으로 경기 리스트를 조회하는 api입니다.")
+    @Operation(summary = "경기 리스트 조회", description = "키워드 및 경기 상태 기반으로 경기 리스트를 조회하는 api입니다.")
     @GetMapping
     public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "친선") String rankType,
+            @RequestParam(defaultValue = "NORMAL") String rankType,
             @RequestParam(required = false) String matchTypes,
             @RequestParam(required = false) String statuses,
             @RequestParam(required = false) String regions,
