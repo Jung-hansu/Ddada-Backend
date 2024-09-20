@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
-import ssafy.ddada.common.exception.exception.player.MemberNotFoundException;
-import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
-import ssafy.ddada.common.exception.exception.token.TokenSaveFailedException;
+import ssafy.ddada.common.error.exception.player.EmailDuplicateException;
+import ssafy.ddada.common.error.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.error.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.error.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
@@ -36,6 +37,9 @@ public class PlayerServiceImpl implements PlayerService {
     public PlayerSignupResponse signupMember(MemberSignupCommand signupCommand) {
         Player tempPlayer = playerRepository.findByEmail(signupCommand.email())
                 .orElse(null);
+        if (tempPlayer != null && !tempPlayer.getIsDeleted()) {
+            throw new EmailDuplicateException();
+        }
 
         if (tempPlayer == null) {
             tempPlayer = new Player(
@@ -53,10 +57,11 @@ public class PlayerServiceImpl implements PlayerService {
             playerRepository.save(tempPlayer);
         }
 
-        // 이미지 처리 로직 추가: MultipartFile이 비어 있으면 기본 이미지 사용
-        String imageUrl = (signupCommand.imageUrl() == null || signupCommand.imageUrl().isEmpty())
-                ? "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg" // 기본 이미지 경로
-                : s3Util.uploadImageToS3(signupCommand.imageUrl(), tempPlayer.getId(), "profileImg/"); // 이미지가 있으면 S3에 업로드
+        String imageUrl = tempPlayer.getImage();
+
+        if (signupCommand.imageUrl() != null) {
+            imageUrl = s3Util.uploadImageToS3(signupCommand.imageUrl(), tempPlayer.getId(), "profileImg/");
+        }
 
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
 
@@ -74,7 +79,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
-        String profileImagePath = currentLoggedInPlayer.getProfileImg();
+        String profileImagePath = currentLoggedInPlayer.getImage();
 
         String preSignedProfileImage = "";
         if (profileImagePath != null) {
@@ -101,7 +106,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         // 만약 MultipartFile이 비어 있으면 기존 이미지 사용, 그렇지 않으면 새 이미지 업로드
         if (command.profileImagePath() == null || command.profileImagePath().isEmpty()) {
-            imageUrl = currentLoggedInPlayer.getProfileImg(); // 기존 이미지 사용
+            imageUrl = currentLoggedInPlayer.getImage(); // 기존 이미지 사용
         } else {
             // 새 이미지를 업로드하고 새로운 이미지 URL을 얻음
             imageUrl = s3Util.uploadImageToS3(command.profileImagePath(), currentLoggedInPlayer.getId(), "profileImg/");

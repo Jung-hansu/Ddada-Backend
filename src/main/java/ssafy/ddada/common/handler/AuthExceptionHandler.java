@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.exception.player.AbnormalLoginProgressException;
-import ssafy.ddada.common.exception.exception.security.FilterException;
-import ssafy.ddada.common.exception.exception.security.IssuerTokenIncorrectException;
-import ssafy.ddada.common.exception.exception.security.KakaoTokenExpireException;
-import ssafy.ddada.common.exception.exception.security.TokenExpiredException;
-import ssafy.ddada.common.exception.exception.token.TokenTypeNotMatchedException;
+import ssafy.ddada.common.error.exception.player.AbnormalLoginProgressException;
+import ssafy.ddada.common.error.exception.security.FilterException;
+import ssafy.ddada.common.error.exception.security.IssuerTokenIncorrectException;
+import ssafy.ddada.common.error.exception.security.KakaoTokenExpireException;
+import ssafy.ddada.common.error.exception.security.TokenExpiredException;
+import ssafy.ddada.common.error.exception.token.TokenTypeNotMatchedException;
 
 @RestControllerAdvice
 @Slf4j

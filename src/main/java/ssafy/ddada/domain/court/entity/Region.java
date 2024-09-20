@@ -2,7 +2,7 @@ package ssafy.ddada.domain.court.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ssafy.ddada.common.exception.exception.court.InvalidRegionException;
+import ssafy.ddada.common.error.exception.court.InvalidRegionException;
 
 import java.util.Set;
 import java.util.stream.Collectors;

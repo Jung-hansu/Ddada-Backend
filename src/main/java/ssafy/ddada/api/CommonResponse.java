@@ -2,7 +2,7 @@ package ssafy.ddada.api;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import ssafy.ddada.common.exception.errorcode.BaseErrorCode;
+import ssafy.ddada.common.error.errorcode.BaseErrorCode;
 
 import static ssafy.ddada.api.StatusCode.*;
 

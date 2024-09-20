@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ssafy.ddada.common.exception.exception.BaseException;
+import ssafy.ddada.common.error.exception.BaseException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.exception.s3.*;
+import ssafy.ddada.common.error.exception.s3.*;
 
 @RestControllerAdvice
 @Slf4j

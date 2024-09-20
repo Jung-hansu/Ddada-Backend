@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.exception.global.AccessDeniedRequestException;
-import ssafy.ddada.common.exception.exception.player.InvalidLoginInfoException;
+import ssafy.ddada.common.error.exception.global.AccessDeniedRequestException;
+import ssafy.ddada.common.error.exception.player.InvalidLoginInfoException;
 
 @RestControllerAdvice
 @Slf4j

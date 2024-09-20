@@ -12,11 +12,11 @@ import ssafy.ddada.api.auth.request.SmsRequest;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
-import ssafy.ddada.common.exception.exception.player.LoginTypeNotSupportedException;
-import ssafy.ddada.common.exception.exception.player.*;
-import ssafy.ddada.common.exception.exception.security.InvalidTokenException;
-import ssafy.ddada.common.exception.exception.security.NotAuthenticatedException;
-import ssafy.ddada.common.exception.exception.token.TokenSaveFailedException;
+import ssafy.ddada.common.error.exception.player.LoginTypeNotSupportedException;
+import ssafy.ddada.common.error.exception.player.*;
+import ssafy.ddada.common.error.exception.security.InvalidTokenException;
+import ssafy.ddada.common.error.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.error.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
@@ -65,13 +65,18 @@ public class AuthServiceImpl implements AuthService {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
+
                 if (notRegisteredPlayer(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
 
-                MemberInterface kakaoMember = findMemberByEmail(userInfo.email())
+                Player kakaoMember = playerRepository.findByEmail(userInfo.email())
                         .orElseThrow(KakaoMailPlayerNotFoundException::new);
+
+                if (kakaoMember.getIsDeleted()) {
+                    return AuthResponse.notRegistered(userInfo);
+                }
 
                 tokens = generateTokens(kakaoMember);
                 jwtProcessor.saveRefreshToken(tokens);

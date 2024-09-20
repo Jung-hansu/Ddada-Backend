@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.common.exception.exception.court.CourtNotFoundException;
-import ssafy.ddada.common.exception.exception.manager.ManagerNotFoundException;
-import ssafy.ddada.common.exception.exception.match.*;
-import ssafy.ddada.common.exception.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.error.exception.court.CourtNotFoundException;
+import ssafy.ddada.common.error.exception.manager.ManagerNotFoundException;
+import ssafy.ddada.common.error.exception.match.*;
+import ssafy.ddada.common.error.exception.player.MemberNotFoundException;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -25,7 +25,6 @@ import ssafy.ddada.domain.match.repository.TeamRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j
