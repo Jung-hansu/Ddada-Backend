@@ -206,7 +206,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         // 팀 1 플레이어들의 레이팅 추가
         if (match.getTeam1().getPlayer1() != null) {
-            totalRating += match.getTeam1().getPlayer1().get();
+            totalRating += match.getTeam1().getPlayer1().getRating();
             playerCount++;
         }
         if (match.getTeam1().getPlayer2() != null) {

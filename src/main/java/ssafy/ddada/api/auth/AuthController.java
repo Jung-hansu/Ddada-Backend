@@ -1,5 +1,6 @@
 package ssafy.ddada.api.auth;
 
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,8 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "엑세스 토큰을 이용하여 login type으로 로그인 합니다.")
     @PostMapping("logout")
-    public CommonResponse<Void> logout(
-            @RequestBody LogoutRequest request
-    ) {
-        authService.logout(request.toCommand());
+    public CommonResponse<Void> logout() {
+        authService.logout();
         return CommonResponse.noContent();
     }
 
