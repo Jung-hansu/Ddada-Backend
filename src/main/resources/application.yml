@@ -31,12 +31,12 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
 
-  data:
-    redis:
-      password: ${REDIS_PASSWORD}
-      cluster:
-        max-redirects: 6
-        nodes: ${REDIS_NODES}
+#  data:
+#    redis:
+#      password: ${REDIS_PASSWORD}
+#      cluster:
+#        max-redirects: 6
+#        nodes: ${REDIS_NODES}
 
   graphql:
     cors:

@@ -49,5 +49,4 @@ public class ManagerServiceImpl implements ManagerService {
 
         return ManagerSignupResponse.of(accessToken, refreshToken);
     }
-
 }

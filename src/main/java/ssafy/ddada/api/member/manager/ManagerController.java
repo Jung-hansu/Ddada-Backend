@@ -27,14 +27,14 @@ import ssafy.ddada.domain.match.service.MatchService;
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
 public class ManagerController {
-//TODO: 진입 전에 Manager 로그인 여부 판단하는 필터 적용하기
+    //TODO: 진입 전에 Manager 로그인 여부 판단하는 필터 적용하기
     private final ManagerService managerService;
     private final MatchService matchService;
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "매니저 세부 조회", description = "매니저 세부 정보를 조회하는 api입니다.")
     @GetMapping
-    public CommonResponse<ManagerDetailResponse> getManager(){
+    public CommonResponse<ManagerDetailResponse> getManager() {
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("매니저 세부 조회 >>>> 매니저 ID: {}", managerId);
@@ -52,7 +52,7 @@ public class ManagerController {
             @RequestParam String statuses,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
-    ){
+    ) {
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         ManagerSearchMatchRequest request = new ManagerSearchMatchRequest(managerId, keyword, todayOnly, statuses, page, size);
@@ -65,10 +65,10 @@ public class ManagerController {
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
     @PatchMapping("/matches/{match_id}")
-    public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
+    public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId) {
         MemberRole memberRole = SecurityUtil.getLoginMemberRole()
                 .orElseThrow(NotAuthenticatedException::new);
-        if (memberRole != MemberRole.MANAGER){
+        if (memberRole != MemberRole.MANAGER) {
             throw new NotAuthenticatedException();
         }
 
@@ -83,7 +83,7 @@ public class ManagerController {
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "할당된 경기 저장", description = "경기 종료 후 경기 데이터를 저장하는 api입니다.")
     @PutMapping("/matches/{match_id}")
-    public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
+    public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request) {
 //        TODO: 이건 매니저 검사용으로만 쓰기. managerId는 비즈니스 로직상 안씀
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
@@ -94,7 +94,7 @@ public class ManagerController {
     }
 
     @Operation(summary = "매니저 회원가입", description = "매니저 회원가입 api입니다.")
-    @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
+    @PostMapping(value = "/signup", consumes = {"multipart/form-data"})
     public CommonResponse<?> signup(
             @ModelAttribute @Validated ManagerSignupRequest request
     ) {

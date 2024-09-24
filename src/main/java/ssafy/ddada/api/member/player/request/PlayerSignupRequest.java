@@ -38,6 +38,7 @@ public class PlayerSignupRequest {
         String number;
 
         @Schema(description = "자기소개", example = "배드민턴 초보입니다")
+        @Size(max = 50)
         String description;
 
 
