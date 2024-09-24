@@ -10,9 +10,9 @@ public record PlayerMatchResponse(
         @Schema(description = "매치 ID")
         Long matchId,
         @Schema(description = "경기장 이름")
-        String courtName,
+        String gymName,
         @Schema(description = "코트 주소")
-        String courtAddress,
+        String gymAddress,
         @Schema(description = "경기 날짜")
         LocalDate matchDate,
         @Schema(description = "경기 시간")
@@ -32,8 +32,8 @@ public record PlayerMatchResponse(
     public static PlayerMatchResponse from(Match match, Integer avgRating, String MyTeamAndNumber) {
         return new PlayerMatchResponse(
                 match.getId(),
-                match.getCourt().getName(),
-                match.getCourt().getAddress(),
+                match.getGym().getName(),
+                match.getGym().getAddress(),
                 match.getMatchDate(),
                 match.getMatchTime(),
                 match.getMatchType().name(),

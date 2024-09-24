@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MatchCreateCommand(
-    Long courtId,
+    Long gymId,
     RankType rankType,
     MatchType matchType,
     LocalDate matchDate,

@@ -1,8 +1,8 @@
-package ssafy.ddada.domain.court.entity;
+package ssafy.ddada.domain.gym.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ssafy.ddada.common.exception.court.InvalidRegionException;
+import ssafy.ddada.common.exception.gym.InvalidRegionException;
 
 import java.util.Set;
 import java.util.stream.Collectors;

@@ -1,11 +1,11 @@
-package ssafy.ddada.api.court.request;
+package ssafy.ddada.api.gym.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;
-import ssafy.ddada.domain.court.entity.Region;
+import ssafy.ddada.domain.gym.entity.Region;
 
 @Schema(description = "배드민턴 코트 생성 요청 DTO")
-public record CourtCreateRequest(
+public record GymCreateRequest(
         @Schema(description = "코트 이름", example = "문화체육관 배드민턴장")
         String name,
 

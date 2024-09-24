@@ -7,11 +7,11 @@ import static ssafy.ddada.api.StatusCode.*;
 
 @Getter
 @AllArgsConstructor
-public enum CourtErrorCode implements BaseErrorCode{
+public enum GymErrorCode implements BaseErrorCode{
 
-    INVALID_REGION(BAD_REQUEST, "COURT_400_1", "잘못된 지역입니다."),
+    INVALID_REGION(BAD_REQUEST, "GYM_400_1", "잘못된 지역입니다."),
 
-    COURT_NOT_FOUND(NOT_FOUND, "COURT_404_1", "존재하지 않는 시설입니다.");
+    GYM_NOT_FOUND(NOT_FOUND, "GYM_404_1", "존재하지 않는 체육관입니다.");
 
     private final Integer httpStatus;
     private final String code;

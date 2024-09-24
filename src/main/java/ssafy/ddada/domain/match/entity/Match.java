@@ -2,7 +2,7 @@ package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 
 import java.time.LocalDate;
@@ -23,8 +23,8 @@ public class Match extends BaseMatchEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "court_id", nullable = false)
-    private Court court;
+    @JoinColumn(name = "gym_id", nullable = false)
+    private Gym gym;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team1_id")
@@ -67,8 +67,8 @@ public class Match extends BaseMatchEntity {
     @Builder.Default
     private List<Set> sets = new ArrayList<>();
 
-    public Match(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
-        this.court = court;
+    public Match(Gym gym, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
+        this.gym = gym;
         this.team1 = team1;
         this.team2 = team2;
         this.status = MatchStatus.CREATED;
@@ -78,8 +78,8 @@ public class Match extends BaseMatchEntity {
         this.matchTime = matchTime;
     }
 
-    public static Match createNewMatch(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
-        return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
+    public static Match createNewMatch(Gym gym, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
+        return new Match(gym, team1, team2, rankType, matchType, matchDate, matchTime);
     }
 
 }

@@ -2,7 +2,7 @@ package ssafy.ddada.api.match.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.api.court.response.CourtDetailResponse;
+import ssafy.ddada.api.gym.response.GymDetailResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
@@ -17,8 +17,8 @@ import java.util.List;
 public record MatchDetailResponse(
         @Schema(description = "경기 ID")
         Long id,
-        @Schema(description = "시설")
-        CourtDetailResponse court,
+        @Schema(description = "체육관")
+        GymDetailResponse gym,
         @Schema(description = "팀1")
         TeamDetailResponse team1,
         @Schema(description = "팀2")
@@ -49,7 +49,7 @@ public record MatchDetailResponse(
     public static MatchDetailResponse from(Match match){
         return new MatchDetailResponse(
                 match.getId(),
-                CourtDetailResponse.fromWhereMatchDetail(match.getCourt()),
+                GymDetailResponse.fromWhereMatchDetail(match.getGym()),
                 TeamDetailResponse.from(match.getTeam1()),
                 TeamDetailResponse.from(match.getTeam2()),
                 ManagerSimpleResponse.from(match.getManager()),

@@ -1,7 +1,7 @@
 package ssafy.ddada.api.match.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.api.court.response.CourtSimpleResponse;
+import ssafy.ddada.api.gym.response.GymSimpleResponse;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchType;
@@ -32,8 +32,8 @@ public record MatchSimpleResponse(
         Integer team2PlayerCount,
         @Schema(description = "예약 여부")
         boolean isReserved,
-        @Schema(description = "시설 정보")
-        CourtSimpleResponse court
+        @Schema(description = "체육관 정보")
+        GymSimpleResponse gym
 ) {
         public static MatchSimpleResponse from(Match match, boolean isReserved){
                 int team1PlayerCount = match.getTeam1().getPlayerCount();
@@ -54,7 +54,7 @@ public record MatchSimpleResponse(
                         team1PlayerCount,
                         team2PlayerCount,
                         isReserved,
-                        CourtSimpleResponse.onMatchListFrom(match.getCourt())
+                        GymSimpleResponse.onMatchListFrom(match.getGym())
                 );
         }
 }

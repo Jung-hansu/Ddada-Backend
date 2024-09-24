@@ -11,9 +11,9 @@ import java.time.LocalTime;
 
 @Schema(description = "경기 생성 요청 DTO")
 public record MatchCreateRequest(
-        @Schema(description = "시설 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "시설 ID는 필수입니다.")
-        Long courtId,
+        @Schema(description = "체육관 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "체육관 ID는 필수입니다.")
+        Long gymId,
 
         @Schema(description = "랭크 타입", example = "RANK", requiredMode = Schema.RequiredMode.REQUIRED)
         RankType rankType,
@@ -28,6 +28,6 @@ public record MatchCreateRequest(
         LocalTime time
 ) {
     public MatchCreateCommand toCommand(){
-        return new MatchCreateCommand(courtId, rankType, matchType, date, time);
+        return new MatchCreateCommand(gymId, rankType, matchType, date, time);
     }
 }

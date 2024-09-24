@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.common.exception.court.CourtNotFoundException;
-import ssafy.ddada.common.exception.court.InvalidRegionException;
+import ssafy.ddada.common.exception.gym.GymNotFoundException;
+import ssafy.ddada.common.exception.gym.InvalidRegionException;
 
 @Slf4j
 @RestControllerAdvice
-public class CourtExceptionHandler {
+public class GymExceptionHandler {
 
     @ExceptionHandler(InvalidRegionException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -20,10 +20,10 @@ public class CourtExceptionHandler {
         return CommonResponse.badRequest(e.getErrorCode());
     }
 
-    @ExceptionHandler(CourtNotFoundException.class)
+    @ExceptionHandler(GymNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonResponse<?> handleCourtNotFoundException(CourtNotFoundException e) {
-        log.error("CourtNotFoundException occurs", e);
+    public CommonResponse<?> handleGymNotFoundException(GymNotFoundException e) {
+        log.error("GymNotFoundException occurs", e);
         return CommonResponse.notFound(e.getErrorCode());
     }
 
