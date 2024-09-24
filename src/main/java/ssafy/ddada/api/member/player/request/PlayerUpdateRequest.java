@@ -13,14 +13,11 @@ public record PlayerUpdateRequest(
         @Schema(description = "프로필 이미지 파일")
         MultipartFile profileImagePath,
 
-        @Schema(description = "전화번호", example = "010-1234-5678")
-        String phoneNumber,
-
         @Schema(description = "한 줄 소개", example = "안녕하세요")
         @Size(max = 50)
         String description
 ) {
     public UpdateProfileCommand toCommand() {
-        return new UpdateProfileCommand(nickname, profileImagePath, phoneNumber, description);
+        return new UpdateProfileCommand(nickname, profileImagePath, description);
     }
 }

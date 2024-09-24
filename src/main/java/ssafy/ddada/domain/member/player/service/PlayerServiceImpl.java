@@ -159,9 +159,13 @@ public class PlayerServiceImpl implements PlayerService {
             String imagePath = imageUrl.substring(imageUrl.indexOf("profileImg/"));
             presignedUrl = s3Util.getPresignedUrlFromS3(imagePath);
         }
+        String nickname = command.nickname();
+        if (command.nickname() != null && !command.nickname().isEmpty()) {
+            nickname = currentLoggedInPlayer.getNickname();
+        }
 
         // 프로필 정보 업데이트
-        currentLoggedInPlayer.updateProfile(command.nickname(), imageUrl, command.phoneNumber(), command.description());
+        currentLoggedInPlayer.updateProfile(nickname, imageUrl, command.description());
         playerRepository.save(currentLoggedInPlayer);
 
         // presignedUrl을 반환
@@ -187,6 +191,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public String updateMemberPassword(PasswordUpdateCommand command) {
 
         validateNewPassword(command.newPassword());
@@ -218,7 +223,6 @@ public class PlayerServiceImpl implements PlayerService {
 
         return "비밀번호가 성공적으로 변경되었습니다.";
     }
-
 
     @Override
     public List<PlayerMatchResponse> getPlayerMatches() {

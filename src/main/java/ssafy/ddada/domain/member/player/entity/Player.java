@@ -101,10 +101,9 @@ public class Player extends BaseMemberEntity implements Member {
         return this;
     }
 
-    public void updateProfile(String nickname, String profileImagePath, String number, String description) {
+    public void updateProfile(String nickname, String profileImagePath, String description) {
         this.nickname = nickname;
         this.image = profileImagePath;
-        this.number = number;
         this.description = description;
     }
 
