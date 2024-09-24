@@ -13,7 +13,7 @@ import ssafy.ddada.domain.auth.command.VerifyCommand;
 public interface AuthService {
     AuthResponse login(LoginCommand command);
     AuthResponse refresh(TokenRefreshRequest refreshToken);
-    void logout(LogoutCommand command);
+    void logout();
     void sendSms(SmsRequest smsRequest);
     Boolean verifyCertificationCode(VerifyCommand command);
     MemberTypeResponse getMemberType();

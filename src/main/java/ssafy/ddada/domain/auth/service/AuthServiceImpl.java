@@ -1,7 +1,9 @@
 package ssafy.ddada.domain.auth.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -54,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final JavaMailSender javaMailSender;
     private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 5L;
+    private final HttpServletRequest request;
 
     @Override
     @Transactional
@@ -104,10 +107,23 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.of(tokens.accessToken(), tokens.refreshToken());
     }
-    @Transactional
+
     @Override
-    public void logout(LogoutCommand command) {
-        jwtProcessor.expireToken(command.accessToken());
+    @Transactional
+    public void logout() {
+        // 헤더에서 Authorization 값 가져오기
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            // "Bearer " 이후의 토큰 값만 추출
+            String token = authorizationHeader.substring(7);
+
+            // JWT 토큰 만료 처리
+            jwtProcessor.expireToken(token);
+        } else {
+            // Authorization 헤더가 없거나 올바르지 않을 경우 처리 로직
+            throw new IllegalArgumentException("Invalid or missing Authorization header");
+        }
     }
 
     @Transactional
@@ -159,8 +175,8 @@ public class AuthServiceImpl implements AuthService {
         String title = "DDADA 이메일 인증";
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
         String text = "인증번호는 " + certificationCode + " 입니다.";
-        SimpleMailMessage emailForm = createEmailForm(gmailSendCommand.email(), title, text);
         redisTemplate.opsForValue().set(gmailSendCommand.email(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+        SimpleMailMessage emailForm = createEmailForm(gmailSendCommand.email(), title, text);
         try {
             javaMailSender.send(emailForm);
             log.info("이메일 발송 성공");
