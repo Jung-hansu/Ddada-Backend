@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
+import ssafy.ddada.common.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.member.manager.command.ManagerSignupCommand;
 import ssafy.ddada.domain.member.manager.entity.Manager;
@@ -50,4 +54,10 @@ public class ManagerServiceImpl implements ManagerService {
         return ManagerSignupResponse.of(accessToken, refreshToken);
     }
 
+    @Override
+    public ManagerIdResponse getManagerId() {
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        return ManagerIdResponse.of(managerId);
+    }
 }

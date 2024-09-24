@@ -94,9 +94,15 @@ public class Player extends BaseMemberEntity implements Member {
         return this;
     }
 
-    public void updateProfile(String nickname, String profileImagePath) {
+    public void updateProfile(String nickname, String profileImagePath, String number, String description) {
         this.nickname = nickname;
         this.image = profileImagePath;
+        this.number = number;
+        this.description = description;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
     // 저장 전에 기본 role 설정

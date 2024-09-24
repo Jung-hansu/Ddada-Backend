@@ -13,6 +13,7 @@ import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,4 +83,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             @Param("setNumber") Integer setNumber
     );
 
+    @Query("SELECT m FROM Match m WHERE m.team1.player1.id = :playerId OR" +
+            " m.team1.player2.id = :playerId OR" +
+            " m.team2.player1.id = :playerId OR" +
+            " m.team2.player2.id = :playerId")
+    List<Match> findMatchesByPlayerId(Long playerId);
 }

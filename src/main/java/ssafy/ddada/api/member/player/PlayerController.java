@@ -8,12 +8,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.member.player.request.PasswordUpdateRequest;
 import ssafy.ddada.api.member.player.request.PlayerSignupRequest;
 import ssafy.ddada.api.member.player.request.PlayerUpdateRequest;
 import ssafy.ddada.api.member.player.response.PlayerDeleteResponse;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
+import ssafy.ddada.api.member.player.response.PlayerMatchResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.domain.member.player.service.PlayerService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,6 +79,34 @@ public class PlayerController {
             @ModelAttribute @Validated PlayerUpdateRequest request
     ) {
         PlayerDetailResponse response = playerService.updateMemberProfile(request.toCommand());
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "회원 비밀번호 수정", description = "회원 비밀번호를 수정하는 API입니다.")
+    @PatchMapping(value = "/password")
+    public CommonResponse<String> updateMemberPassword(
+            @RequestBody PasswordUpdateRequest request
+            ) {
+        String response = playerService.updateMemberPassword(request.toCommand());
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "플레이어의 경기 조회", description = "나의 경기들을 조회하는 API입니다.")
+    @GetMapping("/matches")
+    public CommonResponse<List<PlayerMatchResponse>> getPlayerMatches(
+    ) {
+        List<PlayerMatchResponse> response = playerService.getPlayerMatches();
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "플레이어의 id 조회", description = "나의 id를 조회하는 API입니다.")
+    @GetMapping("/id")
+    public CommonResponse<Long> getPlayerId(
+    ) {
+        Long response = playerService.getPlayerId();
         return CommonResponse.ok(response);
     }
 }

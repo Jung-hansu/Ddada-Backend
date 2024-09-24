@@ -14,6 +14,7 @@ import ssafy.ddada.api.member.manager.request.ManagerSignupRequest;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
+import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -118,6 +119,15 @@ public class ManagerController {
     ) {
         ManagerSignupResponse response = managerService.signupManager(request.toCommand());
 
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "매니저 정보 조회", description = "매니저 정보를 조회하는 API입니다.")
+    @GetMapping("/id")
+    public CommonResponse<ManagerIdResponse> getManagerId(
+    ) {
+        ManagerIdResponse response = managerService.getManagerId();
         return CommonResponse.ok(response);
     }
 }
