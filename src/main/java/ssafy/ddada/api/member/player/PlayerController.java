@@ -103,7 +103,7 @@ public class PlayerController {
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 완료된 경기 조회", description = "플레이어의 완료된 경기들을 조회하는 API입니다.")
-    @GetMapping("/matches/complete")
+    @GetMapping("/matches/finished")
     public CommonResponse<List<PlayerMatchResponse>> getPlayerCompleteMatches(
     ) {
         List<PlayerMatchResponse> response = playerService.getPlayerCompleteMatches();
