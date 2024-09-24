@@ -179,6 +179,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional
     public void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
