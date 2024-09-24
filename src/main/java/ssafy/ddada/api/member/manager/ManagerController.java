@@ -81,6 +81,24 @@ public class ManagerController {
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "매니저 경기 할당 해제", description = "매니저를 경기에서 할당 해제하는 api입니다.")
+    @DeleteMapping("/matches/{match_id}")
+    public CommonResponse<?> deallocateToMatch(@PathVariable("match_id") Long matchId){
+        MemberRole memberRole = SecurityUtil.getLoginMemberRole()
+                .orElseThrow(NotAuthenticatedException::new);
+        if (memberRole != MemberRole.MANAGER){
+            throw new NotAuthenticatedException();
+        }
+
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        log.info("매니저 경기 할당 해제 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
+
+        matchService.deallocateManager(matchId, managerId);
+        return CommonResponse.noContent();
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "할당된 경기 저장", description = "경기 종료 후 경기 데이터를 저장하는 api입니다.")
     @PutMapping("/matches/{match_id}")
     public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
