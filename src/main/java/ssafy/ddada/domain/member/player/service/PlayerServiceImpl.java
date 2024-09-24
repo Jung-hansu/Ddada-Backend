@@ -179,6 +179,13 @@ public class PlayerServiceImpl implements PlayerService {
                 .toList();
     }
 
+    @Override
+    public Long getPlayerId() {
+        Long userId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        return userId;
+    }
+
     private Player getCurrentLoggedInMember() {
         Long userId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
