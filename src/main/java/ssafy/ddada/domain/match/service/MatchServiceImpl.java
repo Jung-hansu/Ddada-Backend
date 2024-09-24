@@ -199,9 +199,9 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidTeamNumberException();
         }
 
-        if (team.getPlayer1() == player){
+        if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())){
             team.setPlayer1(null);
-        } else if (team.getPlayer2() == player){
+        } else if (team.getPlayer2() != null && Objects.equals(team.getPlayer2().getId(), player.getId())){
             team.setPlayer2(null);
         } else {
             throw new TeamPlayerNotFoundException();
@@ -260,6 +260,29 @@ public class MatchServiceImpl implements MatchService {
         match.setManager(manager);
         if (isMatchFull(match)){
             match.setStatus(MatchStatus.RESERVED);
+        }
+        matchRepository.save(match);
+    }
+
+    @Override
+    @Transactional
+    public void deallocateManager(Long matchId, Long managerId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(MatchNotFoundException::new);
+        Manager manager = managerRepository.findById(managerId)
+                .orElseThrow(ManagerNotFoundException::new);
+
+        if (match.getManager() == null){
+            throw new ManagerNotFoundException();
+        }
+
+        if (!Objects.equals(match.getManager().getId(), manager.getId())){
+            throw new UnauthorizedManagerException();
+        }
+
+        match.setManager(null);
+        if (match.getStatus() == MatchStatus.RESERVED){
+            match.setStatus(MatchStatus.CREATED);
         }
         matchRepository.save(match);
     }
