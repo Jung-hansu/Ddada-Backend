@@ -32,6 +32,7 @@ public class Set extends BaseMatchEntity {
     private Integer team2Score;
 
     @OneToMany(mappedBy = "set", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Score> scores = new ArrayList<>();
 
 }

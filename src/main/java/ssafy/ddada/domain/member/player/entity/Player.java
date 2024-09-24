@@ -13,6 +13,8 @@ import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -46,6 +48,11 @@ public class Player extends BaseMemberEntity implements Member {
     private String description;
 
     private Integer rating;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistories = new ArrayList<>();
+
+
 
     // 명시적인 생성자 추가 (null 값 허용)
     public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String image, String number, String description, Integer rating, MemberRole role) {
@@ -101,8 +108,15 @@ public class Player extends BaseMemberEntity implements Member {
         this.description = description;
     }
 
-    public void updatePassword(String password) {
-        this.password = password;
+    public void addPasswordHistory(String password) {
+        PasswordHistory passwordHistory = new PasswordHistory(this, password);
+        this.passwordHistories.add(passwordHistory);
+    }
+
+    public void updatePassword(String newPassword) {
+        // 비밀번호 변경 전에 이력을 저장
+        this.addPasswordHistory(this.password);
+        this.password = newPassword;
     }
 
     // 저장 전에 기본 role 설정
