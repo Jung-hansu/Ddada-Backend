@@ -160,12 +160,17 @@ public class PlayerServiceImpl implements PlayerService {
             presignedUrl = s3Util.getPresignedUrlFromS3(imagePath);
         }
         String nickname = command.nickname();
-        if (command.nickname() != null && !command.nickname().isEmpty()) {
+        if (nickname == null || nickname.isEmpty()) {
             nickname = currentLoggedInPlayer.getNickname();
         }
 
+        String description = command.description();
+        if (description == null || description.isEmpty()) {
+            description = currentLoggedInPlayer.getDescription();
+        }
+
         // 프로필 정보 업데이트
-        currentLoggedInPlayer.updateProfile(nickname, imageUrl, command.description());
+        currentLoggedInPlayer.updateProfile(nickname, imageUrl, description);
         playerRepository.save(currentLoggedInPlayer);
 
         // presignedUrl을 반환
