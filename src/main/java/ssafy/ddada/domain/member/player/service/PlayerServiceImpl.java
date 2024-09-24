@@ -6,12 +6,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
+import ssafy.ddada.api.member.player.response.PlayerProfileDetailResponse;
 import ssafy.ddada.api.member.player.response.PlayerMatchResponse;
 import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
 import ssafy.ddada.common.exception.player.EmailDuplicateException;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PasswordNotMatchException;
+import ssafy.ddada.common.exception.security.InvalidPasswordException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.exception.security.PasswordUsedException;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -19,10 +22,10 @@ import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.Team;
 import ssafy.ddada.domain.match.repository.MatchRepository;
-import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 import ssafy.ddada.domain.member.player.command.PasswordUpdateCommand;
 import ssafy.ddada.domain.member.player.command.UpdateProfileCommand;
+import ssafy.ddada.domain.member.player.entity.PasswordHistory;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
@@ -90,6 +93,29 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerDetailResponse getMemberDetail() {
         Player currentLoggedInPlayer = getCurrentLoggedInMember();
+
+        // 프로필 이미지 경로 가져오기
+        String profileImagePath = currentLoggedInPlayer.getImage();
+        String preSignedProfileImage = "";
+
+        if (profileImagePath != null) {
+            String imagePath = profileImagePath.substring(profileImagePath.indexOf("profileImg/"));
+            preSignedProfileImage = s3Util.getPresignedUrlFromS3(imagePath);
+        }
+
+        Integer rating = currentLoggedInPlayer.getRating();
+
+        // PlayerDetailResponse 반환
+        return PlayerDetailResponse.of(
+                preSignedProfileImage,
+                currentLoggedInPlayer.getNickname(),
+                rating
+        );
+    }
+
+    @Override
+    public PlayerProfileDetailResponse getMemberProfileDetail() {
+        Player currentLoggedInPlayer = getCurrentLoggedInMember();
         String profileImagePath = currentLoggedInPlayer.getImage();
 
         String preSignedProfileImage = "";
@@ -98,12 +124,16 @@ public class PlayerServiceImpl implements PlayerService {
             preSignedProfileImage = s3Util.getPresignedUrlFromS3(imagePath);
         }
 
-        return PlayerDetailResponse.of(
+        return PlayerProfileDetailResponse.of(
                 preSignedProfileImage,
                 currentLoggedInPlayer.getNickname(),
-                currentLoggedInPlayer.getGender()
+                currentLoggedInPlayer.getGender(),
+                String.valueOf(currentLoggedInPlayer.getRating()),
+                currentLoggedInPlayer.getNumber(),
+                currentLoggedInPlayer.getEmail(),
+                currentLoggedInPlayer.getDescription()
         );
-    }
+}
 
     @Override
     @Transactional
@@ -136,9 +166,9 @@ public class PlayerServiceImpl implements PlayerService {
 
         // presignedUrl을 반환
         return PlayerDetailResponse.of(
-                presignedUrl, // 프리사인드 URL 전달
+                presignedUrl,
                 currentLoggedInPlayer.getNickname(),
-                currentLoggedInPlayer.getGender()
+                currentLoggedInPlayer.getRating()
         );
     }
 
@@ -158,18 +188,37 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public String updateMemberPassword(PasswordUpdateCommand command) {
-        Player currentLoggedInPlayer = getCurrentLoggedInMember();
 
-        if (!passwordEncoder.matches(command.currentPassword(), ((Member) currentLoggedInPlayer).getPassword())) {
+        validateNewPassword(command.newPassword());
+
+        Player player;
+
+        if (command.email() != null && !command.email().isEmpty()) {
+            player = playerRepository.findByEmail(command.email())
+                    .orElseThrow(MemberNotFoundException::new);
+        }
+        else {
+            player = getCurrentLoggedInMember();
+        }
+
+        if (!passwordEncoder.matches(command.currentPassword(), player.getPassword())) {
             throw new PasswordNotMatchException();
         }
 
+        for (PasswordHistory history : player.getPasswordHistories()) {
+            if (passwordEncoder.matches(command.newPassword(), history.getPassword())) {
+                throw new PasswordUsedException();
+            }
+        }
+
         String encodedPassword = passwordEncoder.encode(command.newPassword());
-        currentLoggedInPlayer.updatePassword(encodedPassword);
-        playerRepository.save(currentLoggedInPlayer);
+
+        player.updatePassword(encodedPassword);
+        playerRepository.save(player);
 
         return "비밀번호가 성공적으로 변경되었습니다.";
     }
+
 
     @Override
     public List<PlayerMatchResponse> getPlayerMatches() {
@@ -251,6 +300,13 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(NotAuthenticatedException::new);
         return playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private void validateNewPassword(String newPassword) {
+        if (newPassword.length() < 8 ||
+                !newPassword.matches(".*[!@#\\$%^&*].*")) {
+            throw new InvalidPasswordException();
+        }
     }
 }
 

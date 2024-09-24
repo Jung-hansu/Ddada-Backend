@@ -64,6 +64,7 @@ public class Match extends BaseMatchEntity {
     private LocalTime matchTime;
 
     @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Set> sets = new ArrayList<>();
 
     public Match(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {

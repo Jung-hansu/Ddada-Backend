@@ -10,10 +10,10 @@ public record PlayerDetailResponse(
         @Schema(description = "닉네임", example = "쿠잉비")
         String nickname,
 
-        @Schema(description = "성별", example = "MALE")
-        String gender
+        @Schema(description = "레이팅", example = "25")
+        Integer rating
 ) {
-    public static PlayerDetailResponse of(String profileImageBase64, String nickname, Gender gender) {
-        return new PlayerDetailResponse(profileImageBase64, nickname, gender.getValue());
+    public static PlayerDetailResponse of(String profileImageBase64, String nickname, Integer rating) {
+        return new PlayerDetailResponse(profileImageBase64, nickname, rating);
     }
 }

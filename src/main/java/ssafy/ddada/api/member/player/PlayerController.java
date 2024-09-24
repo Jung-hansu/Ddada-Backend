@@ -11,10 +11,7 @@ import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.member.player.request.PasswordUpdateRequest;
 import ssafy.ddada.api.member.player.request.PlayerSignupRequest;
 import ssafy.ddada.api.member.player.request.PlayerUpdateRequest;
-import ssafy.ddada.api.member.player.response.PlayerDeleteResponse;
-import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
-import ssafy.ddada.api.member.player.response.PlayerMatchResponse;
-import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
+import ssafy.ddada.api.member.player.response.*;
 import ssafy.ddada.domain.member.player.service.PlayerService;
 
 import java.util.List;
@@ -64,11 +61,20 @@ public class PlayerController {
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
-    @Operation(summary = "회원 정보 조회", description = "회원 정보를 조회하는 API입니다.")
-    @GetMapping("/profile")
+    @Operation(summary = "로그인 시 회원 정보 조회", description = "로그인 시 회원 정보를 조회하는 API입니다.")
+    @GetMapping("")
     public CommonResponse<PlayerDetailResponse> getMemberDetail(
     ) {
         PlayerDetailResponse response = playerService.getMemberDetail();
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "프로필에서 회원 정보 조회", description = "프로필에서 회원 정보를 조회하는 API입니다.")
+    @GetMapping("/profile")
+    public CommonResponse<PlayerProfileDetailResponse> getMemberProfileDetail(
+    ) {
+        PlayerProfileDetailResponse response = playerService.getMemberProfileDetail();
         return CommonResponse.ok(response);
     }
 

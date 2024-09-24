@@ -157,10 +157,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public Boolean verifyCertificationCode(VerifyCommand command) {
-        String storedCode = redisTemplate.opsForValue().get(command.userInfo());
-        if (!storedCode.equals(command.certificationCode())) {
+        String storedCode;
+        try {
+            storedCode = redisTemplate.opsForValue().get(command.userInfo());
+        } catch (Exception e) {
+            // Redis와의 통신 중 오류가 발생한 경우 VerificationException을 던집니다.
             throw new VerificationException();
         }
+
+        if (storedCode == null || !storedCode.equals(command.certificationCode())) {
+            throw new VerificationException();
+        }
+
         return true;
     }
 
