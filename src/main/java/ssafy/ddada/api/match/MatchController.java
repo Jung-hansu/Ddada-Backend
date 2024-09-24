@@ -91,7 +91,7 @@ public class MatchController {
     public CommonResponse<?> setTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
-        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
+        log.info("팀 선수 추가 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
 
         matchService.setTeamPlayer(matchId, playerId, teamNumber);
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
@@ -103,7 +103,7 @@ public class MatchController {
     public CommonResponse<?> unsetTeamPlayer(@PathVariable("match_id") Long matchId, @PathVariable("team_number") Integer teamNumber){
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
-        log.info("팀 선수 변경 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
+        log.info("팀 선수 제거 >>> 경기 ID: {}, 선수 ID: {}, 팀 번호: {}", matchId, playerId, teamNumber);
 
         matchService.unsetTeamPlayer(matchId, playerId, teamNumber);
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
