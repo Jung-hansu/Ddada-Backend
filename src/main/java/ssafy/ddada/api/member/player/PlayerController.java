@@ -93,11 +93,20 @@ public class PlayerController {
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
-    @Operation(summary = "플레이어의 경기 조회", description = "나의 경기들을 조회하는 API입니다.")
+    @Operation(summary = "플레이어의 경기 조회", description = "플레이어의 경기들을 조회하는 API입니다.")
     @GetMapping("/matches")
     public CommonResponse<List<PlayerMatchResponse>> getPlayerMatches(
     ) {
         List<PlayerMatchResponse> response = playerService.getPlayerMatches();
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "플레이어의 완료된 경기 조회", description = "플레이어의 완료된 경기들을 조회하는 API입니다.")
+    @GetMapping("/matches/finished")
+    public CommonResponse<List<PlayerMatchResponse>> getPlayerCompleteMatches(
+    ) {
+        List<PlayerMatchResponse> response = playerService.getPlayerCompleteMatches();
         return CommonResponse.ok(response);
     }
 

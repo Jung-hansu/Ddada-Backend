@@ -114,5 +114,8 @@ public class Player extends BaseMemberEntity implements Member {
         if (image == null){
             image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
         }
+        if (rating == null){
+            rating = 0;
+        }
     }
 }
