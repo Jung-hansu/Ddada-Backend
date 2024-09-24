@@ -17,5 +17,6 @@ public interface PlayerService {
     Boolean checkNickname(String nickname);
     String updateMemberPassword(PasswordUpdateCommand command);
     List<PlayerMatchResponse> getPlayerMatches();
+    List<PlayerMatchResponse> getPlayerCompleteMatches();
     Long getPlayerId();
 }

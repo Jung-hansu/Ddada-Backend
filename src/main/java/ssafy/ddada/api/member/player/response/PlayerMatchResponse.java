@@ -11,23 +11,36 @@ public record PlayerMatchResponse(
         Long matchId,
         @Schema(description = "경기장 이름")
         String courtName,
-        @Schema(description = "팀1 점수")
-        Integer team1SetScore,
-        @Schema(description = "팀2 점수")
-        Integer team2SetScore,
+        @Schema(description = "코트 주소")
+        String courtAddress,
         @Schema(description = "경기 날짜")
         LocalDate matchDate,
         @Schema(description = "경기 시간")
-        LocalTime matchTime
+        LocalTime matchTime,
+        @Schema(description = "경기 타입")
+        String matchType,
+        @Schema(description = "경기 랭크/친선")
+        String rankType,
+        @Schema(description = "평균 레이팅")
+        Integer avgRating,
+        @Schema(description = "경기 예약 상태")
+        String matchStatus,
+        @Schema(description = "나의 포지션")
+        String MyTeamAndNumber
+
 ) {
-    public static PlayerMatchResponse from(Match match) {
+    public static PlayerMatchResponse from(Match match, Integer avgRating, String MyTeamAndNumber) {
         return new PlayerMatchResponse(
                 match.getId(),
-                match.getCourt().getName(),  // 필요한 데이터만 가져옴
-                match.getTeam1SetScore(),
-                match.getTeam2SetScore(),
+                match.getCourt().getName(),
+                match.getCourt().getAddress(),
                 match.getMatchDate(),
-                match.getMatchTime()
+                match.getMatchTime(),
+                match.getMatchType().name(),
+                match.getRankType().name(),
+                avgRating,
+                match.getStatus().name(),
+                MyTeamAndNumber
         );
     }
 }

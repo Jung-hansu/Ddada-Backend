@@ -17,6 +17,7 @@ import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.match.entity.Match;
+import ssafy.ddada.domain.match.entity.Team;
 import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
@@ -27,6 +28,7 @@ import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -171,19 +173,77 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public List<PlayerMatchResponse> getPlayerMatches() {
-        Player currentLoggedInPlayer = getCurrentLoggedInMember();
-        List<Match> matches = matchRepository.findMatchesByPlayerId(currentLoggedInPlayer.getId());
+        Player currentLoggedInPlayer = getCurrentLoggedInMember(); // 현재 로그인된 플레이어
+        List<Match> matches = matchRepository.findMatchesByPlayerId(currentLoggedInPlayer.getId()); // 플레이어와 관련된 경기들
 
         return matches.stream()
-                .map(PlayerMatchResponse::from)
+                .map(match -> {
+                    Integer avgRating = calculateAverageRating(match);
+                    String myTeamAndNumber = getMyTeamAndNumber(match, currentLoggedInPlayer);
+                    return PlayerMatchResponse.from(match, avgRating, myTeamAndNumber);
+                })
+                .toList();
+    }
+
+    private static String getMyTeamAndNumber(Match match, Player currentPlayer) {
+        return getTeamAndPosition(match.getTeam1(), "A팀", currentPlayer)
+                .or(() -> getTeamAndPosition(match.getTeam2(), "B팀", currentPlayer))
+                .orElse("참가 정보 없음");
+    }
+
+    private static Optional<String> getTeamAndPosition(Team team, String teamName, Player currentPlayer) {
+        if (team.getPlayer1() != null && team.getPlayer1().getId().equals(currentPlayer.getId())) {
+            return Optional.of(teamName + " 1번");
+        } else if (team.getPlayer2() != null && team.getPlayer2().getId().equals(currentPlayer.getId())) {
+            return Optional.of(teamName + " 2번");
+        }
+        return Optional.empty();
+    }
+
+    private Integer calculateAverageRating(Match match) {
+        int totalRating = 0;
+        int playerCount = 0;
+
+        // 팀 1 플레이어들의 레이팅 추가
+        if (match.getTeam1().getPlayer1() != null) {
+            totalRating += match.getTeam1().getPlayer1().get();
+            playerCount++;
+        }
+        if (match.getTeam1().getPlayer2() != null) {
+            totalRating += match.getTeam1().getPlayer2().getRating();
+            playerCount++;
+        }
+
+        // 팀 2 플레이어들의 레이팅 추가
+        if (match.getTeam2().getPlayer1() != null) {
+            totalRating += match.getTeam2().getPlayer1().getRating();
+            playerCount++;
+        }
+        if (match.getTeam2().getPlayer2() != null) {
+            totalRating += match.getTeam2().getPlayer2().getRating();
+            playerCount++;
+        }
+
+        // 플레이어가 없을 경우 0 반환, 그렇지 않으면 평균 레이팅 계산
+        return playerCount > 0 ? totalRating / playerCount : 0;
+    }
+    @Override
+    public List<PlayerMatchResponse> getPlayerCompleteMatches() {
+        Player currentLoggedInPlayer = getCurrentLoggedInMember();
+        List<Match> matches = matchRepository.findCompletedMatchesByPlayerId(currentLoggedInPlayer.getId());
+
+        return matches.stream()
+                .map(match -> {
+                    Integer avgRating = calculateAverageRating(match);
+                    String myTeamAndNumber = getMyTeamAndNumber(match, currentLoggedInPlayer);
+                    return PlayerMatchResponse.from(match, avgRating, myTeamAndNumber);
+                })
                 .toList();
     }
 
     @Override
     public Long getPlayerId() {
-        Long userId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
-        return userId;
+        return SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new);
     }
 
     private Player getCurrentLoggedInMember() {
