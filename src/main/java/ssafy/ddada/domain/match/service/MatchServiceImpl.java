@@ -113,6 +113,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private void updateTeamRating(Team team){
+        if (team.getPlayerCount() == 0){
+            team.setRating(0);
+            return;
+        }
+
         Player player1 = team.getPlayer1();
         Player player2 = team.getPlayer2();
         int ratingAverage = 0;
