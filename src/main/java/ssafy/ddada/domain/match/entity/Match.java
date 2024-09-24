@@ -70,7 +70,7 @@ public class Match extends BaseMatchEntity {
         this.court = court;
         this.team1 = team1;
         this.team2 = team2;
-        this.status = MatchStatus.RESERVED;
+        this.status = MatchStatus.CREATED;
         this.rankType = rankType;
         this.matchType = matchType;
         this.matchDate = matchDate;

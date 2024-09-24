@@ -146,8 +146,8 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(TeamNotFoundException::new);
 
         // 모집 안된 경기만 선수 등록 가능
-        if (!match.getStatus().equals(MatchStatus.CREATED)) {
-            throw new InvalidMatchStatusException();
+        if (isMatchFull(match)) {
+            throw new TeamFullException();
         }
 
         Player player = playerRepository.findById(playerId)
