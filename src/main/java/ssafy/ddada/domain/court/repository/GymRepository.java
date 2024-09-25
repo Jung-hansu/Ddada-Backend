@@ -9,6 +9,7 @@ import ssafy.ddada.domain.match.entity.Match;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface GymRepository extends JpaRepository<Gym, Long> {
 
@@ -18,7 +19,7 @@ public interface GymRepository extends JpaRepository<Gym, Long> {
         FROM Gym g
         WHERE g.gymAdmin.id = :gymAdminId
     """)
-    Gym getGymsById(@Param("gymAdminId") Long gymAdminId);
+    Optional<Gym> getGymsById(@Param("gymAdminId") Long gymAdminId);
 
     @EntityGraph(attributePaths = {"court", "court.gym", "manager", "team1", "team2"})
     @Query("""

@@ -12,6 +12,8 @@ import ssafy.ddada.api.gym.response.GymMatchesResponse;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.court.service.GymService;
+import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
+import ssafy.ddada.domain.member.gymadmin.service.GymAdminService;
 
 import java.time.LocalDate;
 
@@ -24,6 +26,7 @@ import java.time.LocalDate;
 public class GymController {
 
     private final GymService gymService;
+    private final GymAdminService gymAdminService;
 
     @Operation(summary = "체육관 조회", description = "체육관 정보를 조회하는 API입니다.")
     @GetMapping
@@ -45,11 +48,11 @@ public class GymController {
 
     @Operation(summary = "체육관 수익 인출", description = "체육관 수익을 인출하는 API입니다.")
     @PatchMapping("/withdraw")
-    public CommonResponse<?> settleAccount(){
+    public CommonResponse<?> settleAccount(@RequestParam String account, @RequestParam Integer amount){
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
-        log.info("settleAccount >>>> gymAdminId: {}", gymAdminId);
-
-        return CommonResponse.ok();
+        log.info("settleAccount >>>> gymAdminId: {}, account: {}, amount: {}", gymAdminId, account, amount);
+        GymAdmin gymAdmin = gymAdminService.settleAccount(gymAdminId, account, amount);
+        return CommonResponse.ok("현재 누적 금액은 "+ gymAdmin.getCumulativeIncome() +"입니다.", null);
     }
 
 

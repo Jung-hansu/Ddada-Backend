@@ -12,7 +12,6 @@ import ssafy.ddada.domain.member.common.MemberRole;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 public class GymAdmin extends BaseMemberEntity implements Member {
     @Id
@@ -34,6 +33,7 @@ public class GymAdmin extends BaseMemberEntity implements Member {
 
     private String number;
 
+    @Setter
     private Integer cumulativeIncome;
 
     // 회원가입 메서드
