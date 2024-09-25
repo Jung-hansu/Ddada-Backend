@@ -16,12 +16,12 @@ import java.util.Set;
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
-    @EntityGraph(attributePaths = {"matches"})
+    @EntityGraph(attributePaths = {"court", "matches"})
     @Query("""
         SELECT c
         FROM Court c
-        WHERE (:keyword IS NULL OR c.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR c.address LIKE CONCAT('%', CAST(:keyword AS string), '%'))
-            AND (:regions IS NULL OR c.region IN :regions)
+        WHERE (:keyword IS NULL OR c.gym.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR c.gym.address LIKE CONCAT('%', CAST(:keyword AS string), '%'))
+            AND (:regions IS NULL OR c.gym.region IN :regions)
     """)
     Page<Court> findCourtsByKeywordAndRegion(
             @Param("keyword") String keyword,

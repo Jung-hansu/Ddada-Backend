@@ -32,7 +32,7 @@ public record MatchSimpleResponse(
         Integer team2PlayerCount,
         @Schema(description = "예약 여부")
         boolean isReserved,
-        @Schema(description = "시설 정보")
+        @Schema(description = "코트 정보")
         CourtSimpleResponse court
 ) {
         public static MatchSimpleResponse from(Match match, boolean isReserved){

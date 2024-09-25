@@ -1,12 +1,12 @@
-package ssafy.ddada.common.exception.court;
+package ssafy.ddada.common.exception.gym;
 
 import ssafy.ddada.common.exception.BaseException;
-import ssafy.ddada.common.exception.errorcode.CourtErrorCode;
+import ssafy.ddada.common.exception.errorcode.GymErrorCode;
 
 public class CourtNotFoundException extends BaseException {
 
     public CourtNotFoundException() {
-        super(CourtErrorCode.COURT_NOT_FOUND);
+        super(GymErrorCode.COURT_NOT_FOUND);
     }
 
 }

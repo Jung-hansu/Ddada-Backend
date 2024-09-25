@@ -28,15 +28,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     Optional<Match> findByIdWithTeams(@Param("matchId") Long matchId);
 
-    @EntityGraph(attributePaths = {"court", "team1", "team2"})
+    @EntityGraph(attributePaths = {"court", "court.court", "team1", "team2"})
     @Query("""
         SELECT m
         FROM Match m
-        WHERE (:keyword IS NULL OR m.court.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR m.court.address LIKE CONCAT('%', CAST(:keyword AS string), '%')) AND
+        WHERE (:keyword IS NULL OR m.court.gym.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR m.court.gym.address LIKE CONCAT('%', CAST(:keyword AS string), '%')) AND
             (:rankType IS NULL OR m.rankType = :rankType) AND
             (:matchTypes IS NULL OR m.matchType IN :matchTypes) AND
             (:statuses IS NULL OR m.status IN :statuses) AND
-            (:regions IS NULL OR m.court.region IN :regions)
+            (:regions IS NULL OR m.court.gym.region IN :regions)
     """)
     Page<Match> findMatchesByKeywordAndTypeAndStatus(
             @Param("keyword") String keyword,
@@ -47,12 +47,12 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"court", "team1", "team2", "manager"})
+    @EntityGraph(attributePaths = {"court", "court.court", "team1", "team2", "manager"})
     @Query("""
         SELECT m
         FROM Match m
         WHERE (m.manager.id = :managerId) AND
-            (:keyword IS NULL OR m.court.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR m.court.address LIKE CONCAT('%', CAST(:keyword AS string), '%')) AND
+            (:keyword IS NULL OR m.court.gym.name LIKE CONCAT('%', CAST(:keyword AS string), '%') OR m.court.gym.address LIKE CONCAT('%', CAST(:keyword AS string), '%')) AND
             (:todayOnly = FALSE OR m.matchDate = CURRENT_DATE) AND
             (:statuses IS NULL OR m.status IN :statuses)
     """)

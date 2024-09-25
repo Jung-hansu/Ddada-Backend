@@ -12,34 +12,38 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "시설 검색 결과 DTO")
+@Schema(description = "코트 검색 결과 DTO")
 public record CourtDetailResponse(
-        @Schema(description = "시설 ID")
+        @Schema(description = "코트 ID")
         Long id,
-        @Schema(description = "시설명")
+        @Schema(description = "코트명")
         String name,
-        @Schema(description = "시설 주소")
+        @Schema(description = "체육관 주소")
         String address,
-        @Schema(description = "시설 전화번호")
+        @Schema(description = "체육관 전화번호")
         String contactNumber,
-        @Schema(description = "시설 설명")
+        @Schema(description = "체육관 설명")
         String description,
-        @Schema(description = "시설 이미지")
+        @Schema(description = "체육관 이미지")
         String image,
-        @Schema(description = "시설 홈페이지 주소")
+        @Schema(description = "체육관 홈페이지 주소")
         String url,
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<LocalTime>> reservations
 ) {
+    private static String getCourtName(Court court){
+        return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
+    }
+
     public static CourtDetailResponse fromWhereMatchDetail(Court court){
         return new CourtDetailResponse(
                 court.getId(),
-                court.getName(),
-                court.getAddress(),
-                court.getContactNumber(),
-                court.getDescription(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getContactNumber(),
+                court.getGym().getDescription(),
                 null,
-                court.getUrl(),
+                court.getGym().getUrl(),
                 null
         );
     }
@@ -47,12 +51,12 @@ public record CourtDetailResponse(
     public static CourtDetailResponse from(Court court){
         return new CourtDetailResponse(
                 court.getId(),
-                court.getName(),
-                court.getAddress(),
-                court.getContactNumber(),
-                court.getDescription(),
-                court.getImage(),
-                court.getUrl(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getContactNumber(),
+                court.getGym().getDescription(),
+                court.getGym().getImage(),
+                court.getGym().getUrl(),
                 court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(

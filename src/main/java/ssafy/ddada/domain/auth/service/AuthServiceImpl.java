@@ -3,7 +3,6 @@ package ssafy.ddada.domain.auth.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +26,7 @@ import ssafy.ddada.domain.auth.command.*;
 import ssafy.ddada.domain.auth.model.LoginTokenModel;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
-import ssafy.ddada.domain.member.courtadmin.repository.CourtAdminRepository;
+import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
@@ -50,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProcessor jwtProcessor;
     private final PasswordEncoder passwordEncoder;
     private final PlayerRepository playerRepository;
-    private final CourtAdminRepository courtAdminRepository;
+    private final GymAdminRepository gymAdminRepository;
     private final ManagerRepository managerRepository;
     private final SmsCertificationUtil smsCertificationUtil;
     private final RedisTemplate<String, String> redisTemplate;
@@ -207,7 +206,7 @@ public class AuthServiceImpl implements AuthService {
         log.debug(">>> noSignupMember: {}", userInfo.email());
 
         if (playerRepository.existsByEmail(userInfo.email()) ||
-                courtAdminRepository.existsByEmail(userInfo.email()) ||
+                gymAdminRepository.existsByEmail(userInfo.email()) ||
                 managerRepository.existsByEmail(userInfo.email())) {
             return isTempPlayer(findMemberByEmail(userInfo.email())
                     .orElseThrow(AbnormalLoginProgressException::new));
@@ -219,7 +218,7 @@ public class AuthServiceImpl implements AuthService {
 
     private Optional<Member> findMemberByEmail(String email) {
         return playerRepository.findByEmail(email).map(member -> (Member) member)
-                .or(() -> courtAdminRepository.findByEmail(email).map(member -> (Member) member))
+                .or(() -> gymAdminRepository.findByEmail(email).map(member -> (Member) member))
                 .or(() -> managerRepository.findByEmail(email).map(member -> (Member) member));
     }
 
@@ -244,8 +243,8 @@ public class AuthServiceImpl implements AuthService {
         return switch (role) {
             case "선수" -> playerRepository.findById(id)
                     .map(member -> (Member) member);
-            case "코트관리자" -> courtAdminRepository.findById(id)
-                    .map(courtAdmin -> (Member) courtAdmin);
+            case "체육관 관리자" -> gymAdminRepository.findById(id)
+                    .map(gymAdmin -> (Member) gymAdmin);
             case "매니저" -> managerRepository.findById(id)
                     .map(manager -> (Member) manager);
             default -> throw new IllegalArgumentException("Unknown role: " + role);

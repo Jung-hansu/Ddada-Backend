@@ -17,7 +17,7 @@ import java.util.List;
 public record MatchDetailResponse(
         @Schema(description = "경기 ID")
         Long id,
-        @Schema(description = "시설")
+        @Schema(description = "코트")
         CourtDetailResponse court,
         @Schema(description = "팀1")
         TeamDetailResponse team1,

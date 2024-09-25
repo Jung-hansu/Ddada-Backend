@@ -4,16 +4,15 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
 import ssafy.ddada.domain.match.entity.Match;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Court extends BaseCourtEntity {
 
@@ -22,45 +21,14 @@ public class Court extends BaseCourtEntity {
     @Column(name = "court_id")
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_id")
+    private Gym gym;
 
     @Column(nullable = false)
-    private String address;
-
-    private String contactNumber;
-
-    private String description;
-
-    @Setter
-    private String image;
-
-    private String url;
-
-    @Enumerated(EnumType.STRING)
-    private Region region;
+    private Integer courtNumber;
 
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 
-    public Court(String name, String address, String contactNumber, String description, String image, String url, Region region) {
-        this.name = name;
-        this.address = address;
-        this.contactNumber = contactNumber;
-        this.description = description;
-        this.image = image;
-        this.url = url;
-        this.region = region;
-    }
-
-    public static Court createCourt(String name, String address, String contactNumber, String description, String image, String url, Region region) {
-        return new Court(name, address, contactNumber, description, image, url, region);
-    }
-
-    @PrePersist
-    public void prePersist(){
-        if (image == null){
-            image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
-        }
-    }
 }

@@ -12,28 +12,32 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "시설 정보 요약 응답 DTO")
+@Schema(description = "코트 정보 요약 응답 DTO")
 public record CourtSimpleResponse(
-        @Schema(description = "시설 ID")
+        @Schema(description = "코트 ID")
         Long id,
-        @Schema(description = "시설명")
+        @Schema(description = "코트명")
         String name,
-        @Schema(description = "시설 주소")
+        @Schema(description = "체육관 주소")
         String address,
-        @Schema(description = "시설 사진")
+        @Schema(description = "체육관 사진")
         String image,
-        @Schema(description = "시설 지역")
+        @Schema(description = "체육관 지역")
         String region,
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<LocalTime>> reservations
 ) {
+    private static String getCourtName(Court court){
+        return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
+    }
+
     public static CourtSimpleResponse onMatchListFrom(Court court) {
         return new CourtSimpleResponse(
                 court.getId(),
-                court.getName(),
-                court.getAddress(),
+                getCourtName(court),
+                court.getGym().getAddress(),
                 null,
-                court.getRegion().getKorValue(),
+                court.getGym().getRegion().getKorValue(),
                 null
         );
     }
@@ -41,10 +45,10 @@ public record CourtSimpleResponse(
     public static CourtSimpleResponse from(Court court) {
         return new CourtSimpleResponse(
                 court.getId(),
-                court.getName(),
-                court.getAddress(),
-                court.getImage(),
-                court.getRegion().getKorValue(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getImage(),
+                court.getGym().getRegion().getKorValue(),
                 court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(
