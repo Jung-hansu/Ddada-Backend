@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.common.exception.security.InvalidPasswordException;
+import ssafy.ddada.common.exception.security.PasswordUsedException;
 
 @RestControllerAdvice
 @Slf4j
@@ -15,6 +16,13 @@ public class SecurityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse handleInvalidPasswordException(InvalidPasswordException e) {
         log.error("InvalidPasswordException Error", e);
+        return CommonResponse.badRequest(e.getErrorCode());
+    }
+
+    @ExceptionHandler(PasswordUsedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse handlePasswordUsedException(PasswordUsedException e) {
+        log.error("PasswordUsedException Error", e);
         return CommonResponse.badRequest(e.getErrorCode());
     }
 }
