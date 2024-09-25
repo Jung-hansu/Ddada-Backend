@@ -141,7 +141,6 @@ public class PlayerServiceImpl implements PlayerService {
 
         Player player = getPlayerForPasswordUpdate(command);
 
-        verifyCurrentPassword(command.currentPassword(), player);
         ensureNewPasswordIsNotUsed(command.newPassword(), player);
 
         String encodedNewPassword = passwordEncoder.encode(command.newPassword());
@@ -240,10 +239,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private Player getPlayerForPasswordUpdate(PasswordUpdateCommand command) {
-        if (command.email() != null && !command.email().isEmpty()) {
+        if (command.email() != null) {
             return playerRepository.findByEmail(command.email())
                     .orElseThrow(MemberNotFoundException::new);
         }
+        Player player = getCurrentLoggedInMember();
+        verifyCurrentPassword(command.currentPassword(), player);
         return getCurrentLoggedInMember();
     }
 
