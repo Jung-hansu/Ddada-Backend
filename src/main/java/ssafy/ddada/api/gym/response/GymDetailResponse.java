@@ -1,6 +1,5 @@
 package ssafy.ddada.api.gym.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Gym;
 
@@ -8,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Schema(description = "코트 정보 요약 응답 DTO")
+@Schema(description = "체육관 정보 요약 응답 DTO")
 public record GymDetailResponse(
         @Schema(description = "관리자 ID")
         GymAdminInfoResponse gymAdmin,
