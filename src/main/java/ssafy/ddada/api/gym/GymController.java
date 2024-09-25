@@ -39,8 +39,8 @@ public class GymController {
     public CommonResponse<GymMatchesResponse> getGymMatches(@RequestParam LocalDate date){
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         log.info("getGymMatches >>>> gymAdminId: {}, date: {}", gymAdminId, date);
-
-        return CommonResponse.ok();
+        GymMatchesResponse response = gymService.getGymMatches(gymAdminId, date);
+        return CommonResponse.ok(response);
     }
 
     @Operation(summary = "체육관 수익 인출", description = "체육관 수익을 인출하는 API입니다.")
