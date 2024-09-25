@@ -20,9 +20,9 @@ public class SecurityExceptionHandler {
     }
 
     @ExceptionHandler(PasswordUsedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public CommonResponse handlePasswordUsedException(PasswordUsedException e) {
         log.error("PasswordUsedException Error", e);
-        return CommonResponse.badRequest(e.getErrorCode());
+        return CommonResponse.conflict(e.getErrorCode());
     }
 }
