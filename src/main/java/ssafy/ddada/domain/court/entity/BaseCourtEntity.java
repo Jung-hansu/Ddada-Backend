@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.gym.entity;
+package ssafy.ddada.domain.court.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseGymEntity {
+public class BaseCourtEntity {
     @CreatedDate
     @Column(updatable = false)
     LocalDateTime createdAt;

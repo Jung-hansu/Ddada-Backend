@@ -1,8 +1,8 @@
-package ssafy.ddada.api.gym.response;
+package ssafy.ddada.api.court.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.gym.entity.Gym;
+import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.time.LocalDate;
@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "체육관 검색 결과 DTO")
-public record GymDetailResponse(
-        @Schema(description = "체육관 ID")
+@Schema(description = "코트 검색 결과 DTO")
+public record CourtDetailResponse(
+        @Schema(description = "코트 ID")
         Long id,
-        @Schema(description = "체육관명")
+        @Schema(description = "코트명")
         String name,
         @Schema(description = "체육관 주소")
         String address,
@@ -31,29 +31,33 @@ public record GymDetailResponse(
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<LocalTime>> reservations
 ) {
-    public static GymDetailResponse fromWhereMatchDetail(Gym gym){
-        return new GymDetailResponse(
-                gym.getId(),
-                gym.getName(),
-                gym.getAddress(),
-                gym.getContactNumber(),
-                gym.getDescription(),
+    private static String getCourtName(Court court){
+        return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
+    }
+
+    public static CourtDetailResponse fromWhereMatchDetail(Court court){
+        return new CourtDetailResponse(
+                court.getId(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getContactNumber(),
+                court.getGym().getDescription(),
                 null,
-                gym.getUrl(),
+                court.getGym().getUrl(),
                 null
         );
     }
 
-    public static GymDetailResponse from(Gym gym){
-        return new GymDetailResponse(
-                gym.getId(),
-                gym.getName(),
-                gym.getAddress(),
-                gym.getContactNumber(),
-                gym.getDescription(),
-                gym.getImage(),
-                gym.getUrl(),
-                gym.getMatches()
+    public static CourtDetailResponse from(Court court){
+        return new CourtDetailResponse(
+                court.getId(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getContactNumber(),
+                court.getGym().getDescription(),
+                court.getGym().getImage(),
+                court.getGym().getUrl(),
+                court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(
                                 Match::getMatchDate,
