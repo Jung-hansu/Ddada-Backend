@@ -88,7 +88,6 @@ public class PlayerController {
         return CommonResponse.ok(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 비밀번호 수정", description = "회원 비밀번호를 수정하는 API입니다.")
     @PatchMapping(value = "/password")
     public CommonResponse<String> updateMemberPassword(
