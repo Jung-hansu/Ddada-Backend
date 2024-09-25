@@ -71,7 +71,7 @@ public class Player extends BaseMemberEntity implements Member {
 
     public static Player createTempPlayer(String email) {
         return new Player(
-                email,
+                null,
                 null,  // 성별 기본값 설정
                 null,   // 생년월일 기본값 설정
                 null,   // 닉네임 기본값
