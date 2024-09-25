@@ -83,14 +83,19 @@ public class PlayerServiceImpl implements PlayerService {
         Player currentPlayer = getCurrentLoggedInMember();
         String preSignedProfileImage = generatePreSignedUrl(currentPlayer.getImage());
 
+        Integer wins = playerRepository.countWinsByPlayerId(currentPlayer.getId());
+        Integer losses = playerRepository.countLossesByPlayerId(currentPlayer.getId());
+
         return PlayerProfileDetailResponse.of(
                 preSignedProfileImage,
                 currentPlayer.getNickname(),
                 currentPlayer.getGender(),
-                String.valueOf(currentPlayer.getRating()),
+                currentPlayer.getRating(),
                 currentPlayer.getNumber(),
                 currentPlayer.getEmail(),
-                currentPlayer.getDescription()
+                currentPlayer.getDescription(),
+                wins,
+                losses
         );
     }
 
