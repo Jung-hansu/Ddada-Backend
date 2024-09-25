@@ -32,8 +32,8 @@ public record MatchSimpleResponse(
         Integer team2PlayerCount,
         @Schema(description = "예약 여부")
         boolean isReserved,
-        @Schema(description = "체육관 정보")
-        CourtSimpleResponse gym
+        @Schema(description = "코트 정보")
+        CourtSimpleResponse court
 ) {
         public static MatchSimpleResponse from(Match match, boolean isReserved){
                 int team1PlayerCount = match.getTeam1().getPlayerCount();

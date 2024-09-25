@@ -23,7 +23,7 @@ public class CourtController {
 
     @Operation(summary = "코트 검색 결과 조회", description = "페이징된 코트 검색 결과를 조회하는 API입니다.")
     @GetMapping("/search")
-    public CommonResponse<Page<CourtSimpleResponse>> getGymsByKeyword(
+    public CommonResponse<Page<CourtSimpleResponse>> getCourtsByKeyword(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String regions,
             @RequestParam(defaultValue = "0") int page,
@@ -37,7 +37,7 @@ public class CourtController {
 
     @Operation(summary = "코트 세부 조회", description = "코트 세부 정보를 조회하는 api입니다.")
     @GetMapping("/{court_id}")
-    public CommonResponse<CourtDetailResponse> getGymById(@PathVariable("court_id") Long courtId){
+    public CommonResponse<CourtDetailResponse> getCourtById(@PathVariable("court_id") Long courtId){
         log.info("코트 세부 조회 >>>> 코트 ID: {}", courtId);
 
         CourtDetailResponse response = courtService.getCourtById(courtId);
