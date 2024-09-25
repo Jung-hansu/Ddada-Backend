@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.gym.entity;
+package ssafy.ddada.domain.court.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

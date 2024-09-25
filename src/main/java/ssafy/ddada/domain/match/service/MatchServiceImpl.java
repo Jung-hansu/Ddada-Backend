@@ -6,13 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.common.exception.gym.GymNotFoundException;
+import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
-import ssafy.ddada.domain.gym.entity.Gym;
-import ssafy.ddada.domain.gym.repository.GymRepository;
+import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.*;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
@@ -34,7 +34,7 @@ public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
-    private final GymRepository gymRepository;
+    private final CourtRepository courtRepository;
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
 
@@ -219,14 +219,14 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void createMatch(Long creatorId, MatchCreateCommand command) {
-        Gym gym = gymRepository.findById(command.gymId())
-                .orElseThrow(GymNotFoundException::new);
+        Court court = courtRepository.findById(command.courtId())
+                .orElseThrow(CourtNotFoundException::new);
         Player creator = playerRepository.findById(creatorId)
                 .orElseThrow(MemberNotFoundException::new);
         Team team1 = teamRepository.save(Team.createNewTeam(creator));
         Team team2 = teamRepository.save(Team.createNewTeam());
         Match match = Match.createNewMatch(
-                gym,
+                court,
                 team1,
                 team2,
                 command.rankType(),
@@ -322,7 +322,7 @@ public class MatchServiceImpl implements MatchService {
     private Match buildMatchFrom(Match match, MatchResultCommand matchCommand) {
         Match newMatch = Match.builder()
                 .id(match.getId())
-                .gym(match.getGym())
+                .court(match.getCourt())
                 .team1(match.getTeam1())
                 .team2(match.getTeam2())
                 .manager(match.getManager())

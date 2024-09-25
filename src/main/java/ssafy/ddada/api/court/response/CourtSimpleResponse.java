@@ -1,8 +1,8 @@
-package ssafy.ddada.api.gym.response;
+package ssafy.ddada.api.court.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.gym.entity.Gym;
+import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.time.LocalDate;
@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "체육관 정보 요약 응답 DTO")
-public record GymSimpleResponse(
-        @Schema(description = "체육관 ID")
+@Schema(description = "코트 정보 요약 응답 DTO")
+public record CourtSimpleResponse(
+        @Schema(description = "코트 ID")
         Long id,
-        @Schema(description = "체육관명")
+        @Schema(description = "코트명")
         String name,
         @Schema(description = "체육관 주소")
         String address,
@@ -27,25 +27,29 @@ public record GymSimpleResponse(
         @Schema(description = "예약된 경기 시간 리스트")
         Map<LocalDate, List<LocalTime>> reservations
 ) {
-    public static GymSimpleResponse onMatchListFrom(Gym gym) {
-        return new GymSimpleResponse(
-                gym.getId(),
-                gym.getName(),
-                gym.getAddress(),
+    private static String getCourtName(Court court){
+        return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
+    }
+
+    public static CourtSimpleResponse onMatchListFrom(Court court) {
+        return new CourtSimpleResponse(
+                court.getId(),
+                getCourtName(court),
+                court.getGym().getAddress(),
                 null,
-                gym.getRegion().getKorValue(),
+                court.getGym().getRegion().getKorValue(),
                 null
         );
     }
 
-    public static GymSimpleResponse from(Gym gym) {
-        return new GymSimpleResponse(
-                gym.getId(),
-                gym.getName(),
-                gym.getAddress(),
-                gym.getImage(),
-                gym.getRegion().getKorValue(),
-                gym.getMatches()
+    public static CourtSimpleResponse from(Court court) {
+        return new CourtSimpleResponse(
+                court.getId(),
+                getCourtName(court),
+                court.getGym().getAddress(),
+                court.getGym().getImage(),
+                court.getGym().getRegion().getKorValue(),
+                court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(
                                 Match::getMatchDate,

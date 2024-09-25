@@ -1,7 +1,7 @@
 package ssafy.ddada.domain.match.command;
 
 import org.springframework.data.domain.Pageable;
-import ssafy.ddada.domain.gym.entity.Region;
+import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
