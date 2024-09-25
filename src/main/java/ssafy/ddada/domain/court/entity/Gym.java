@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.gym.entity;
+package ssafy.ddada.domain.court.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,21 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import ssafy.ddada.domain.match.entity.Match;
+import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 
 import java.util.List;
 import java.util.ArrayList;
 
 @Getter
 @Entity
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Gym extends BaseGymEntity {
+public class Gym extends BaseCourtEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "gym_id")
     private Long id;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    private GymAdmin gymAdmin;
 
     @Column(nullable = false)
     private String name;
@@ -41,21 +44,7 @@ public class Gym extends BaseGymEntity {
     private Region region;
 
     @OneToMany(mappedBy = "gym", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Match> matches = new ArrayList<>();
-
-    public Gym(String name, String address, String contactNumber, String description, String image, String url, Region region) {
-        this.name = name;
-        this.address = address;
-        this.contactNumber = contactNumber;
-        this.description = description;
-        this.image = image;
-        this.url = url;
-        this.region = region;
-    }
-
-    public static Gym createGym(String name, String address, String contactNumber, String description, String image, String url, Region region) {
-        return new Gym(name, address, contactNumber, description, image, url, region);
-    }
+    private List<Court> courts = new ArrayList<>();
 
     @PrePersist
     public void prePersist(){
