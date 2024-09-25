@@ -29,6 +29,9 @@ public class GymAdmin extends BaseMemberEntity implements Member {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, unique = true)
+    private String nickname;
+
     private String number;
 
     private Integer cumulativeIncome;
