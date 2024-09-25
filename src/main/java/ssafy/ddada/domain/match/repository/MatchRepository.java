@@ -83,7 +83,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             @Param("setNumber") Integer setNumber
     );
 
-    @Query("SELECT m FROM Match m WHERE m.team1.player1.id = :playerId OR" +
+    @Query("SELECT m FROM Match m WHERE" +
+            " m.team1.player1.id = :playerId OR" +
             " m.team1.player2.id = :playerId OR" +
             " m.team2.player1.id = :playerId OR" +
             " m.team2.player2.id = :playerId")

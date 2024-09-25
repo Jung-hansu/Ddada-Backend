@@ -22,6 +22,7 @@ import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -308,11 +309,19 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private List<Player> getAllPlayersInMatch(Match match) {
-        return List.of(
-                match.getTeam1().getPlayer1(),
-                match.getTeam1().getPlayer2(),
-                match.getTeam2().getPlayer1(),
-                match.getTeam2().getPlayer2()
-        );
+        List<Player> players = new ArrayList<>();
+        if (match.getTeam1().getPlayer1() != null) {
+            players.add(match.getTeam1().getPlayer1());
+        }
+        if (match.getTeam1().getPlayer2() != null) {
+            players.add(match.getTeam1().getPlayer2());
+        }
+        if (match.getTeam2().getPlayer1() != null) {
+            players.add(match.getTeam2().getPlayer1());
+        }
+        if (match.getTeam2().getPlayer2() != null) {
+            players.add(match.getTeam2().getPlayer2());
+        }
+        return players;
     }
 }
