@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.gym.request.GymCreateRequest;
 import ssafy.ddada.api.gym.response.GymDetailResponse;
@@ -51,6 +52,8 @@ public class GymServiceImpl implements GymService {
         return image == null || image.isEmpty();
     }
 
+    @Override
+    @Transactional
     public void createGym(GymCreateRequest request) {
         Gym gym = gymRepository.save(
                 Gym.createGym(
