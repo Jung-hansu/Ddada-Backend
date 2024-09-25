@@ -15,6 +15,8 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.*;
+import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
+import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
@@ -32,11 +34,14 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MatchServiceImpl implements MatchService {
 
+    private static final int INCOME = 3000;
+
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
     private final CourtRepository courtRepository;
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
+    private final GymAdminRepository gymAdminRepository;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
@@ -351,14 +356,19 @@ public class MatchServiceImpl implements MatchService {
     public void saveMatch(Long matchId, Long managerId, MatchResultCommand matchCommand) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        Manager manager = match.getManager();
 
+        Manager manager = match.getManager();
         if (manager == null || !Objects.equals(manager.getId(), managerId)){
             throw new UnauthorizedManagerException();
         }
 
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
+
+        GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
+        Integer cumulativeIncome = gymAdmin.getCumulativeIncome();
+        gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
+        gymAdminRepository.save(gymAdmin);
     }
 
 }
