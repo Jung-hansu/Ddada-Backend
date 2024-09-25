@@ -32,8 +32,8 @@ public record PlayerMatchResponse(
     public static PlayerMatchResponse from(Match match, Integer avgRating, String MyTeamAndNumber) {
         return new PlayerMatchResponse(
                 match.getId(),
-                match.getGym().getName(),
-                match.getGym().getAddress(),
+                match.getCourt().getGym().getName(),
+                match.getCourt().getGym().getAddress(),
                 match.getMatchDate(),
                 match.getMatchTime(),
                 match.getMatchType().name(),
