@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ssafy.ddada.domain.court.entity.Gym;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
@@ -19,6 +20,9 @@ public class GymAdmin extends BaseMemberEntity implements Member {
     @Column(name = "gym_admin_id")
     private Long id;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    private Gym gym;
+
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -26,6 +30,8 @@ public class GymAdmin extends BaseMemberEntity implements Member {
     private String password;
 
     private String number;
+
+    private Integer cumulativeIncome;
 
     // 회원가입 메서드
     public void signupGymAdmin(String email, String password, String number) {
