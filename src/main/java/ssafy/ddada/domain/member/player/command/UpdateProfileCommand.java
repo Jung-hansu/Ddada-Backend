@@ -5,4 +5,6 @@ import org.springframework.web.multipart.MultipartFile;
 public record UpdateProfileCommand(
         String nickname,
         MultipartFile profileImagePath,
-        String description) {}
+        String description,
+        boolean deleteImage
+) {}

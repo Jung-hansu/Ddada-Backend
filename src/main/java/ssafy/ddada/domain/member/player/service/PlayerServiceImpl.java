@@ -98,8 +98,11 @@ public class PlayerServiceImpl implements PlayerService {
     public PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command) {
         Player currentPlayer = getCurrentLoggedInMember();
 
-        MultipartFile profileImageFile = command.profileImagePath(); // MultipartFile로 변경
-        String imageUrl = handleProfileImage(profileImageFile, currentPlayer.getId(), currentPlayer.getImage());
+        MultipartFile profileImageFile = command.profileImagePath();
+        String imageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+        if (!command.deleteImage()) {
+            imageUrl = handleProfileImage(profileImageFile, currentPlayer.getId(), currentPlayer.getImage());
+        }// MultipartFile로 변경
         String preSignedUrl = generatePreSignedUrl(imageUrl);
 
         String updatedNickname = getUpdatedField(command.nickname(), currentPlayer.getNickname());
@@ -201,10 +204,16 @@ public class PlayerServiceImpl implements PlayerService {
      * @return 새로운 이미지 URL 또는 기존 이미지 URL
      */
     private String handleProfileImage(MultipartFile imageFile, Long playerId, String existingImageUrl) {
-        if (imageFile != null && !imageFile.isEmpty()) {
-            return s3Util.uploadImageToS3(imageFile, playerId, "profileImg/");
+        // 이미지 파일이 없거나 비어있는 경우
+        if (imageFile == null || imageFile.isEmpty()) {
+            if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
+                return existingImageUrl; // 기존 이미지가 있으면 반환
+            } else {
+                return "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg"; // 기본 이미지 URL 반환
+            }
         }
-        return existingImageUrl;
+        // 이미지 파일이 있는 경우 S3에 업로드
+        return s3Util.uploadImageToS3(imageFile, playerId, "profileImg/");
     }
 
     private String generatePreSignedUrl(String imageUrl) {
