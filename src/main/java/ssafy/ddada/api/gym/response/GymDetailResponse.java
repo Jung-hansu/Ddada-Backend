@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "코트 정보 요약 응답 DTO")
 public record GymDetailResponse(
         @Schema(description = "관리자 ID")
