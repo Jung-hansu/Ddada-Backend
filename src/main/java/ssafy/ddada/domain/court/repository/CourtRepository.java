@@ -16,7 +16,7 @@ import java.util.Set;
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
-    @EntityGraph(attributePaths = {"court", "matches"})
+    @EntityGraph(attributePaths = {"gym", "matches"})
     @Query("""
         SELECT c
         FROM Court c
