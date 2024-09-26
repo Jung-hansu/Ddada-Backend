@@ -11,6 +11,7 @@ import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -42,24 +43,25 @@ public class MatchServiceImpl implements MatchService {
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
     private final GymAdminRepository gymAdminRepository;
+    private final RatingUtil ratingUtil;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
         Player B1 = match.getTeam2().getPlayer1(), B2 = match.getTeam2().getPlayer2();
 
-        if (A1 != null && Objects.equals(A1.getId(), memberId)){
+        if (A1 != null && Objects.equals(A1.getId(), memberId)) {
             return true;
         }
 
-        if (A2 != null && Objects.equals(A2.getId(), memberId)){
+        if (A2 != null && Objects.equals(A2.getId(), memberId)) {
             return true;
         }
 
-        if (B1 != null && Objects.equals(B1.getId(), memberId)){
+        if (B1 != null && Objects.equals(B1.getId(), memberId)) {
             return true;
         }
 
-        if (B2 != null && Objects.equals(B2.getId(), memberId)){
+        if (B2 != null && Objects.equals(B2.getId(), memberId)) {
             return true;
         }
 
@@ -104,7 +106,7 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.save(match);
     }
 
-    private void updateTeamPlayerCount(Team team){
+    private void updateTeamPlayerCount(Team team) {
         int playerCount = 0;
 
         if (team.getPlayer1() != null) {
@@ -117,8 +119,8 @@ public class MatchServiceImpl implements MatchService {
         team.setPlayerCount(playerCount);
     }
 
-    private void updateTeamRating(Team team){
-        if (team.getPlayerCount() == 0){
+    private void updateTeamRating(Team team) {
+        if (team.getPlayerCount() == 0) {
             team.setRating(0);
             return;
         }
@@ -139,12 +141,12 @@ public class MatchServiceImpl implements MatchService {
         team.setRating(ratingAverage);
     }
 
-    private void updateTeam(Team team){
+    private void updateTeam(Team team) {
         updateTeamPlayerCount(team);
         updateTeamRating(team);
     }
 
-    private boolean isMatchFull(Match match){
+    private boolean isMatchFull(Match match) {
         int totalPlayerCnt = match.getTeam1().getPlayerCount() + match.getTeam2().getPlayerCount();
         return match.getMatchType().isSingle() ? totalPlayerCnt == 2 : totalPlayerCnt == 4;
     }
@@ -176,9 +178,9 @@ public class MatchServiceImpl implements MatchService {
 
         Team team;
 
-        if (teamNumber == 1){
+        if (teamNumber == 1) {
             team = match.getTeam1();
-        } else if (teamNumber == 2){
+        } else if (teamNumber == 2) {
             team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
@@ -209,24 +211,24 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MemberNotFoundException::new);
         Team team;
 
-        if (teamNumber == 1){
+        if (teamNumber == 1) {
             team = match.getTeam1();
-        } else if (teamNumber == 2){
+        } else if (teamNumber == 2) {
             team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
         }
 
-        if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())){
+        if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())) {
             team.setPlayer1(null);
-        } else if (team.getPlayer2() != null && Objects.equals(team.getPlayer2().getId(), player.getId())){
+        } else if (team.getPlayer2() != null && Objects.equals(team.getPlayer2().getId(), player.getId())) {
             team.setPlayer2(null);
         } else {
             throw new TeamPlayerNotFoundException();
         }
 
         // 모집 완료된 경기에서 선수 취소 시 경기 상태 변경
-        if (match.getStatus() == MatchStatus.RESERVED){
+        if (match.getStatus() == MatchStatus.RESERVED) {
             match.setStatus(MatchStatus.CREATED);
         }
         updateTeam(team);
@@ -262,11 +264,11 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command) {
         return matchRepository.findFilteredMatches(
-                    command.managerId(),
-                    command.keyword(),
-                    command.todayOnly(),
-                    command.statuses(),
-                    command.pageable()
+                        command.managerId(),
+                        command.keyword(),
+                        command.todayOnly(),
+                        command.statuses(),
+                        command.pageable()
                 )
                 .map(match -> MatchSimpleResponse.from(match, true));
     }
@@ -286,7 +288,7 @@ public class MatchServiceImpl implements MatchService {
 
         match.setManager(manager);
 
-        if (isMatchFull(match)){
+        if (isMatchFull(match)) {
             match.setStatus(MatchStatus.RESERVED);
         }
         matchRepository.save(match);
@@ -300,16 +302,16 @@ public class MatchServiceImpl implements MatchService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
-        if (match.getManager() == null){
+        if (match.getManager() == null) {
             throw new ManagerNotFoundException();
         }
 
-        if (!Objects.equals(match.getManager().getId(), manager.getId())){
+        if (!Objects.equals(match.getManager().getId(), manager.getId())) {
             throw new UnauthorizedManagerException();
         }
 
         match.setManager(null);
-        if (match.getStatus() == MatchStatus.RESERVED){
+        if (match.getStatus() == MatchStatus.RESERVED) {
             match.setStatus(MatchStatus.CREATED);
         }
         matchRepository.save(match);
@@ -380,44 +382,42 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
 
         Manager manager = match.getManager();
-        if (manager == null || !Objects.equals(manager.getId(), managerId)){
+        if (manager == null || !Objects.equals(manager.getId(), managerId)) {
             throw new UnauthorizedManagerException();
         }
 
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
 
-        if (match.getWinnerTeamNumber() == 1) {
-            updateTeamRatings(match.getTeam1(), match.getTeam2());
-        } else {
-            updateTeamRatings(match.getTeam2(), match.getTeam1());
+        // 팀 레이팅 업데이트
+        Team winningTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam1() : match.getTeam2();
+        Team losingTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam2() : match.getTeam1();
+
+        double winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
+        double losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
+
+        // 플레이어 레이팅 업데이트
+        for (MatchResultCommand.SetResultCommand set : matchCommand.sets()) {
+            // 이긴 팀 플레이어 점수 계산
+            for (Player player : winningTeam.getPlayers()) {
+                int playerScore = (player.equals(winningTeam.getPlayer1())) ? set.team1Score() : set.team2Score();
+                Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, playerScore, 60, -100, 100);
+                player.setRating(newRating);
+                playerRepository.save(player);
+            }
+
+            // 진 팀 플레이어 점수 계산
+            for (Player player : losingTeam.getPlayers()) {
+                int playerScore = (player.equals(losingTeam.getPlayer1())) ? set.team1Score() : set.team2Score();
+                Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, playerScore, 60, -100, 100);
+                player.setRating(newRating);
+                playerRepository.save(player);
+            }
         }
 
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
         Integer cumulativeIncome = gymAdmin.getCumulativeIncome();
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
         gymAdminRepository.save(gymAdmin);
-    }
-
-    private void updateTeamRatings(Team winningTeam, Team losingTeam) {
-        // 승리한 팀의 플레이어들 레이팅 증가
-        if (winningTeam.getPlayer1() != null) {
-            winningTeam.getPlayer1().addRating();
-            playerRepository.save(winningTeam.getPlayer1());  // 저장
-        }
-        if (winningTeam.getPlayer2() != null) {
-            winningTeam.getPlayer2().addRating();
-            playerRepository.save(winningTeam.getPlayer2());  // 저장
-        }
-
-        // 패배한 팀의 플레이어들 레이팅 감소
-        if (losingTeam.getPlayer1() != null) {
-            losingTeam.getPlayer1().subRating();
-            playerRepository.save(losingTeam.getPlayer1());  // 저장
-        }
-        if (losingTeam.getPlayer2() != null) {
-            losingTeam.getPlayer2().subRating();
-            playerRepository.save(losingTeam.getPlayer2());  // 저장
-        }
     }
 }

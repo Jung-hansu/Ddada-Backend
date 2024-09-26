@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import ssafy.ddada.domain.member.player.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -43,4 +46,14 @@ public class Team extends BaseMatchEntity {
         return new Team(null, null, 0, 0);
     }
 
+    public List<Player> getPlayers() {
+        List<Player> players = new ArrayList<>();
+        if (player1 != null) {
+            players.add(player1);
+        }
+        if (player2 != null) {
+            players.add(player2);
+        }
+        return players;
+    }
 }
