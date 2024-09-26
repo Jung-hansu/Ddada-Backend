@@ -82,4 +82,10 @@ public class Match extends BaseMatchEntity {
         return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
     }
 
+    public String getPlayersGender() {
+        return (team1.getPlayer1() != null ? team1.getPlayer1().getGender().name() : "notReserved") + ", "
+                + (team1.getPlayer2() != null ? team1.getPlayer2().getGender().name() : "notReserved") + ", "
+                + (team2.getPlayer1() != null ? team2.getPlayer1().getGender().name() : "notReserved") + ", "
+                + (team2.getPlayer2() != null ? team2.getPlayer2().getGender().name() : "notReserved");
+    }
 }
