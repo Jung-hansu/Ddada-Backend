@@ -378,10 +378,37 @@ public class MatchServiceImpl implements MatchService {
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
 
+        if (match.getWinnerTeamNumber() == 1) {
+            updateTeamRatings(match.getTeam1(), match.getTeam2());
+        } else {
+            updateTeamRatings(match.getTeam2(), match.getTeam1());
+        }
+
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
         Integer cumulativeIncome = gymAdmin.getCumulativeIncome();
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
         gymAdminRepository.save(gymAdmin);
     }
 
+    private void updateTeamRatings(Team winningTeam, Team losingTeam) {
+        // 승리한 팀의 플레이어들 레이팅 증가
+        if (winningTeam.getPlayer1() != null) {
+            winningTeam.getPlayer1().addRating();
+            playerRepository.save(winningTeam.getPlayer1());  // 저장
+        }
+        if (winningTeam.getPlayer2() != null) {
+            winningTeam.getPlayer2().addRating();
+            playerRepository.save(winningTeam.getPlayer2());  // 저장
+        }
+
+        // 패배한 팀의 플레이어들 레이팅 감소
+        if (losingTeam.getPlayer1() != null) {
+            losingTeam.getPlayer1().subRating();
+            playerRepository.save(losingTeam.getPlayer1());  // 저장
+        }
+        if (losingTeam.getPlayer2() != null) {
+            losingTeam.getPlayer2().subRating();
+            playerRepository.save(losingTeam.getPlayer2());  // 저장
+        }
+    }
 }

@@ -52,8 +52,6 @@ public class Player extends BaseMemberEntity implements Member {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 
-
-
     // 명시적인 생성자 추가 (null 값 허용)
     public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String image, String number, String description, Integer rating, MemberRole role) {
         this.email = email;
@@ -79,7 +77,7 @@ public class Player extends BaseMemberEntity implements Member {
                 null,   // 프로필 이미지 기본값
                 null,   // 전화번호 기본값
                 null,   // 임시 설명
-                0,      // 초기 레이팅
+                1500,      // 초기 레이팅
                 MemberRole.TEMP
         );
     }
@@ -93,7 +91,7 @@ public class Player extends BaseMemberEntity implements Member {
         this.gender = signupCommand.gender();
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
-        this.rating = 0;
+        this.rating = 1500;
         this.isDeleted = false;
         this.role = MemberRole.PLAYER;
 
@@ -128,7 +126,15 @@ public class Player extends BaseMemberEntity implements Member {
             image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
         }
         if (rating == null){
-            rating = 0;
+            rating = 1500;
         }
+    }
+
+    public void addRating() {
+        this.rating = this.rating + 100;
+    }
+
+    public void subRating() {
+        this.rating = this.rating - 100;
     }
 }
