@@ -104,6 +104,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     List<Match> findCompletedMatchesByPlayerId(Long playerId);
 
+    @Query("""
+        SELECT m
+        FROM Match m
+        WHERE m.matchDate > CURRENT_DATE AND
+            (m.status = 'CREATED' OR m.status = 'RESERVED')
+    """)
+    List<Match> findAllOutDatedMatches();
+
+
     @Query("SELECT COUNT(m) FROM Match m WHERE (m.team1.player1 = :player OR m.team1.player2 = :player OR m.team2.player1 = :player OR m.team2.player2 = :player) AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
     int countByPlayerAndDateTime(@Param("player") Player player, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 
