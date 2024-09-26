@@ -4,9 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ssafy.ddada.api.racket.response.RacketDetailResponse;
+import ssafy.ddada.api.racket.response.RacketSimpleResponse;
 import ssafy.ddada.api.racket.response.RacketSearchResponse;
-import ssafy.ddada.domain.racket.entity.Racket;
 import ssafy.ddada.domain.racket.repository.RacketRepository;
 
 import java.util.List;
@@ -21,10 +20,10 @@ public class RacketServiceImpl implements RacketService {
 
     @Override
     public RacketSearchResponse getRacketsByKeyword(String keyword) {
-        List<RacketDetailResponse> rackets = racketRepository
+        List<RacketSimpleResponse> rackets = racketRepository
                 .findByNameOrManufacturer(keyword, keyword)
                 .stream()
-                .map(RacketDetailResponse::from)
+                .map(RacketSimpleResponse::from)
                 .toList();
 
         return RacketSearchResponse.of(rackets.size(), rackets);
