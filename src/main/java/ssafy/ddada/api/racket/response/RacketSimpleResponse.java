@@ -3,7 +3,7 @@ package ssafy.ddada.api.racket.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.racket.entity.Racket;
 
-public record RacketDetailResponse(
+public record RacketSimpleResponse(
         @Schema(description = "라켓 ID")
         Long id,
         @Schema(description = "라켓명")
@@ -17,8 +17,8 @@ public record RacketDetailResponse(
         @Schema(description = "라켓 이미지")
         String image
 ) {
-    public static RacketDetailResponse from(Racket racket) {
-        return new RacketDetailResponse(
+    public static RacketSimpleResponse from(Racket racket) {
+        return new RacketSimpleResponse(
                 racket.getId(),
                 racket.getName(),
                 racket.getManufacturer(),

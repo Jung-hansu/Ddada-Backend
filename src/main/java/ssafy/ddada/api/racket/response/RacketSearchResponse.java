@@ -8,9 +8,9 @@ public record RacketSearchResponse(
         @Schema(description = "검색 결과 수")
         Integer count,
         @Schema(description = "검색 결과")
-        List<RacketDetailResponse> rackets
+        List<RacketSimpleResponse> rackets
 ) {
-    public static RacketSearchResponse of(Integer count, List<RacketDetailResponse> rackets) {
+    public static RacketSearchResponse of(Integer count, List<RacketSimpleResponse> rackets) {
         return new RacketSearchResponse(count, rackets);
     }
 }

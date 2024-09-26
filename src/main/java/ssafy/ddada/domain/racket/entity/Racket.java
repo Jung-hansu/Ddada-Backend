@@ -24,11 +24,21 @@ public class Racket {
     private String manufacturer;
 
     @Column(nullable = false)
+    private Integer price;
+
+    private String balance;
+
+    @Column(nullable = false)
     private String weight;
+
+    private String shaft;
 
     @Column(nullable = false)
     private String material;
 
+    private String color;
+
+    @Column(nullable = false)
     private String image;
 
 }
