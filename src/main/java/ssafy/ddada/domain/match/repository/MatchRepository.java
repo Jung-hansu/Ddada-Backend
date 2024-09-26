@@ -99,4 +99,13 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId)
     """)
     List<Match> findCompletedMatchesByPlayerId(Long playerId);
+
+    @Query("""
+        SELECT m
+        FROM Match m
+        WHERE m.matchDate > CURRENT_DATE AND
+            (m.status = 'CREATED' OR m.status = 'RESERVED')
+    """)
+    List<Match> findAllOutDatedMatches();
+
 }
