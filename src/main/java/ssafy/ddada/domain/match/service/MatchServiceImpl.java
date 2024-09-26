@@ -162,6 +162,13 @@ public class MatchServiceImpl implements MatchService {
 
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
+
+        // 같은 시간에 이미 경기가 있는지 확인
+        int conflictCount = matchRepository.countByPlayerAndDateTime(player, match.getMatchDate(), match.getMatchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+
         Team team;
 
         if (teamNumber == 1){
@@ -172,9 +179,9 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidTeamNumberException();
         }
 
-        if (team.getPlayer1() == null){
+        if (team.getPlayer1() == null) {
             team.setPlayer1(player);
-        } else if (team.getPlayer2() == null){
+        } else if (team.getPlayer2() == null) {
             team.setPlayer2(player);
         } else {
             throw new TeamFullException();
@@ -182,7 +189,7 @@ public class MatchServiceImpl implements MatchService {
 
         // 경기 모집 완료 시 경기 상태 변경
         updateTeam(team);
-        if (isMatchFull(match) && match.getManager() != null){
+        if (isMatchFull(match) && match.getManager() != null) {
             match.setStatus(MatchStatus.RESERVED);
         }
         teamRepository.save(team);
@@ -263,7 +270,13 @@ public class MatchServiceImpl implements MatchService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
+        int conflictCount = matchRepository.countByManagerAndDateTime(manager, match.getMatchDate(), match.getMatchTime());
+        if (conflictCount > 0) {
+            throw new ManagerAlreadyBookedException();
+        }
+
         match.setManager(manager);
+
         if (isMatchFull(match)){
             match.setStatus(MatchStatus.RESERVED);
         }
