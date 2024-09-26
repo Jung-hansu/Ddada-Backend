@@ -149,6 +149,11 @@ public class MatchServiceImpl implements MatchService {
         return match.getMatchType().isSingle() ? totalPlayerCnt == 2 : totalPlayerCnt == 4;
     }
 
+    private boolean isMatchEmpty(Match match){
+        int totalPlayerCnt = match.getTeam1().getPlayerCount() + match.getTeam2().getPlayerCount();
+        return totalPlayerCnt == 0;
+    }
+
     @Override
     @Transactional
     public void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
@@ -226,6 +231,10 @@ public class MatchServiceImpl implements MatchService {
         }
         updateTeam(team);
         teamRepository.save(team);
+
+        if (isMatchEmpty(match)){
+            matchRepository.delete(match);
+        }
     }
 
     @Override
