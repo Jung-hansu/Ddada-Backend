@@ -30,6 +30,8 @@ public record MatchSimpleResponse(
         Integer team1PlayerCount,
         @Schema(description = "팀2 인원 수")
         Integer team2PlayerCount,
+        @Schema(description = "예약자들 성별")
+        String playersGender,
         @Schema(description = "예약 여부")
         boolean isReserved,
         @Schema(description = "코트 정보")
@@ -42,6 +44,7 @@ public record MatchSimpleResponse(
                 int team2Rating = match.getTeam2().getRating();
                 int rating = (team1Rating * team1PlayerCount + team2Rating * team2PlayerCount) /
                         (team1PlayerCount + team2PlayerCount);
+                String playersGender = match.getPlayersGender();
 
                 return new MatchSimpleResponse(
                         match.getId(),
@@ -53,6 +56,7 @@ public record MatchSimpleResponse(
                         rating,
                         team1PlayerCount,
                         team2PlayerCount,
+                        playersGender,
                         isReserved,
                         CourtSimpleResponse.onMatchListFrom(match.getCourt())
                 );
