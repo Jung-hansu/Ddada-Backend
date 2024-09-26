@@ -118,9 +118,9 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 id 조회", description = "나의 id를 조회하는 API입니다.")
     @GetMapping("/id")
-    public CommonResponse<Long> getPlayerId(
+    public CommonResponse<PlayerIdResponse> getPlayerId(
     ) {
-        Long response = playerService.getPlayerId();
+        PlayerIdResponse response = playerService.getPlayerId();
         return CommonResponse.ok(response);
     }
 }

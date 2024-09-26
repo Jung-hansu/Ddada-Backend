@@ -1,9 +1,6 @@
 package ssafy.ddada.domain.member.player.service;
 
-import ssafy.ddada.api.member.player.response.PlayerDetailResponse;
-import ssafy.ddada.api.member.player.response.PlayerProfileDetailResponse;
-import ssafy.ddada.api.member.player.response.PlayerMatchResponse;
-import ssafy.ddada.api.member.player.response.PlayerSignupResponse;
+import ssafy.ddada.api.member.player.response.*;
 import ssafy.ddada.domain.member.player.command.MemberSignupCommand;
 import ssafy.ddada.domain.member.player.command.PasswordUpdateCommand;
 import ssafy.ddada.domain.member.player.command.UpdateProfileCommand;
@@ -20,5 +17,5 @@ public interface PlayerService {
     String updateMemberPassword(PasswordUpdateCommand command);
     List<PlayerMatchResponse> getPlayerMatches();
     List<PlayerMatchResponse> getPlayerCompleteMatches();
-    Long getPlayerId();
+    PlayerIdResponse getPlayerId();
 }

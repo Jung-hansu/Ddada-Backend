@@ -177,8 +177,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Long getPlayerId() {
-        return SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new);
+    public PlayerIdResponse getPlayerId() {
+        return PlayerIdResponse.of(SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new));
     }
 
     private boolean isDuplicateEmail(Player existingPlayer) {
