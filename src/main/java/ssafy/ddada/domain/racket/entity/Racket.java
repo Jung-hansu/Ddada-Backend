@@ -17,17 +17,21 @@ public class Racket {
     @Column(name = "racket_id")
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String manufacturer;
 
-    @Column(nullable = false)
+    private Integer price;
+
+    private String balance;
+
     private String weight;
 
-    @Column(nullable = false)
+    private String shaft;
+
     private String material;
+
+    private String color;
 
     private String image;
 
