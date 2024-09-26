@@ -3,7 +3,9 @@ package ssafy.ddada.domain.match.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.manager.entity.Manager;
+import ssafy.ddada.domain.member.player.entity.Player;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -82,23 +84,37 @@ public class Match extends BaseMatchEntity {
         return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
     }
 
-    public List<String> getPlayersGender() {
-        List<String> playersGender = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            playersGender.add("notReserved");
+    public List<String> getTeamGender(Team team) {
+        List<String> teamGender = new ArrayList<>();
+
+        Player player1 = team.getPlayer1();
+        Player player2 = team.getPlayer2();
+
+        // First, add male players
+        if (player1 != null && player1.getGender() == Gender.MALE) {
+            teamGender.add(player1.getGender().name());
         }
-        if (team1.getPlayer1() != null) {
-            playersGender.set(0, team1.getPlayer1().getGender().name());
+        if (player2 != null && player2.getGender() == Gender.MALE) {
+            teamGender.add(player2.getGender().name());
         }
-        if (team1.getPlayer2() != null) {
-            playersGender.set(1, team1.getPlayer2().getGender().name());
+
+        // Then, add female players
+        if (player1 != null && player1.getGender() == Gender.FEMALE) {
+            teamGender.add(player1.getGender().name());
         }
-        if (team2.getPlayer1() != null) {
-            playersGender.set(2, team2.getPlayer1().getGender().name());
+        if (player2 != null && player2.getGender() == Gender.FEMALE) {
+            teamGender.add(player2.getGender().name());
         }
-        if (team2.getPlayer2() != null) {
-            playersGender.set(3, team2.getPlayer2().getGender().name());
+
+        // If a player is not reserved, add "notReserved"
+        if (player1 == null) {
+            teamGender.add("notReserved");
         }
-        return playersGender;
+        if (player2 == null) {
+            teamGender.add("notReserved");
+        }
+
+        return teamGender;
     }
+
 }
