@@ -12,7 +12,11 @@ import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
+import ssafy.ddada.domain.member.manager.entity.Manager;
+import ssafy.ddada.domain.member.player.entity.Player;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -108,4 +112,10 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     List<Match> findAllOutDatedMatches();
 
+
+    @Query("SELECT COUNT(m) FROM Match m WHERE (m.team1.player1 = :player OR m.team1.player2 = :player OR m.team2.player1 = :player OR m.team2.player2 = :player) AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    int countByPlayerAndDateTime(@Param("player") Player player, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
+
+    @Query("SELECT COUNT(m) FROM Match m WHERE m.manager = :manager AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    int countByManagerAndDateTime(@Param("manager") Manager manager, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 }

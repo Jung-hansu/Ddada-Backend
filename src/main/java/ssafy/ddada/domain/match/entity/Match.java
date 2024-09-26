@@ -82,10 +82,23 @@ public class Match extends BaseMatchEntity {
         return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
     }
 
-    public String getPlayersGender() {
-        return (team1.getPlayer1() != null ? team1.getPlayer1().getGender().name() : "notReserved") + ", "
-                + (team1.getPlayer2() != null ? team1.getPlayer2().getGender().name() : "notReserved") + ", "
-                + (team2.getPlayer1() != null ? team2.getPlayer1().getGender().name() : "notReserved") + ", "
-                + (team2.getPlayer2() != null ? team2.getPlayer2().getGender().name() : "notReserved");
+    public List<String> getPlayersGender() {
+        List<String> playersGender = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            playersGender.add("notReserved");
+        }
+        if (team1.getPlayer1() != null) {
+            playersGender.set(0, team1.getPlayer1().getGender().name());
+        }
+        if (team1.getPlayer2() != null) {
+            playersGender.set(1, team1.getPlayer2().getGender().name());
+        }
+        if (team2.getPlayer1() != null) {
+            playersGender.set(2, team2.getPlayer1().getGender().name());
+        }
+        if (team2.getPlayer2() != null) {
+            playersGender.set(3, team2.getPlayer2().getGender().name());
+        }
+        return playersGender;
     }
 }
