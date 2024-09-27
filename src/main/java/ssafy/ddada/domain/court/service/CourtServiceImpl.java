@@ -29,10 +29,8 @@ public class CourtServiceImpl implements CourtService {
                 .map(court -> {
                     String image = Objects.requireNonNull(court.getGym().getImage());
                     String presignedUrl = s3Util.getPresignedUrlFromS3(image);
-                    court.getGym().setImage(presignedUrl);
-                    return court;
-                })
-                .map(CourtSimpleResponse::from);
+                    return CourtSimpleResponse.from(court, presignedUrl);
+                });
     }
 
     @Override

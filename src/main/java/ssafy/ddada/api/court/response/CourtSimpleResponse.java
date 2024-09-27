@@ -42,12 +42,12 @@ public record CourtSimpleResponse(
         );
     }
 
-    public static CourtSimpleResponse from(Court court) {
+    public static CourtSimpleResponse from(Court court, String presignedUrl) {
         return new CourtSimpleResponse(
                 court.getId(),
                 getCourtName(court),
                 court.getGym().getAddress(),
-                court.getGym().getImage(),
+                presignedUrl,
                 court.getGym().getRegion().getKorValue(),
                 court.getMatches()
                         .stream()
