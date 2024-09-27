@@ -26,10 +26,12 @@ public record PlayerMatchResponse(
         @Schema(description = "경기 예약 상태")
         String matchStatus,
         @Schema(description = "나의 포지션")
-        String MyTeamAndNumber
+        String MyTeamAndNumber,
+        @Schema(description = "나의 변화 레이팅")
+        Integer myRatingChange
 
 ) {
-    public static PlayerMatchResponse from(Match match, Integer avgRating, String MyTeamAndNumber) {
+    public static PlayerMatchResponse from(Match match, Integer avgRating, String myTeamAndNumber, Integer myRatingChange) {
         return new PlayerMatchResponse(
                 match.getId(),
                 match.getCourt().getGym().getName(),
@@ -40,7 +42,8 @@ public record PlayerMatchResponse(
                 match.getRankType().name(),
                 avgRating,
                 match.getStatus().name(),
-                MyTeamAndNumber
+                myTeamAndNumber,
+                myRatingChange
         );
     }
 }

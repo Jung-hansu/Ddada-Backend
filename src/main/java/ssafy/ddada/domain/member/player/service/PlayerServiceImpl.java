@@ -14,6 +14,7 @@ import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;
 import ssafy.ddada.domain.match.entity.Match;
+import ssafy.ddada.domain.match.entity.RatingChange;
 import ssafy.ddada.domain.match.entity.Team;
 import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.member.player.command.*;
@@ -277,7 +278,15 @@ public class PlayerServiceImpl implements PlayerService {
     private PlayerMatchResponse createPlayerMatchResponse(Match match, Player currentPlayer) {
         Integer avgRating = calculateAverageRating(match);
         String myTeamAndNumber = determineTeamAndNumber(match, currentPlayer);
-        return PlayerMatchResponse.from(match, avgRating, myTeamAndNumber);
+
+        RatingChange ratingChange = playerRepository.findFirstByPlayerIdAndMatchId(currentPlayer.getId(), match.getId());
+
+        Integer myRatingChange = null;
+        if (ratingChange != null) {
+            myRatingChange = ratingChange.getRatingChange();
+        }
+
+        return PlayerMatchResponse.from(match, avgRating, myTeamAndNumber, myRatingChange);
     }
 
     private String determineTeamAndNumber(Match match, Player currentPlayer) {
