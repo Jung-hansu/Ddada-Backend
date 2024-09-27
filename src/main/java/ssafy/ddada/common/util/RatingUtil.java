@@ -53,7 +53,6 @@ public class RatingUtil {
 
         // 새로운 레이팅 계산
         int newRating = (int) Math.round(player.getRating() + ratingChange);
-        log.info("Player {}'s rating updated: {} -> {}, {}", player.getId(), player.getRating(), newRating, ratingChange);
         return newRating;
     }
 }
