@@ -16,6 +16,7 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.*;
+import ssafy.ddada.domain.match.repository.RatingChangeRepository;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
@@ -44,6 +45,7 @@ public class MatchServiceImpl implements MatchService {
     private final TeamRepository teamRepository;
     private final GymAdminRepository gymAdminRepository;
     private final RatingUtil ratingUtil;
+    private final RatingChangeRepository ratingChangeRepository;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
@@ -396,23 +398,41 @@ public class MatchServiceImpl implements MatchService {
         double winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
         double losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
 
-        // 플레이어 레이팅 업데이트
-        for (MatchResultCommand.SetResultCommand set : matchCommand.sets()) {
-            // 이긴 팀 플레이어 점수 계산
-            for (Player player : winningTeam.getPlayers()) {
-                int playerScore = (player.equals(winningTeam.getPlayer1())) ? set.team1Score() : set.team2Score();
-                Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, playerScore, 60, -100, 100);
-                player.setRating(newRating);
-                playerRepository.save(player);
-            }
+        // 팀의 총 점수 계산
+        int winningTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
 
-            // 진 팀 플레이어 점수 계산
-            for (Player player : losingTeam.getPlayers()) {
-                int playerScore = (player.equals(losingTeam.getPlayer1())) ? set.team1Score() : set.team2Score();
-                Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, playerScore, 60, -100, 100);
-                player.setRating(newRating);
-                playerRepository.save(player);
-            }
+        int losingTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> !set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
+
+        // 플레이어 레이팅 업데이트
+        for (Player player : winningTeam.getPlayers()) {
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore, 60, -100, 100);
+
+            // 레이팅 변화 기록
+            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            playerRepository.save(player);
+        }
+
+        // 진 팀 플레이어 점수 계산
+        for (Player player : losingTeam.getPlayers()) {
+            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, 60, -100, 100);
+
+            // 레이팅 변화 기록
+            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            playerRepository.save(player);
         }
 
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
