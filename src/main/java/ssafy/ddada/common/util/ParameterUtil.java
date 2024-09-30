@@ -17,4 +17,8 @@ public class ParameterUtil {
         return bool != null && bool;
     }
 
+    public static Integer nullToZero(Integer num){
+        return num == null ? 0 : num;
+    }
+
 }
