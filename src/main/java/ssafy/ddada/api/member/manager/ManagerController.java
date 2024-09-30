@@ -118,7 +118,7 @@ public class ManagerController {
     @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
     @PatchMapping("/matches/{match_id}/status")
     public CommonResponse<?> updateMatchStatus(
-            @RequestParam("match_id") Long matchId,
+            @PathVariable("match_id") Long matchId,
             @RequestBody ManagerMatchStatusChangeRequest request
     ){
         log.info("경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", matchId, request);
