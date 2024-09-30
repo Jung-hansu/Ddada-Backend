@@ -12,7 +12,6 @@ public interface MatchService {
     Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command);
     void createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchByIdWithInfos(Long matchId);
-    SetDetailResponse getSetsByIdWithInfos(Long matchId, Integer setNumber);
     void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command);
 
     // Team 관련 메소드

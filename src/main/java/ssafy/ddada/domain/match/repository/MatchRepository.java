@@ -76,17 +76,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     Optional<Match> findByIdWithInfos(@Param("matchId") Long matchId);
 
-    @EntityGraph(attributePaths = {"match", "scores"})
-    @Query("""
-        SELECT s
-        FROM Set s
-        WHERE s.match.id = :matchId AND s.setNumber = :setNumber
-    """)
-    Optional<ssafy.ddada.domain.match.entity.Set> findSetsByIdWithInfos(
-            @Param("matchId") Long matchId,
-            @Param("setNumber") Integer setNumber
-    );
-
     @Query("""
         SELECT m
         FROM Match m
