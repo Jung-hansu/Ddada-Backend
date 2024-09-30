@@ -11,6 +11,7 @@ import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Schema(description = "경기 세부 정보 응답 DTO")
@@ -64,6 +65,7 @@ public record MatchDetailResponse(
                 match.getSets()
                         .stream()
                         .map(SetSimpleResponse::from)
+                        .sorted(Comparator.comparing(SetSimpleResponse::setNumber))
                         .toList()
         );
     }

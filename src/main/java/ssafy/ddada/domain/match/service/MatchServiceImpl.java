@@ -95,14 +95,6 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public SetDetailResponse getSetsByIdWithInfos(Long matchId, Integer setNumber) {
-        Set set = matchRepository.findSetsByIdWithInfos(matchId, setNumber)
-                .orElseThrow(InvalidSetNumberException::new);
-
-        return SetDetailResponse.from(set);
-    }
-
-    @Override
     @Transactional
     public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
         Match match = matchRepository.findById(matchId)
