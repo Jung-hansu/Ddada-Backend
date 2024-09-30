@@ -12,6 +12,7 @@ import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.util.RatingUtil;
+import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -49,6 +50,7 @@ public class MatchServiceImpl implements MatchService {
     private final GymAdminRepository gymAdminRepository;
     private final RatingUtil ratingUtil;
     private final RatingChangeRepository ratingChangeRepository;
+    private final S3Util s3Util;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
@@ -91,8 +93,17 @@ public class MatchServiceImpl implements MatchService {
     public MatchDetailResponse getMatchByIdWithInfos(Long matchId) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        return MatchDetailResponse.from(match);
+
+        return MatchDetailResponse.from(
+                match,
+                s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer1().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer2().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer1().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer2().getImage())
+        );
     }
+
 
     @Override
     @Transactional

@@ -35,14 +35,14 @@ public record CourtDetailResponse(
         return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
     }
 
-    public static CourtDetailResponse fromWhereMatchDetail(Court court){
+    public static CourtDetailResponse fromWhereMatchDetail(Court court, String GymImage){
         return new CourtDetailResponse(
                 court.getId(),
                 getCourtName(court),
                 court.getGym().getAddress(),
                 court.getGym().getContactNumber(),
                 court.getGym().getDescription(),
-                null,
+                GymImage,
                 court.getGym().getUrl(),
                 null
         );
