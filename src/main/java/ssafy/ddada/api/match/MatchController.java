@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
-import ssafy.ddada.api.match.request.MatchStatusChangeRequest;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -73,16 +72,6 @@ public class MatchController {
 
         matchService.createMatch(creatorId, request.toCommand());
         return CommonResponse.created("경기가 성공적으로 생성되었습니다.", null);
-    }
-
-    @PreAuthorize("hasRole('ROLE_PLAYER')")
-    @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
-    @PatchMapping("/status")
-    public CommonResponse<?> updateMatchStatus(@RequestBody MatchStatusChangeRequest request){
-        log.info("경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", request.matchId(), request.status());
-
-        matchService.updateMatchStatus(request.toCommand());
-        return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", null);
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")

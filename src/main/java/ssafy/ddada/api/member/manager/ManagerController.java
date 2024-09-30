@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.member.manager.request.ManagerMatchStatusChangeRequest;
 import ssafy.ddada.api.member.manager.request.ManagerSearchMatchRequest;
 import ssafy.ddada.api.member.manager.request.ManagerSignupRequest;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
@@ -18,6 +19,7 @@ import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
+import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.manager.service.ManagerService;
 import ssafy.ddada.domain.match.service.MatchService;
@@ -110,6 +112,19 @@ public class ManagerController {
 
         matchService.saveMatch(matchId, managerId, request.toCommand());
         return CommonResponse.ok("저장되었습니다.", null);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
+    @PatchMapping("/matches/{match_id}/status")
+    public CommonResponse<?> updateMatchStatus(
+            @RequestParam("match_id") Long matchId,
+            @RequestBody ManagerMatchStatusChangeRequest request
+    ){
+        log.info("경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", matchId, request);
+
+        matchService.updateMatchStatus(matchId, request.toCommand());
+        return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", request.toCommand());
     }
 
     @Operation(summary = "매니저 회원가입", description = "매니저 회원가입 api입니다.")
