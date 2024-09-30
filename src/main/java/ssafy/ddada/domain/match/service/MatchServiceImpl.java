@@ -31,6 +31,8 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import java.util.Comparator;
 import java.util.Objects;
 
+import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -105,6 +107,10 @@ public class MatchServiceImpl implements MatchService {
     public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
+
+        if (command.status() == MatchStatus.PLAYING && match.getStatus() != MatchStatus.RESERVED){
+            throw new InvalidMatchStatusException();
+        }
         match.setStatus(command.status());
         matchRepository.save(match);
     }
@@ -389,6 +395,10 @@ public class MatchServiceImpl implements MatchService {
             throw new UnauthorizedManagerException();
         }
 
+        if (match.getStatus() != MatchStatus.PLAYING){
+            throw new InvalidMatchStatusException();
+        }
+
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
 
@@ -437,7 +447,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
-        Integer cumulativeIncome = gymAdmin.getCumulativeIncome();
+        Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
         gymAdminRepository.save(gymAdmin);
     }
