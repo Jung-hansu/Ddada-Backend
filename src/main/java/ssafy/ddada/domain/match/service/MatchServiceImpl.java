@@ -20,6 +20,7 @@ import ssafy.ddada.domain.match.repository.RatingChangeRepository;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
+import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.repository.MatchRepository;
@@ -101,8 +102,8 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void updateMatchStatus(MatchStatusChangeCommand command) {
-        Match match = matchRepository.findById(command.matchId())
+    public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
+        Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         match.setStatus(command.status());
         matchRepository.save(match);
