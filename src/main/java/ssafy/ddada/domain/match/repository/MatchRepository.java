@@ -76,7 +76,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     Optional<Match> findByIdWithInfos(@Param("matchId") Long matchId);
 
-    @EntityGraph(attributePaths = {"scores"})
+    @EntityGraph(attributePaths = {"match", "scores"})
     @Query("""
         SELECT s
         FROM Set s
