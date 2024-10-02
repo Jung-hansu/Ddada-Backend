@@ -27,17 +27,6 @@ public class RacketServiceImpl implements RacketService {
     private final ElasticsearchOperations elasticsearchOperations;
 
     @Override
-    public RacketSearchResponse getRacketsByKeyword(String keyword) {
-        List<RacketSimpleResponse> rackets = racketRepository
-                .findByNameOrManufacturer(keyword, keyword)
-                .stream()
-                .map(RacketSimpleResponse::from)
-                .toList();
-
-        return RacketSearchResponse.of(rackets.size(), rackets);
-    }
-
-    @Override
     public RacketSearchResponse getRacketsByElasticKeyword(String keyword) {
         Criteria criteria = new Criteria("name").matches(keyword)
                 .or("manufacturer").matches(keyword);

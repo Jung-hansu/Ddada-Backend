@@ -10,8 +10,6 @@ import java.util.List;
 @Repository
 public interface RacketRepository extends JpaRepository<Racket, Long> {
 
-    List<Racket> findByNameOrManufacturer(String name, String manufacturer);
-
     @NotNull
     List<Racket> findAll();
 

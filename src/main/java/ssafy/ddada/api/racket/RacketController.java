@@ -25,7 +25,6 @@ public class RacketController {
     @GetMapping
     public CommonResponse<RacketSearchResponse> getRackets(@RequestParam String keyword){
         log.info("getRackets >>>> keyword: {}", keyword);
-//        RacketSearchResponse response = racketService.getRacketsByKeyword(keyword);
         RacketSearchResponse response = racketService.getRacketsByElasticKeyword(keyword);
         return CommonResponse.ok(response);
     }

@@ -37,17 +37,6 @@ public class CourtServiceImpl implements CourtService {
     private final S3Util s3Util;
 
     @Override
-    public Page<CourtSimpleResponse> getFilteredCourts(CourtSearchCommand command) {
-        return courtRepository
-                .findCourtsByKeywordAndRegion(command.keyword(), command.regions(), command.pageable())
-                .map(court -> {
-                    String image = Objects.requireNonNull(court.getGym().getImage());
-                    String presignedUrl = s3Util.getPresignedUrlFromS3(image);
-                    return CourtSimpleResponse.from(court, presignedUrl);
-                });
-    }
-
-    @Override
     public CourtDetailResponse getCourtById(Long courtId) {
         Court court = courtRepository.findCourtWithMatchesById(courtId)
                 .orElseThrow(CourtNotFoundException::new);

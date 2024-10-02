@@ -7,7 +7,6 @@ import ssafy.ddada.domain.court.command.CourtSearchCommand;
 
 public interface CourtService {
 
-    Page<CourtSimpleResponse> getFilteredCourts(CourtSearchCommand command);
     CourtDetailResponse getCourtById(Long courtId);
 
     // Elasticsearch
