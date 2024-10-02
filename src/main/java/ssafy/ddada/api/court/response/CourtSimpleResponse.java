@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
 import ssafy.ddada.domain.match.entity.Match;
+import ssafy.ddada.domain.match.entity.MatchDocument;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -66,13 +67,12 @@ public record CourtSimpleResponse(
                 court.getGymAddress(),
                 presignedUrl,
                 court.getGymRegion().getKorValue(),
-                null
-//                court.getMatches()
-//                        .stream()
-//                        .collect(Collectors.groupingBy(
-//                                Match::getMatchDate,
-//                                Collectors.mapping(Match::getMatchTime, Collectors.toList())
-//                        ))
+                court.getMatches()
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                MatchDocument::getMatchDate,
+                                Collectors.mapping(MatchDocument::getMatchTime, Collectors.toList())
+                        ))
         );
     }
 }

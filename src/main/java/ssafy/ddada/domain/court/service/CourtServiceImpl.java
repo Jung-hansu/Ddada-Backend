@@ -20,6 +20,7 @@ import ssafy.ddada.domain.court.entity.Gym;
 import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
+import ssafy.ddada.domain.match.entity.MatchDocument;
 
 import java.util.List;
 import java.util.Objects;
@@ -93,6 +94,10 @@ public class CourtServiceImpl implements CourtService {
                 .gymImage(gym != null ? gym.getImage() : null)
                 .gymUrl(gym != null ? gym.getUrl() : null)
                 .gymRegion(gym != null ? gym.getRegion() : null)
+                .matches(court.getMatches()
+                        .stream()
+                        .map(MatchDocument::from)
+                        .toList())
                 .build();
 
         courtElasticsearchRepository.save(courtDocument);
