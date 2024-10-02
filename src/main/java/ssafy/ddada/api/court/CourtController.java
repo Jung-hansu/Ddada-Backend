@@ -11,7 +11,6 @@ import ssafy.ddada.api.court.request.CourtSearchRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.court.service.CourtService;
-import ssafy.ddada.domain.racket.service.RacketService;
 
 @Slf4j
 @RestController
@@ -21,7 +20,6 @@ import ssafy.ddada.domain.racket.service.RacketService;
 public class CourtController {
 
     private final CourtService courtService;
-    private final RacketService racketService; ///////////
 
     @Operation(summary = "코트 검색 결과 조회", description = "페이징된 코트 검색 결과를 조회하는 API입니다.")
     @GetMapping("/search")

@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.gym.response.GymDetailResponse;
+import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;
 import ssafy.ddada.api.gym.response.GymMatchesResponse;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -43,6 +44,15 @@ public class GymController {
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         log.info("getGymMatches >>>> gymAdminId: {}, date: {}", gymAdminId, date);
         GymMatchesResponse response = gymService.getGymMatches(gymAdminId, date);
+        return CommonResponse.ok(response);
+    }
+
+    @Operation(summary = "체육관 최근 일주일간 경기 수 조회", description = "체육관의 최근 일주일간 경기 수를 조회하는 API입니다.")
+    @GetMapping("/matches/history")
+    public CommonResponse<GymMatchesHistoryResponse> getCurrentGymMatchesHistory(){
+        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        log.info("getCurrentGymMatchesHistory >>>> gymAdminId: {}", gymAdminId);
+        GymMatchesHistoryResponse response = gymService.getGymMatchesHistory(gymAdminId);
         return CommonResponse.ok(response);
     }
 
