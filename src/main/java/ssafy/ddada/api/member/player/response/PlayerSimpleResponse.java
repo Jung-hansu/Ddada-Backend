@@ -14,11 +14,11 @@ public record PlayerSimpleResponse(
         Gender gender,
         @Schema(description = "선수 레이팅")
         Integer rating,
-        @Schema(description = "선수 프로필 이미지")
-        String image
+        @Schema(description = "선수 프로필 이미지 presigned url")
+        String presignedUrl
 ) {
-    public static PlayerSimpleResponse from(Player player) {
-        if(player == null){
+    public static PlayerSimpleResponse from(Player player, String image) {
+        if (player == null) {
             return null;
         }
         return new PlayerSimpleResponse(
@@ -26,7 +26,7 @@ public record PlayerSimpleResponse(
                 player.getNickname(),
                 player.getGender(),
                 player.getRating(),
-                player.getImage()
+                image
         );
     }
 }

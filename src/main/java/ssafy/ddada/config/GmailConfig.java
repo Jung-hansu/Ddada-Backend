@@ -1,5 +1,6 @@
 package ssafy.ddada.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,13 +9,10 @@ import ssafy.ddada.common.properties.GmailSmtpProperties;
 import java.util.Properties;
 
 @Configuration
+@RequiredArgsConstructor
 public class GmailConfig {
 
     private final GmailSmtpProperties gmailSmtpProperties;
-
-    public GmailConfig(GmailSmtpProperties gmailSmtpProperties) {
-        this.gmailSmtpProperties = gmailSmtpProperties;
-    }
 
     @Bean
     public JavaMailSender javaMailSender() {

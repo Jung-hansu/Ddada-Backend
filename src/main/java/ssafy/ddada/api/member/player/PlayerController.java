@@ -88,7 +88,6 @@ public class PlayerController {
         return CommonResponse.ok(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 비밀번호 수정", description = "회원 비밀번호를 수정하는 API입니다.")
     @PatchMapping(value = "/password")
     public CommonResponse<String> updateMemberPassword(
@@ -119,9 +118,9 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 id 조회", description = "나의 id를 조회하는 API입니다.")
     @GetMapping("/id")
-    public CommonResponse<Long> getPlayerId(
+    public CommonResponse<PlayerIdResponse> getPlayerId(
     ) {
-        Long response = playerService.getPlayerId();
+        PlayerIdResponse response = playerService.getPlayerId();
         return CommonResponse.ok(response);
     }
 }

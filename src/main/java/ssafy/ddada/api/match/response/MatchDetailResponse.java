@@ -11,13 +11,14 @@ import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Schema(description = "경기 세부 정보 응답 DTO")
 public record MatchDetailResponse(
         @Schema(description = "경기 ID")
         Long id,
-        @Schema(description = "시설")
+        @Schema(description = "코트")
         CourtDetailResponse court,
         @Schema(description = "팀1")
         TeamDetailResponse team1,
@@ -46,12 +47,12 @@ public record MatchDetailResponse(
         List<SetSimpleResponse> sets
 ) {
 
-    public static MatchDetailResponse from(Match match){
+    public static MatchDetailResponse from(Match match,String GymImage, String Team1Player1Image, String Team1Player2Image, String Team2Player1Image, String Team2Player2Image) {
         return new MatchDetailResponse(
                 match.getId(),
-                CourtDetailResponse.fromWhereMatchDetail(match.getCourt()),
-                TeamDetailResponse.from(match.getTeam1()),
-                TeamDetailResponse.from(match.getTeam2()),
+                CourtDetailResponse.fromWhereMatchDetail(match.getCourt(), GymImage),
+                TeamDetailResponse.from(match.getTeam1(), Team1Player1Image, Team1Player2Image),
+                TeamDetailResponse.from(match.getTeam2(), Team2Player1Image, Team2Player2Image),
                 ManagerSimpleResponse.from(match.getManager()),
                 match.getWinnerTeamNumber(),
                 match.getTeam1SetScore(),
@@ -64,6 +65,7 @@ public record MatchDetailResponse(
                 match.getSets()
                         .stream()
                         .map(SetSimpleResponse::from)
+                        .sorted(Comparator.comparing(SetSimpleResponse::setNumber))
                         .toList()
         );
     }

@@ -6,16 +6,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.common.exception.court.CourtNotFoundException;
+import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.util.RatingUtil;
+import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.*;
+import ssafy.ddada.domain.match.repository.RatingChangeRepository;
+import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
+import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
+import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.match.repository.MatchRepository;
@@ -26,35 +32,43 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import java.util.Comparator;
 import java.util.Objects;
 
+import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MatchServiceImpl implements MatchService {
 
+    private static final int INCOME = 3000;
+
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
     private final CourtRepository courtRepository;
     private final ManagerRepository managerRepository;
     private final TeamRepository teamRepository;
+    private final GymAdminRepository gymAdminRepository;
+    private final RatingUtil ratingUtil;
+    private final RatingChangeRepository ratingChangeRepository;
+    private final S3Util s3Util;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
         Player B1 = match.getTeam2().getPlayer1(), B2 = match.getTeam2().getPlayer2();
 
-        if (A1 != null && Objects.equals(A1.getId(), memberId)){
+        if (A1 != null && Objects.equals(A1.getId(), memberId)) {
             return true;
         }
 
-        if (A2 != null && Objects.equals(A2.getId(), memberId)){
+        if (A2 != null && Objects.equals(A2.getId(), memberId)) {
             return true;
         }
 
-        if (B1 != null && Objects.equals(B1.getId(), memberId)){
+        if (B1 != null && Objects.equals(B1.getId(), memberId)) {
             return true;
         }
 
-        if (B2 != null && Objects.equals(B2.getId(), memberId)){
+        if (B2 != null && Objects.equals(B2.getId(), memberId)) {
             return true;
         }
 
@@ -79,27 +93,32 @@ public class MatchServiceImpl implements MatchService {
     public MatchDetailResponse getMatchByIdWithInfos(Long matchId) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        return MatchDetailResponse.from(match);
+
+        return MatchDetailResponse.from(
+                match,
+                s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer1().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer2().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer1().getImage()),
+                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer2().getImage())
+        );
     }
 
-    @Override
-    public SetDetailResponse getSetsByIdWithInfos(Long matchId, Integer setNumber) {
-        Set set = matchRepository.findSetsByIdWithInfos(matchId, setNumber)
-                .orElseThrow(InvalidSetNumberException::new);
-
-        return SetDetailResponse.from(set);
-    }
 
     @Override
     @Transactional
-    public void updateMatchStatus(MatchStatusChangeCommand command) {
-        Match match = matchRepository.findById(command.matchId())
+    public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
+        Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
+
+        if (command.status() == MatchStatus.PLAYING && match.getStatus() != MatchStatus.RESERVED){
+            throw new InvalidMatchStatusException();
+        }
         match.setStatus(command.status());
         matchRepository.save(match);
     }
 
-    private void updateTeamPlayerCount(Team team){
+    private void updateTeamPlayerCount(Team team) {
         int playerCount = 0;
 
         if (team.getPlayer1() != null) {
@@ -112,8 +131,8 @@ public class MatchServiceImpl implements MatchService {
         team.setPlayerCount(playerCount);
     }
 
-    private void updateTeamRating(Team team){
-        if (team.getPlayerCount() == 0){
+    private void updateTeamRating(Team team) {
+        if (team.getPlayerCount() == 0) {
             team.setRating(0);
             return;
         }
@@ -134,14 +153,19 @@ public class MatchServiceImpl implements MatchService {
         team.setRating(ratingAverage);
     }
 
-    private void updateTeam(Team team){
+    private void updateTeam(Team team) {
         updateTeamPlayerCount(team);
         updateTeamRating(team);
     }
 
-    private boolean isMatchFull(Match match){
+    private boolean isMatchFull(Match match) {
         int totalPlayerCnt = match.getTeam1().getPlayerCount() + match.getTeam2().getPlayerCount();
         return match.getMatchType().isSingle() ? totalPlayerCnt == 2 : totalPlayerCnt == 4;
+    }
+
+    private boolean isMatchEmpty(Match match){
+        int totalPlayerCnt = match.getTeam1().getPlayerCount() + match.getTeam2().getPlayerCount();
+        return totalPlayerCnt == 0;
     }
 
     @Override
@@ -157,19 +181,26 @@ public class MatchServiceImpl implements MatchService {
 
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
+
+        // 같은 시간에 이미 경기가 있는지 확인
+        int conflictCount = matchRepository.countByPlayerAndDateTime(player, match.getMatchDate(), match.getMatchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+
         Team team;
 
-        if (teamNumber == 1){
+        if (teamNumber == 1) {
             team = match.getTeam1();
-        } else if (teamNumber == 2){
+        } else if (teamNumber == 2) {
             team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
         }
 
-        if (team.getPlayer1() == null){
+        if (team.getPlayer1() == null) {
             team.setPlayer1(player);
-        } else if (team.getPlayer2() == null){
+        } else if (team.getPlayer2() == null) {
             team.setPlayer2(player);
         } else {
             throw new TeamFullException();
@@ -177,7 +208,7 @@ public class MatchServiceImpl implements MatchService {
 
         // 경기 모집 완료 시 경기 상태 변경
         updateTeam(team);
-        if (isMatchFull(match) && match.getManager() != null){
+        if (isMatchFull(match) && match.getManager() != null) {
             match.setStatus(MatchStatus.RESERVED);
         }
         teamRepository.save(team);
@@ -192,28 +223,32 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MemberNotFoundException::new);
         Team team;
 
-        if (teamNumber == 1){
+        if (teamNumber == 1) {
             team = match.getTeam1();
-        } else if (teamNumber == 2){
+        } else if (teamNumber == 2) {
             team = match.getTeam2();
         } else {
             throw new InvalidTeamNumberException();
         }
 
-        if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())){
+        if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())) {
             team.setPlayer1(null);
-        } else if (team.getPlayer2() != null && Objects.equals(team.getPlayer2().getId(), player.getId())){
+        } else if (team.getPlayer2() != null && Objects.equals(team.getPlayer2().getId(), player.getId())) {
             team.setPlayer2(null);
         } else {
             throw new TeamPlayerNotFoundException();
         }
 
         // 모집 완료된 경기에서 선수 취소 시 경기 상태 변경
-        if (match.getStatus() == MatchStatus.RESERVED){
+        if (match.getStatus() == MatchStatus.RESERVED) {
             match.setStatus(MatchStatus.CREATED);
         }
         updateTeam(team);
         teamRepository.save(team);
+
+        if (isMatchEmpty(match)){
+            matchRepository.delete(match);
+        }
     }
 
     @Override
@@ -241,11 +276,11 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command) {
         return matchRepository.findFilteredMatches(
-                    command.managerId(),
-                    command.keyword(),
-                    command.todayOnly(),
-                    command.statuses(),
-                    command.pageable()
+                        command.managerId(),
+                        command.keyword(),
+                        command.todayOnly(),
+                        command.statuses(),
+                        command.pageable()
                 )
                 .map(match -> MatchSimpleResponse.from(match, true));
     }
@@ -258,8 +293,14 @@ public class MatchServiceImpl implements MatchService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
+        int conflictCount = matchRepository.countByManagerAndDateTime(manager, match.getMatchDate(), match.getMatchTime());
+        if (conflictCount > 0) {
+            throw new ManagerAlreadyBookedException();
+        }
+
         match.setManager(manager);
-        if (isMatchFull(match)){
+
+        if (isMatchFull(match)) {
             match.setStatus(MatchStatus.RESERVED);
         }
         matchRepository.save(match);
@@ -273,16 +314,16 @@ public class MatchServiceImpl implements MatchService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
-        if (match.getManager() == null){
+        if (match.getManager() == null) {
             throw new ManagerNotFoundException();
         }
 
-        if (!Objects.equals(match.getManager().getId(), manager.getId())){
+        if (!Objects.equals(match.getManager().getId(), manager.getId())) {
             throw new UnauthorizedManagerException();
         }
 
         match.setManager(null);
-        if (match.getStatus() == MatchStatus.RESERVED){
+        if (match.getStatus() == MatchStatus.RESERVED) {
             match.setStatus(MatchStatus.CREATED);
         }
         matchRepository.save(match);
@@ -351,14 +392,66 @@ public class MatchServiceImpl implements MatchService {
     public void saveMatch(Long matchId, Long managerId, MatchResultCommand matchCommand) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        Manager manager = match.getManager();
 
-        if (manager == null || !Objects.equals(manager.getId(), managerId)){
+        Manager manager = match.getManager();
+        if (manager == null || !Objects.equals(manager.getId(), managerId)) {
             throw new UnauthorizedManagerException();
+        }
+
+        if (match.getStatus() != MatchStatus.PLAYING){
+            throw new InvalidMatchStatusException();
         }
 
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
-    }
 
+        // 팀 레이팅 업데이트
+        Team winningTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam1() : match.getTeam2();
+        Team losingTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam2() : match.getTeam1();
+
+        double winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
+        double losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
+
+        // 팀의 총 점수 계산
+        int winningTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
+
+        int losingTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> !set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
+
+        // 플레이어 레이팅 업데이트
+        for (Player player : winningTeam.getPlayers()) {
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore, 60, -100, 100);
+
+            // 레이팅 변화 기록
+            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            playerRepository.save(player);
+        }
+
+        // 진 팀 플레이어 점수 계산
+        for (Player player : losingTeam.getPlayers()) {
+            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, 60, -100, 100);
+
+            // 레이팅 변화 기록
+            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            playerRepository.save(player);
+        }
+
+        GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
+        Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
+        gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
+        gymAdminRepository.save(gymAdmin);
+    }
 }

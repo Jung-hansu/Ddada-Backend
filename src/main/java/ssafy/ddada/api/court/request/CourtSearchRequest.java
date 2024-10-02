@@ -8,8 +8,8 @@ import ssafy.ddada.domain.court.entity.Region;
 
 import static ssafy.ddada.common.util.ParameterUtil.blankToNull;
 
-@Schema(description = "시설 검색 요청 DTO")
-public record CourtSearchRequest (
+@Schema(description = "코트 검색 요청 DTO")
+public record CourtSearchRequest(
         @Schema(description = "검색 키워드", example = "문화체육관")
         String keyword,
         @Schema(description = "지역 목록", example = "[\"서울\", \"부산\"]")

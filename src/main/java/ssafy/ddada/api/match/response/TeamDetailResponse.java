@@ -8,11 +8,11 @@ public record TeamDetailResponse(
         PlayerSimpleResponse player1,
         PlayerSimpleResponse player2
 ) {
-    public static TeamDetailResponse from(Team team){
+    public static TeamDetailResponse from(Team team, String player1Image, String player2Image) {
         return new TeamDetailResponse(
                 team.getId(),
-                PlayerSimpleResponse.from(team.getPlayer1()),
-                PlayerSimpleResponse.from(team.getPlayer2())
+                PlayerSimpleResponse.from(team.getPlayer1(), player1Image),
+                PlayerSimpleResponse.from(team.getPlayer2(), player2Image)
         );
     }
 }

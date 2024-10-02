@@ -14,7 +14,7 @@ public record PlayerProfileDetailResponse(
         String gender,
 
         @Schema(description = "레이팅", example = "25")
-        String rating,
+        Integer rating,
 
         @Schema(description = "전화번호", example = "010-1234-5678")
         String phoneNumber,
@@ -23,10 +23,16 @@ public record PlayerProfileDetailResponse(
         String email,
 
         @Schema(description = "한 줄 소개", example = "안녕하세요")
-        String description
+        String description,
+
+        @Schema(description = "승리 횟수", example = "10")
+        Integer winCount,
+
+        @Schema(description = "패배 횟수", example = "5")
+        Integer loseCount
 ) {
     // 모든 필드를 받는 메서드
-    public static PlayerProfileDetailResponse of(String profileImageBase64, String nickname, Gender gender, String rating, String phoneNumber, String email, String description) {
+    public static PlayerProfileDetailResponse of(String profileImageBase64, String nickname, Gender gender, Integer rating, String phoneNumber, String email, String description, Integer winCount, Integer loseCount) {
         return new PlayerProfileDetailResponse(
                 profileImageBase64,
                 nickname,
@@ -34,7 +40,9 @@ public record PlayerProfileDetailResponse(
                 rating,
                 phoneNumber,
                 email,
-                description
+                description,
+                winCount,
+                loseCount
         );
     }
 }

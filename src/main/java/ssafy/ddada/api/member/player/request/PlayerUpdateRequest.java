@@ -15,9 +15,12 @@ public record PlayerUpdateRequest(
 
         @Schema(description = "한 줄 소개", example = "안녕하세요")
         @Size(max = 50)
-        String description
+        String description,
+
+        @Schema(description = "사진 삭제 여부", example = "true")
+        boolean deleteImage
 ) {
     public UpdateProfileCommand toCommand() {
-        return new UpdateProfileCommand(nickname, profileImagePath, description);
+        return new UpdateProfileCommand(nickname, profileImagePath, description, deleteImage);
     }
 }

@@ -9,6 +9,7 @@ import ssafy.ddada.domain.match.entity.RankType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Schema(description = "경기 정보 요약 응답 DTO")
 public record MatchSimpleResponse(
@@ -30,9 +31,13 @@ public record MatchSimpleResponse(
         Integer team1PlayerCount,
         @Schema(description = "팀2 인원 수")
         Integer team2PlayerCount,
+        @Schema(description = "팀1 성별")
+        List<String> team1Gender,
+        @Schema(description = "팀2 성별")
+        List<String> team2Gender,
         @Schema(description = "예약 여부")
         boolean isReserved,
-        @Schema(description = "시설 정보")
+        @Schema(description = "코트 정보")
         CourtSimpleResponse court
 ) {
         public static MatchSimpleResponse from(Match match, boolean isReserved){
@@ -42,6 +47,8 @@ public record MatchSimpleResponse(
                 int team2Rating = match.getTeam2().getRating();
                 int rating = (team1Rating * team1PlayerCount + team2Rating * team2PlayerCount) /
                         (team1PlayerCount + team2PlayerCount);
+                List<String> team1Gender = match.getTeamGender(match.getTeam1());
+                List<String> team2Gender = match.getTeamGender(match.getTeam2());
 
                 return new MatchSimpleResponse(
                         match.getId(),
@@ -53,6 +60,8 @@ public record MatchSimpleResponse(
                         rating,
                         team1PlayerCount,
                         team2PlayerCount,
+                        team1Gender,
+                        team2Gender,
                         isReserved,
                         CourtSimpleResponse.onMatchListFrom(match.getCourt())
                 );

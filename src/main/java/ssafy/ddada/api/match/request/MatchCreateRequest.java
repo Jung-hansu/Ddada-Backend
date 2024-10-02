@@ -11,8 +11,8 @@ import java.time.LocalTime;
 
 @Schema(description = "경기 생성 요청 DTO")
 public record MatchCreateRequest(
-        @Schema(description = "시설 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "시설 ID는 필수입니다.")
+        @Schema(description = "코트 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "코트 ID는 필수입니다.")
         Long courtId,
 
         @Schema(description = "랭크 타입", example = "RANK", requiredMode = Schema.RequiredMode.REQUIRED)

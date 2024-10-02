@@ -3,7 +3,9 @@ package ssafy.ddada.domain.match.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import ssafy.ddada.domain.court.entity.Court;
+import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.manager.entity.Manager;
+import ssafy.ddada.domain.member.player.entity.Player;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -80,6 +82,39 @@ public class Match extends BaseMatchEntity {
 
     public static Match createNewMatch(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
         return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
+    }
+
+    public List<String> getTeamGender(Team team) {
+        List<String> teamGender = new ArrayList<>();
+
+        Player player1 = team.getPlayer1();
+        Player player2 = team.getPlayer2();
+
+        // First, add male players
+        if (player1 != null && player1.getGender() == Gender.MALE) {
+            teamGender.add(player1.getGender().name());
+        }
+        if (player2 != null && player2.getGender() == Gender.MALE) {
+            teamGender.add(player2.getGender().name());
+        }
+
+        // Then, add female players
+        if (player1 != null && player1.getGender() == Gender.FEMALE) {
+            teamGender.add(player1.getGender().name());
+        }
+        if (player2 != null && player2.getGender() == Gender.FEMALE) {
+            teamGender.add(player2.getGender().name());
+        }
+
+        // If a player is not reserved, add "notReserved"
+        if (player1 == null) {
+            teamGender.add("notReserved");
+        }
+        if (player2 == null) {
+            teamGender.add("notReserved");
+        }
+
+        return teamGender;
     }
 
 }
