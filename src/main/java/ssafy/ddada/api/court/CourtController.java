@@ -11,7 +11,6 @@ import ssafy.ddada.api.court.request.CourtSearchRequest;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.domain.court.service.CourtService;
-import ssafy.ddada.domain.racket.service.RacketService;
 
 @Slf4j
 @RestController
