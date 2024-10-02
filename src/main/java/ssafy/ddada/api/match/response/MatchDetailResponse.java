@@ -47,12 +47,12 @@ public record MatchDetailResponse(
         List<SetSimpleResponse> sets
 ) {
 
-    public static MatchDetailResponse from(Match match){
+    public static MatchDetailResponse from(Match match,String GymImage, String Team1Player1Image, String Team1Player2Image, String Team2Player1Image, String Team2Player2Image) {
         return new MatchDetailResponse(
                 match.getId(),
-                CourtDetailResponse.fromWhereMatchDetail(match.getCourt()),
-                TeamDetailResponse.from(match.getTeam1()),
-                TeamDetailResponse.from(match.getTeam2()),
+                CourtDetailResponse.fromWhereMatchDetail(match.getCourt(), GymImage),
+                TeamDetailResponse.from(match.getTeam1(), Team1Player1Image, Team1Player2Image),
+                TeamDetailResponse.from(match.getTeam2(), Team2Player1Image, Team2Player2Image),
                 ManagerSimpleResponse.from(match.getManager()),
                 match.getWinnerTeamNumber(),
                 match.getTeam1SetScore(),
