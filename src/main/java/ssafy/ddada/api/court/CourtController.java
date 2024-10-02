@@ -37,20 +37,6 @@ public class CourtController {
         return CommonResponse.ok(response);
     }
 
-    @Operation(summary = "court 인덱싱", description = "test API")
-    @GetMapping("/elastic/courts")
-    public CommonResponse<?> elasticCourt(){
-        courtService.indexAll();
-        return CommonResponse.ok();
-    }
-
-    @Operation(summary = "racket 인덱싱", description = "test API")
-    @GetMapping("/elastic/rackets")
-    public CommonResponse<?> elasticRacket(){
-        racketService.indexAll();
-        return CommonResponse.ok();
-    }
-
     @Operation(summary = "코트 세부 조회", description = "코트 세부 정보를 조회하는 api입니다.")
     @GetMapping("/{court_id}")
     public CommonResponse<CourtDetailResponse> getCourtById(@PathVariable("court_id") Long courtId){
