@@ -33,10 +33,18 @@ spring:
 
   data:
     redis:
-      password: ${REDIS_PASSWORD}
       cluster:
         max-redirects: 6
         nodes: ${REDIS_NODES}
+      password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: 20000
+  elasticsearch:
+    username: ${ELASTICSEARCH_USERNAME}
+    password: ${ELASTICSEARCH_PASSWORD}
+    uris: ${ELASTICSEARCH_URIS}
 
   graphql:
     cors:

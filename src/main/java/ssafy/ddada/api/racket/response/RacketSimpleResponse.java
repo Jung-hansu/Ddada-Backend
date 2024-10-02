@@ -2,6 +2,7 @@ package ssafy.ddada.api.racket.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.racket.entity.Racket;
+import ssafy.ddada.domain.racket.entity.RacketDocument;
 
 public record RacketSimpleResponse(
         @Schema(description = "라켓 ID")
@@ -20,6 +21,17 @@ public record RacketSimpleResponse(
     public static RacketSimpleResponse from(Racket racket) {
         return new RacketSimpleResponse(
                 racket.getId(),
+                racket.getName(),
+                racket.getManufacturer(),
+                racket.getWeight(),
+                racket.getMaterial(),
+                racket.getImage()
+        );
+    }
+
+    public static RacketSimpleResponse from(RacketDocument racket) {
+        return new RacketSimpleResponse(
+                racket.getRacketId(),
                 racket.getName(),
                 racket.getManufacturer(),
                 racket.getWeight(),
