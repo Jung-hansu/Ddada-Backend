@@ -121,7 +121,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     @Query("""
         SELECT COUNT(m)
         FROM Match m
-        WHERE m.court.gym.id = :gymId AND m.matchDate = :date
+        WHERE m.court.gym.id = :gymId AND m.matchDate = :date AND m.status = "FINISHED"
     """)
     int countByGymIdAndMatchDate(@Param("gymId") Long gymId, @Param("matchDate") LocalDate date);
 
