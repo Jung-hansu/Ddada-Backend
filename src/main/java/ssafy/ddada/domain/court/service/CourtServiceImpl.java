@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.court.response.CourtDetailResponse;
 import ssafy.ddada.api.court.response.CourtSimpleResponse;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
@@ -37,13 +38,12 @@ public class CourtServiceImpl implements CourtService {
     private final S3Util s3Util;
 
     @Override
+    @Transactional(readOnly = true)
     public CourtDetailResponse getCourtById(Long courtId) {
         Court court = courtRepository.findCourtWithMatchesById(courtId)
                 .orElseThrow(CourtNotFoundException::new);
-
         String presignedUrl = s3Util.getPresignedUrlFromS3(court.getGym().getImage());  // S3Util의 메서드 사용
-        court.getGym().setImage(presignedUrl);
-        return CourtDetailResponse.from(court);
+        return CourtDetailResponse.from(court, presignedUrl);
     }
 
     @Override
