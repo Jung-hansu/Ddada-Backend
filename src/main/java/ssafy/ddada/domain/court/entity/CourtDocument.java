@@ -5,6 +5,10 @@ import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
+import ssafy.ddada.domain.match.entity.MatchDocument;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
@@ -46,6 +50,7 @@ public class CourtDocument {
     @Enumerated(EnumType.STRING)
     private Region gymRegion;
 
-//    private List<Match> matches = new ArrayList<>();
+    @Field(type = Nested, index = false)
+    private List<MatchDocument> matches = new ArrayList<>();
 
 }
