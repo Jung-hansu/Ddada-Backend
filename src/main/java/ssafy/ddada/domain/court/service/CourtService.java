@@ -11,6 +11,6 @@ public interface CourtService {
 
     // Elasticsearch
     Page<CourtSimpleResponse> getElasticFilteredCourts(CourtSearchCommand command);
-    void indexAllCourts();
+    void indexAll();
 
 }

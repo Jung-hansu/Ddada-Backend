@@ -74,7 +74,7 @@ public class CourtServiceImpl implements CourtService {
     }
 
     @Override
-    public void indexAllCourts() {
+    public void indexAll() {
         List<Court> courts = courtRepository.findAll();
         for (Court court : courts) {
             indexCourt(court);

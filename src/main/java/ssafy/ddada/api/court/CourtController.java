@@ -40,14 +40,14 @@ public class CourtController {
     @Operation(summary = "court 인덱싱", description = "test API")
     @GetMapping("/elastic/courts")
     public CommonResponse<?> elasticCourt(){
-        courtService.indexAllCourts();
+        courtService.indexAll();
         return CommonResponse.ok();
     }
 
     @Operation(summary = "racket 인덱싱", description = "test API")
     @GetMapping("/elastic/rackets")
     public CommonResponse<?> elasticRacket(){
-        racketService.indexAllRackets();
+        racketService.indexAll();
         return CommonResponse.ok();
     }
 

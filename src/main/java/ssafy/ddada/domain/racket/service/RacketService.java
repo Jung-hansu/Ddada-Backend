@@ -6,6 +6,6 @@ public interface RacketService {
 
     // Elasticsearch
     RacketSearchResponse getRacketsByElasticKeyword(String keyword);
-    void indexAllRackets();
+    void indexAll();
 
 }

@@ -40,7 +40,7 @@ public class RacketServiceImpl implements RacketService {
     }
 
     @Override
-    public void indexAllRackets() {
+    public void indexAll() {
         List<Racket> rackets = racketRepository.findAll();
         for (Racket racket : rackets) {
             indexRacket(racket);
