@@ -107,4 +107,22 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     @Query("SELECT COUNT(m) FROM Match m WHERE m.manager = :manager AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
     int countByManagerAndDateTime(@Param("manager") Manager manager, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
+
+
+    @EntityGraph(attributePaths = {"court", "court.gym", "manager", "team1", "team2"})
+    @Query("""
+        SELECT m
+        FROM Match m
+        WHERE m.court.gym.id = :gymAdminId AND m.matchDate = :date
+    """)
+    List<Match> getMatchesByGymIdAndDate(@Param("gymAdminId") Long gymAdminId, @Param("date") LocalDate date);
+
+    @EntityGraph(attributePaths = {"court", "court.gym"})
+    @Query("""
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE m.court.gym.id = :gymId AND m.matchDate = :date
+    """)
+    int countByGymIdAndMatchDate(@Param("gymId") Long gymId, @Param("matchDate") LocalDate date);
+
 }
