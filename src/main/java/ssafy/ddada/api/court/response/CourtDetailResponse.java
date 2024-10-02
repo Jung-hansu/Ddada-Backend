@@ -48,14 +48,14 @@ public record CourtDetailResponse(
         );
     }
 
-    public static CourtDetailResponse from(Court court){
+    public static CourtDetailResponse from(Court court, String GymImage){
         return new CourtDetailResponse(
                 court.getId(),
                 getCourtName(court),
                 court.getGym().getAddress(),
                 court.getGym().getContactNumber(),
                 court.getGym().getDescription(),
-                court.getGym().getImage(),
+                GymImage,
                 court.getGym().getUrl(),
                 court.getMatches()
                         .stream()
