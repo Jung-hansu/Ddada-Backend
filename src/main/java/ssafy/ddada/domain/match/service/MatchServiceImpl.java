@@ -93,14 +93,13 @@ public class MatchServiceImpl implements MatchService {
     public MatchDetailResponse getMatchByIdWithInfos(Long matchId) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-
         return MatchDetailResponse.from(
                 match,
                 s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer1().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer2().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer1().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer2().getImage())
+                getPlayerImage(match.getTeam1().getPlayer1()),
+                getPlayerImage(match.getTeam1().getPlayer2()),
+                getPlayerImage(match.getTeam2().getPlayer1()),
+                getPlayerImage(match.getTeam2().getPlayer2())
         );
     }
 
@@ -453,5 +452,25 @@ public class MatchServiceImpl implements MatchService {
         Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
         gymAdminRepository.save(gymAdmin);
+    }
+
+    private String getPlayerImage(Player player) {
+        // 기본 이미지 경로
+        String defaultImageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+
+        // 플레이어가 null인 경우 기본 이미지 URL 반환
+        if (player == null) {
+            log.warn("플레이어 객체가 null입니다.");
+            return null;
+        }
+
+        // 플레이어의 이미지 경로가 null이거나 비어있는 경우 기본 이미지 URL 반환
+        if (player.getImage() == null || player.getImage().isEmpty()) {
+            log.warn("{}의 이미지 경로가 null 또는 비어있습니다. 기본 이미지 URL 반환: {}", player.getNickname(), defaultImageUrl);
+            return s3Util.getPresignedUrlFromS3(defaultImageUrl);
+        }
+
+        // S3에서 presigned URL 생성
+        return s3Util.getPresignedUrlFromS3(player.getImage());
     }
 }
