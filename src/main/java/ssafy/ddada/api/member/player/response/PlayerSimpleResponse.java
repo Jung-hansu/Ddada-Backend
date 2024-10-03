@@ -15,7 +15,7 @@ public record PlayerSimpleResponse(
         @Schema(description = "선수 레이팅")
         Integer rating,
         @Schema(description = "선수 프로필 이미지 presigned url")
-        String presignedUrl
+        String image
 ) {
     public static PlayerSimpleResponse from(Player player, String image) {
         if (player == null) {
