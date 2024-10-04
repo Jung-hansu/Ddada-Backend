@@ -101,13 +101,13 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     """)
     List<Match> findAllOutDatedMatches();
 
+    @EntityGraph(attributePaths = {"team1.player1", "team1.player2", "team2.player1", "team2.player2"})
+    @Query("SELECT COUNT(m) FROM Match m WHERE (m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId OR m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId) AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    int countByPlayerAndDateTime(@Param("playerId") Long playerId, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 
-    @Query("SELECT COUNT(m) FROM Match m WHERE (m.team1.player1 = :player OR m.team1.player2 = :player OR m.team2.player1 = :player OR m.team2.player2 = :player) AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
-    int countByPlayerAndDateTime(@Param("player") Player player, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
-
-    @Query("SELECT COUNT(m) FROM Match m WHERE m.manager = :manager AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
-    int countByManagerAndDateTime(@Param("manager") Manager manager, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
-
+    @EntityGraph(attributePaths = {"manager"})
+    @Query("SELECT COUNT(m) FROM Match m WHERE m.manager.id = :managerId AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    int countByManagerAndDateTime(@Param("managerId") Long managerId, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 
     @EntityGraph(attributePaths = {"court", "court.gym", "manager", "team1", "team2"})
     @Query("""

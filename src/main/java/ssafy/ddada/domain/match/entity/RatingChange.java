@@ -1,10 +1,7 @@
 package ssafy.ddada.domain.match.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
@@ -17,6 +14,7 @@ public class RatingChange {
     @Column(name = "rating_change_id")
     private Long id;
 
+    @Setter
     private Integer ratingChange;
 
     @ManyToOne

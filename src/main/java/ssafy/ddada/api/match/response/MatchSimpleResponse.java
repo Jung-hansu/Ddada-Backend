@@ -40,7 +40,7 @@ public record MatchSimpleResponse(
         @Schema(description = "코트 정보")
         CourtSimpleResponse court
 ) {
-        public static MatchSimpleResponse from(Match match, boolean isReserved){
+        public static MatchSimpleResponse from(Match match, boolean isReserved, String courtPresignedUrl) {
                 int team1PlayerCount = match.getTeam1().getPlayerCount();
                 int team2PlayerCount = match.getTeam2().getPlayerCount();
                 int team1Rating = match.getTeam1().getRating();
@@ -63,7 +63,7 @@ public record MatchSimpleResponse(
                         team1Gender,
                         team2Gender,
                         isReserved,
-                        CourtSimpleResponse.onMatchListFrom(match.getCourt())
+                        CourtSimpleResponse.onMatchListFrom(match.getCourt(), courtPresignedUrl)
                 );
         }
 }
