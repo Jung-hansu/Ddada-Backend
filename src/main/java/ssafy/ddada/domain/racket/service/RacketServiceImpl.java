@@ -42,8 +42,11 @@ public class RacketServiceImpl implements RacketService {
     @Override
     public void indexAll() {
         List<Racket> rackets = racketRepository.findAll();
+        int size = rackets.size(), cur = 0;
+
         for (Racket racket : rackets) {
             indexRacket(racket);
+            log.info("라켓 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
         }
     }
 

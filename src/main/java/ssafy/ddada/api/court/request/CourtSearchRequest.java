@@ -22,7 +22,7 @@ public record CourtSearchRequest(
         public CourtSearchCommand toCommand() {
                 return new CourtSearchCommand(
                         blankToNull(keyword),
-                        Region.toRegionSet(regions),
+                        Region.toKorRegionSet(regions),
                         PageRequest.of(page, size, Sort.by("id").descending())
                 );
         }

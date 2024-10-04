@@ -50,7 +50,7 @@ public class CourtServiceImpl implements CourtService {
     @Override
     public Page<CourtSimpleResponse> getElasticFilteredCourts(CourtSearchCommand command) {
         String keyword = nullToBlank(command.keyword());
-        Set<Region> regions = nullToEmptySet(command.regions());
+        Set<String> regions = nullToEmptySet(command.regions());
 
         Criteria criteria = new Criteria();
         if (!isEmptyString(keyword)) {
@@ -58,7 +58,8 @@ public class CourtServiceImpl implements CourtService {
                     .or("gymAddress").matches(keyword);
         }
         if (!isEmptySet(regions)) {
-            criteria = criteria.and("region").in(regions);
+            log.info("regions: {}", regions);
+            criteria = criteria.and("gymRegion").in(regions);
         }
 
         CriteriaQuery query = new CriteriaQuery(criteria);
@@ -77,8 +78,11 @@ public class CourtServiceImpl implements CourtService {
     @Override
     public void indexAll() {
         List<Court> courts = courtRepository.findAll();
+        int size = courts.size(), cur = 0;
+
         for (Court court : courts) {
             indexCourt(court);
+            log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
         }
     }
 
@@ -93,7 +97,7 @@ public class CourtServiceImpl implements CourtService {
                 .gymContactNumber(gym != null ? gym.getContactNumber() : null)
                 .gymImage(gym != null ? gym.getImage() : null)
                 .gymUrl(gym != null ? gym.getUrl() : null)
-                .gymRegion(gym != null ? gym.getRegion() : null)
+                .gymRegion(gym != null ? gym.getRegion().getKorValue() : null)
                 .matches(court.getMatches()
                         .stream()
                         .map(MatchDocument::from)

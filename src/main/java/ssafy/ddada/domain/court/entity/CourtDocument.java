@@ -1,7 +1,5 @@
 package ssafy.ddada.domain.court.entity;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -47,8 +45,7 @@ public class CourtDocument {
     private String gymUrl;
 
     @Field(type = Keyword)
-    @Enumerated(EnumType.STRING)
-    private Region gymRegion;
+    private String gymRegion;
 
     @Field(type = Nested, index = false)
     private List<MatchDocument> matches = new ArrayList<>();
