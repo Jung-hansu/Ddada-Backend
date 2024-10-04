@@ -496,7 +496,7 @@ public class MatchServiceImpl implements MatchService {
             // 각 세트의 점수 결과에 대해 반복
             for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
                 // 득점 확인
-                if (scoreResult.earnedPlayer().longValue() == playerId) {
+                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
                     totalScore++;
                 }
 
