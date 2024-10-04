@@ -28,7 +28,7 @@ public class RatingUtil {
         int maxChange = 100;
 
         // 개인 성과를 반영한 레이팅 업데이트
-        double ratingChange = calculateEloRating(player.getRating(), (int) opponentTeamRating, isWin, getDynamicK(player.getRating()));
+        double ratingChange = calculateEloRating(player.getRating(), (int) opponentTeamRating, isWin, getDynamicK(player.getRating(), player));
         double performanceBonus = teamScore * 0.1;
 
         // 승리 시 레이팅 증가, 패배 시 감소
@@ -57,13 +57,18 @@ public class RatingUtil {
         return (int) Math.round(newRating); // 최종적으로 int로 변환하여 반환
     }
 
-    public static int getDynamicK(int playerRating) {
+    public static int getDynamicK(int playerRating, Player player) {
+        int k = 0;
         if (playerRating < 1000) {
-            return 50; // 초보자 레벨에서는 큰 변화
+            k = 50; // 초보자 레벨에서는 큰 변화
         } else if (playerRating < 2000) {
-            return 40; // 중간 레벨에서는 보통의 변화
+            k = 40; // 중간 레벨에서는 보통의 변화
         } else {
-            return 30; // 고수 레벨에서는 작은 변화
+            k = 30; // 고수 레벨에서는 작은 변화
         }
+        if (player.getGameCount()<10) {
+            k += 30;
+        }
+        return k;
     }
 }

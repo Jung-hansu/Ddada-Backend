@@ -444,6 +444,7 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
+            player.setGameCount(player.getGameCount()+1);
             playerRepository.save(player);
         }
 

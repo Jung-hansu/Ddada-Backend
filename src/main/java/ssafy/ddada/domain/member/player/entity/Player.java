@@ -53,6 +53,8 @@ public class Player extends BaseMemberEntity implements Member {
 
     private Integer loseStreak;
 
+    private Integer gameCount;
+
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 
@@ -71,6 +73,7 @@ public class Player extends BaseMemberEntity implements Member {
         this.role = role;
         this.loseStreak = 0;
         this.winStreak = 0;
+        this.gameCount = 0;
     }
 
     public static Player createTempPlayer(String email) {
@@ -100,6 +103,7 @@ public class Player extends BaseMemberEntity implements Member {
         this.rating = 800;
         this.isDeleted = false;
         this.role = MemberRole.PLAYER;
+        this.gameCount = 0;
 
         // 현재 객체 (Player) 반환
         return this;
