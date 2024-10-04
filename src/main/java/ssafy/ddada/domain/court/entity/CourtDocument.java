@@ -31,23 +31,7 @@ public class CourtDocument {
     @Field(type = Text, analyzer = "nori")
     private String gymAddress;
 
-    @Field(type = Text, index = false)
-    private String gymDescription;
-
-    @Field(type = Keyword, index = false)
-    private String gymContactNumber;
-
-    @Setter
-    @Field(type = Keyword, index = false)
-    private String gymImage;
-
-    @Field(type = Keyword, index = false)
-    private String gymUrl;
-
     @Field(type = Keyword)
     private String gymRegion;
-
-    @Field(type = Nested, index = false)
-    private List<MatchDocument> matches = new ArrayList<>();
 
 }
