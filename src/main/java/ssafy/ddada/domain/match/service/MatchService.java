@@ -13,6 +13,7 @@ public interface MatchService {
     void createMatch(Long creatorId, MatchCreateCommand command);
     MatchDetailResponse getMatchByIdWithInfos(Long matchId);
     void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command);
+    boolean CheckPlayerBooked(CheckPlayerBookedCommand command);
 
     // Team 관련 메소드
     void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
