@@ -49,6 +49,10 @@ public class Player extends BaseMemberEntity implements Member {
 
     private Integer rating;
 
+    private Integer winStreak;
+
+    private Integer loseStreak;
+
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 
@@ -65,6 +69,8 @@ public class Player extends BaseMemberEntity implements Member {
         this.rating = rating;
         this.isDeleted = false;
         this.role = role;
+        this.loseStreak = 0;
+        this.winStreak = 0;
     }
 
     public static Player createTempPlayer(String email) {
@@ -77,7 +83,7 @@ public class Player extends BaseMemberEntity implements Member {
                 null,   // 프로필 이미지 기본값
                 null,   // 전화번호 기본값
                 null,   // 임시 설명
-                1500,      // 초기 레이팅
+                800,      // 초기 레이팅
                 MemberRole.TEMP
         );
     }
@@ -91,7 +97,7 @@ public class Player extends BaseMemberEntity implements Member {
         this.gender = signupCommand.gender();
         this.birth = signupCommand.birth();
         this.description = signupCommand.description();
-        this.rating = 1500;
+        this.rating = 800;
         this.isDeleted = false;
         this.role = MemberRole.PLAYER;
 
@@ -126,15 +132,17 @@ public class Player extends BaseMemberEntity implements Member {
             image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
         }
         if (rating == null){
-            rating = 1500;
+            rating = 800;
         }
     }
 
-    public void addRating() {
-        this.rating = this.rating + 100;
+    public void incrementWinStreak() {
+        this.winStreak++;
+        this.loseStreak = 0; // 연승이 계속되면 연패는 초기화
     }
 
-    public void subRating() {
-        this.rating = this.rating - 100;
+    public void incrementLoseStreak() {
+        this.loseStreak++;
+        this.winStreak = 0; // 연패가 계속되면 연승은 초기화
     }
 }

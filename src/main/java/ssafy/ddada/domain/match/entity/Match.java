@@ -116,5 +116,4 @@ public class Match extends BaseMatchEntity {
 
         return teamGender;
     }
-
 }
