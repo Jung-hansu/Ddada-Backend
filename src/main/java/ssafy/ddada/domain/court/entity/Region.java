@@ -50,4 +50,14 @@ public enum Region {
                 .collect(Collectors.toSet());
     }
 
+    public static Set<String> toKorRegionSet(String regions){
+        if (isEmptyString(regions)){
+            return null;
+        }
+        return Stream.of(regions.split(","))
+                .map(Region::fromValue)
+                .map(Region::getKorValue)
+                .collect(Collectors.toSet());
+    }
+
 }

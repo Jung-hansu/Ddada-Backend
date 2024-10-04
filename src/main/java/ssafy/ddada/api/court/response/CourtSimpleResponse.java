@@ -4,11 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
-import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchDocument;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,7 +24,7 @@ public record CourtSimpleResponse(
         @Schema(description = "체육관 지역")
         String region,
         @Schema(description = "예약된 경기 시간 리스트")
-        Map<LocalDate, List<LocalTime>> reservations
+        Map<String, List<String>> reservations
 ) {
     private static String getCourtName(Court court){
         return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
@@ -44,29 +41,13 @@ public record CourtSimpleResponse(
         );
     }
 
-    public static CourtSimpleResponse from(Court court, String presignedUrl) {
-        return new CourtSimpleResponse(
-                court.getId(),
-                getCourtName(court),
-                court.getGym().getAddress(),
-                presignedUrl,
-                court.getGym().getRegion().getKorValue(),
-                court.getMatches()
-                        .stream()
-                        .collect(Collectors.groupingBy(
-                                Match::getMatchDate,
-                                Collectors.mapping(Match::getMatchTime, Collectors.toList())
-                        ))
-        );
-    }
-
     public static CourtSimpleResponse from(CourtDocument court, String presignedUrl) {
         return new CourtSimpleResponse(
                 court.getCourtId(),
                 court.getGymName(),
                 court.getGymAddress(),
                 presignedUrl,
-                court.getGymRegion().getKorValue(),
+                court.getGymRegion(),
                 court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(

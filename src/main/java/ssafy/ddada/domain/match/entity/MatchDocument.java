@@ -1,24 +1,26 @@
 package ssafy.ddada.domain.match.entity;
 
 import lombok.*;
+import org.springframework.data.elasticsearch.annotations.Field;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
 @Getter
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@NoArgsConstructor
 public class MatchDocument {
 
-    private LocalDate matchDate;
+    @Field(type = Keyword, index = false)
+    private String matchDate;
 
-    private LocalTime matchTime;
+    @Field(type = Keyword, index = false)
+    private String matchTime;
 
     public static MatchDocument from(Match match) {
         return MatchDocument.builder()
-                .matchDate(match.getMatchDate())
-                .matchTime(match.getMatchTime())
+                .matchDate(match.getMatchDate().toString())
+                .matchTime(match.getMatchTime().toString())
                 .build();
     }
 
