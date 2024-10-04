@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.match.InvalidMatchTypeException;
 import ssafy.ddada.common.exception.match.InvalidRankTypeException;
 import ssafy.ddada.common.exception.match.TeamFullException;
 import ssafy.ddada.common.exception.match.TeamPlayerNotFoundException;
+import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 
 @Slf4j
 @RestControllerAdvice
@@ -79,17 +81,10 @@ public class MatchExceptionHandler {
         return CommonResponse.notFound(e.getErrorCode());
     }
 
-    @ExceptionHandler(PlayerAlreadyBookedException.class)
+    @ExceptionHandler(ManagerAlreadyExistException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public CommonResponse<?> handlePlayerAlreadyBookedException(PlayerAlreadyBookedException e) {
-        log.error("PlayerAlreadyBookedException occurs", e);
-        return CommonResponse.conflict(e.getErrorCode());
-    }
-
-    @ExceptionHandler(ManagerAlreadyBookedException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public CommonResponse<?> handleManagerAlreadyBookedException(ManagerAlreadyBookedException e) {
-        log.error("ManagerAlreadyBookedException occurs", e);
+    public CommonResponse<?> handleManagerAlreadyExistException(ManagerAlreadyExistException e) {
+        log.error("ManagerAlreadyExistException occurs", e);
         return CommonResponse.conflict(e.getErrorCode());
     }
 }

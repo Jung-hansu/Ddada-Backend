@@ -1,10 +1,10 @@
-package ssafy.ddada.common.exception.match;
+package ssafy.ddada.common.exception.player;
 
 import ssafy.ddada.common.exception.BaseException;
-import ssafy.ddada.common.exception.errorcode.MatchErrorCode;
+import ssafy.ddada.common.exception.errorcode.PlayerErrorCode;
 
 public class PlayerAlreadyBookedException extends BaseException {
     public PlayerAlreadyBookedException() {
-        super(MatchErrorCode.PLAYER_ALREADY_BOOKED);
+        super(PlayerErrorCode.PLAYER_ALREADY_BOOKED);
     }
 }

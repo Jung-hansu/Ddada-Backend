@@ -30,7 +30,6 @@ import ssafy.ddada.domain.match.service.MatchService;
 @RequestMapping("/manager")
 @Tag(name = "Manager", description = "매니저관리")
 public class ManagerController {
-//TODO: 진입 전에 Manager 로그인 여부 판단하는 필터 적용하기
     private final ManagerService managerService;
     private final MatchService matchService;
 
@@ -69,11 +68,6 @@ public class ManagerController {
     @Operation(summary = "매니저 경기 할당", description = "매니저에 경기를 할당하는 api입니다.")
     @PatchMapping("/matches/{match_id}")
     public CommonResponse<?> allocateToMatch(@PathVariable("match_id") Long matchId){
-        MemberRole memberRole = SecurityUtil.getLoginMemberRole()
-                .orElseThrow(NotAuthenticatedException::new);
-        if (memberRole != MemberRole.MANAGER){
-            throw new NotAuthenticatedException();
-        }
 
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
