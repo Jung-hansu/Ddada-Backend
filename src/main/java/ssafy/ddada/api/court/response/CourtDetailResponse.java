@@ -3,10 +3,7 @@ package ssafy.ddada.api.court.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.match.entity.Match;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +26,7 @@ public record CourtDetailResponse(
         @Schema(description = "체육관 홈페이지 주소")
         String url,
         @Schema(description = "예약된 경기 시간 리스트")
-        Map<LocalDate, List<LocalTime>> reservations
+        Map<String, List<String>> reservations
 ) {
     private static String getCourtName(Court court){
         return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
@@ -60,8 +57,8 @@ public record CourtDetailResponse(
                 court.getMatches()
                         .stream()
                         .collect(Collectors.groupingBy(
-                                Match::getMatchDate,
-                                Collectors.mapping(Match::getMatchTime, Collectors.toList())
+                                match -> match.getMatchDate().toString(),
+                                Collectors.mapping(match -> match.getMatchTime().toString(), Collectors.toList())
                         ))
         );
     }
