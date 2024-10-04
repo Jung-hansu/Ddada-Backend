@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
+import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
@@ -15,6 +16,7 @@ import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -476,7 +478,16 @@ public class MatchServiceImpl implements MatchService {
         gymAdminRepository.save(gymAdmin);
     }
 
-    public List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
+    public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
+        Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+        return true;
+    }
+
+    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
         int totalScore = 0;   // 총 득점
         int totalMissed = 0;  // 총 실점
 
