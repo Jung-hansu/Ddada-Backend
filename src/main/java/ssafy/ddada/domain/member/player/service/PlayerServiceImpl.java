@@ -75,7 +75,8 @@ public class PlayerServiceImpl implements PlayerService {
         return PlayerDetailResponse.of(
                 preSignedProfileImage,
                 currentPlayer.getNickname(),
-                currentPlayer.getRating()
+                currentPlayer.getRating(),
+                currentPlayer.getGameCount()
         );
     }
 
@@ -92,6 +93,7 @@ public class PlayerServiceImpl implements PlayerService {
                 currentPlayer.getNickname(),
                 currentPlayer.getGender(),
                 currentPlayer.getRating(),
+                currentPlayer.getGameCount(),
                 currentPlayer.getNumber(),
                 currentPlayer.getEmail(),
                 currentPlayer.getDescription(),
@@ -121,7 +123,8 @@ public class PlayerServiceImpl implements PlayerService {
         return PlayerDetailResponse.of(
                 preSignedUrl,
                 currentPlayer.getNickname(),
-                currentPlayer.getRating()
+                currentPlayer.getRating(),
+                currentPlayer.getGameCount()
         );
     }
 

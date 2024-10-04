@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,8 @@ import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
 import ssafy.ddada.domain.court.entity.Gym;
-import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.match.entity.MatchDocument;
 
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +49,7 @@ public class CourtServiceImpl implements CourtService {
     @Override
     public Page<CourtSimpleResponse> getElasticFilteredCourts(CourtSearchCommand command) {
         String keyword = nullToBlank(command.keyword());
-        Set<Region> regions = nullToEmptySet(command.regions());
+        Set<String> regions = nullToEmptySet(command.regions());
 
         Criteria criteria = new Criteria();
         if (!isEmptyString(keyword)) {
@@ -58,27 +57,35 @@ public class CourtServiceImpl implements CourtService {
                     .or("gymAddress").matches(keyword);
         }
         if (!isEmptySet(regions)) {
-            criteria = criteria.and("region").in(regions);
+            log.info("regions: {}", regions);
+            criteria = criteria.and("gymRegion").in(regions);
         }
 
-        CriteriaQuery query = new CriteriaQuery(criteria);
-        List<CourtSimpleResponse> courts = elasticsearchOperations.search(query, CourtDocument.class)
-                .map(searchHit -> {
-                    CourtDocument courtDocument = searchHit.getContent();
-                    String image = Objects.requireNonNull(courtDocument.getGymImage());
+        CriteriaQuery query = new CriteriaQuery(criteria).setPageable(command.pageable());
+        SearchHits<CourtDocument> courtDocuments = elasticsearchOperations.search(query, CourtDocument.class);
+        List<Long> courtIds = courtDocuments
+                .map(searchHit -> searchHit.getContent().getCourtId())
+                .toList();
+        List<CourtSimpleResponse> courts = courtRepository.findCourtsByCourtIds(courtIds)
+                .stream()
+                .map(court -> {
+                    String image = Objects.requireNonNull(court.getGym().getImage());
                     String presignedUrl = s3Util.getPresignedUrlFromS3(image);
-                    return CourtSimpleResponse.from(courtDocument, presignedUrl);
+                    return CourtSimpleResponse.from(court, presignedUrl);
                 })
                 .toList();
 
-        return new PageImpl<>(courts, command.pageable(), courts.size());
+        return new PageImpl<>(courts, command.pageable(), courtDocuments.getTotalHits());
     }
 
     @Override
     public void indexAll() {
         List<Court> courts = courtRepository.findAll();
+        int size = courts.size(), cur = 0;
+
         for (Court court : courts) {
             indexCourt(court);
+            log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
         }
     }
 
@@ -89,15 +96,6 @@ public class CourtServiceImpl implements CourtService {
                 .courtId(court.getId())
                 .gymName(gym != null ? gym.getName() : null)
                 .gymAddress(gym != null ? gym.getAddress() : null)
-                .gymDescription(gym != null ? gym.getDescription() : null)
-                .gymContactNumber(gym != null ? gym.getContactNumber() : null)
-                .gymImage(gym != null ? gym.getImage() : null)
-                .gymUrl(gym != null ? gym.getUrl() : null)
-                .gymRegion(gym != null ? gym.getRegion() : null)
-                .matches(court.getMatches()
-                        .stream()
-                        .map(MatchDocument::from)
-                        .toList())
                 .build();
 
         courtElasticsearchRepository.save(courtDocument);

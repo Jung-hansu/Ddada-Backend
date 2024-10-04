@@ -8,12 +8,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.match.request.CheckPlayerBookedRequest;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.match.service.MatchService;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Slf4j
 @RestController
@@ -24,7 +28,6 @@ public class MatchController {
 
     private final MatchService matchService;
 
-    // TODO: ES 구상하기
     @Operation(summary = "경기 리스트 조회", description = "키워드 및 경기 상태 기반으로 경기 리스트를 조회하는 api입니다.")
     @GetMapping
     public CommonResponse<Page<MatchSimpleResponse>> getMatchesByKeyword(
@@ -89,4 +92,16 @@ public class MatchController {
         return CommonResponse.ok("팀 선수가 성공적으로 변경되었습니다.", null);
     }
 
+    @PreAuthorize(("hasRole('ROLE_PLAYER')"))
+    @Operation(summary = "선수 예약된 경기 확인", description = "같은 시간에 이미 예약된 경기가 있는지 확인하는 api입니다.")
+    @GetMapping("/player/bookings")
+    public CommonResponse<Boolean> checkPlayerBooked(
+            @RequestParam LocalDate date,
+            @RequestParam LocalTime time
+    ) {
+        log.info("선수 예약된 경기 확인 >>> 선수 ID: {}, 날짜: {}, 시간: {}",date, time);
+        CheckPlayerBookedRequest request = new CheckPlayerBookedRequest(date, time);
+        Boolean response = matchService.CheckPlayerBooked(request.toCommand());
+        return CommonResponse.ok(response);
+    }
 }

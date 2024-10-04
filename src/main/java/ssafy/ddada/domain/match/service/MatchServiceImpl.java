@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
+import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
+import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -29,7 +33,9 @@ import ssafy.ddada.domain.match.repository.TeamRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
@@ -86,7 +92,7 @@ public class MatchServiceImpl implements MatchService {
                 command.pageable()
         );
 
-        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId)));
+        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId), s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
     }
 
     @Override
@@ -97,13 +103,12 @@ public class MatchServiceImpl implements MatchService {
         return MatchDetailResponse.from(
                 match,
                 s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer1().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam1().getPlayer2().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer1().getImage()),
-                s3Util.getPresignedUrlFromS3(match.getTeam2().getPlayer2().getImage())
+                getPlayerImage(match.getTeam1().getPlayer1()),
+                getPlayerImage(match.getTeam1().getPlayer2()),
+                getPlayerImage(match.getTeam2().getPlayer1()),
+                getPlayerImage(match.getTeam2().getPlayer2())
         );
     }
-
 
     @Override
     @Transactional
@@ -183,7 +188,7 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MemberNotFoundException::new);
 
         // 같은 시간에 이미 경기가 있는지 확인
-        int conflictCount = matchRepository.countByPlayerAndDateTime(player, match.getMatchDate(), match.getMatchTime());
+        int conflictCount = matchRepository.countByPlayerAndDateTime(player.getId(), match.getMatchDate(), match.getMatchTime());
         if (conflictCount > 0) {
             throw new PlayerAlreadyBookedException();
         }
@@ -254,6 +259,10 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void createMatch(Long creatorId, MatchCreateCommand command) {
+        int conflictCount = matchRepository.countByPlayerAndDateTime(creatorId, command.matchDate(), command.matchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
         Court court = courtRepository.findById(command.courtId())
                 .orElseThrow(CourtNotFoundException::new);
         Player creator = playerRepository.findById(creatorId)
@@ -282,7 +291,7 @@ public class MatchServiceImpl implements MatchService {
                         command.statuses(),
                         command.pageable()
                 )
-                .map(match -> MatchSimpleResponse.from(match, true));
+                .map(match -> MatchSimpleResponse.from(match, true, s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
     }
 
     @Override
@@ -293,7 +302,11 @@ public class MatchServiceImpl implements MatchService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
 
-        int conflictCount = matchRepository.countByManagerAndDateTime(manager, match.getMatchDate(), match.getMatchTime());
+        if (match.getManager() != null) {
+            throw new ManagerAlreadyExistException();
+        }
+
+        int conflictCount = matchRepository.countByManagerAndDateTime(manager.getId(), match.getMatchDate(), match.getMatchTime());
         if (conflictCount > 0) {
             throw new ManagerAlreadyBookedException();
         }
@@ -409,8 +422,8 @@ public class MatchServiceImpl implements MatchService {
         Team winningTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam1() : match.getTeam2();
         Team losingTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam2() : match.getTeam1();
 
-        double winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
-        double losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
+        int winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
+        int losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
 
         // 팀의 총 점수 계산
         int winningTeamTotalScore = matchCommand.sets().stream()
@@ -425,7 +438,7 @@ public class MatchServiceImpl implements MatchService {
 
         // 플레이어 레이팅 업데이트
         for (Player player : winningTeam.getPlayers()) {
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore, 60, -100, 100);
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,winningTeamRating, losingTeamRating);
 
             // 레이팅 변화 기록
             RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
@@ -433,15 +446,25 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
+            player.setGameCount(player.getGameCount()+1);
             playerRepository.save(player);
         }
 
         // 진 팀 플레이어 점수 계산
         for (Player player : losingTeam.getPlayers()) {
-            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, 60, -100, 100);
-
+            player.incrementLoseStreak();
+            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
+            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
+            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
+            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
-            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            if (ratingChange == null) {
+                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            }
+            else {
+                ratingChange.setRatingChange(newRating - player.getRating());
+            }
             ratingChangeRepository.save(ratingChange);
 
             // 플레이어의 레이팅 업데이트
@@ -454,4 +477,60 @@ public class MatchServiceImpl implements MatchService {
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
         gymAdminRepository.save(gymAdmin);
     }
+
+    public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
+        Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+        return true;
+    }
+
+    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
+        int totalScore = 0;   // 총 득점
+        int totalMissed = 0;  // 총 실점
+
+        // 각 세트에 대해 반복
+        for (MatchResultCommand.SetResultCommand setResult : matchResultCommand.sets()) {
+            // 각 세트의 점수 결과에 대해 반복
+            for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
+                // 득점 확인
+                if (scoreResult.earnedPlayer().longValue() == playerId) {
+                    totalScore++;
+                }
+
+                // 실점 확인
+                if (scoreResult.missedPlayer1() != null && scoreResult.missedPlayer1().longValue() == playerId) {
+                    totalMissed++;
+                }
+                if (scoreResult.missedPlayer2() != null && scoreResult.missedPlayer2().longValue() == playerId) {
+                    totalMissed++;
+                }
+            }
+        }
+
+        return Arrays.asList(totalScore, totalMissed);
+    }
+
+    private String getPlayerImage(Player player) {
+        // 기본 이미지 경로
+        String defaultImageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+
+        // 플레이어가 null인 경우 기본 이미지 URL 반환
+        if (player == null) {
+            log.warn("플레이어 객체가 null입니다.");
+            return null;
+        }
+
+        // 플레이어의 이미지 경로가 null이거나 비어있는 경우 기본 이미지 URL 반환
+        if (player.getImage() == null || player.getImage().isEmpty()) {
+            log.warn("{}의 이미지 경로가 null 또는 비어있습니다. 기본 이미지 URL 반환: {}", player.getNickname(), defaultImageUrl);
+            return s3Util.getPresignedUrlFromS3(defaultImageUrl);
+        }
+
+        // S3에서 presigned URL 생성
+        return s3Util.getPresignedUrlFromS3(player.getImage());
+    }
+
 }

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 
@@ -27,4 +28,10 @@ public class ManagerExceptionHandler {
         return CommonResponse.notFound(e.getErrorCode());
     }
 
+    @ExceptionHandler(ManagerAlreadyBookedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public CommonResponse<?> handleManagerAlreadyBookedException(ManagerAlreadyBookedException e) {
+        log.error("ManagerAlreadyBookedException occurs", e);
+        return CommonResponse.conflict(e.getErrorCode());
+    }
 }

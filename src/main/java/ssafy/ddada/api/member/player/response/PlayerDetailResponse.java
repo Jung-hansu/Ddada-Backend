@@ -11,9 +11,12 @@ public record PlayerDetailResponse(
         String nickname,
 
         @Schema(description = "레이팅", example = "25")
-        Integer rating
+        Integer rating,
+
+        @Schema(description = "선수 경기 수")
+        Integer gameCount
 ) {
-    public static PlayerDetailResponse of(String profileImageBase64, String nickname, Integer rating) {
-        return new PlayerDetailResponse(profileImageBase64, nickname, rating);
+    public static PlayerDetailResponse of(String profileImageBase64, String nickname, Integer rating, Integer gameCount) {
+        return new PlayerDetailResponse(profileImageBase64, nickname, rating, gameCount);
     }
 }

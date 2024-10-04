@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
-import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.config.auth.JwtProcessor;

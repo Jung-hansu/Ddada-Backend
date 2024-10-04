@@ -22,6 +22,14 @@ public interface CourtRepository extends JpaRepository<Court, Long> {
     """)
     Optional<Court> findCourtWithMatchesById(@Param("courtId") Long courtId);
 
+    @EntityGraph(attributePaths = {"gym", "matches"})
+    @Query("""
+        SELECT c
+        FROM Court c
+        WHERE c.id in :courtIds
+    """)
+    List<Court> findCourtsByCourtIds(@Param("courtIds") List<Long> courtIds);
+
     @EntityGraph(attributePaths = {"gym", "gym.gymAdmin", "matches"})
     @NotNull
     List<Court> findAll();
