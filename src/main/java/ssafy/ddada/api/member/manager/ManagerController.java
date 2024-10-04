@@ -81,12 +81,6 @@ public class ManagerController {
     @Operation(summary = "매니저 경기 할당 해제", description = "매니저를 경기에서 할당 해제하는 api입니다.")
     @DeleteMapping("/matches/{match_id}")
     public CommonResponse<?> deallocateToMatch(@PathVariable("match_id") Long matchId){
-        MemberRole memberRole = SecurityUtil.getLoginMemberRole()
-                .orElseThrow(NotAuthenticatedException::new);
-        if (memberRole != MemberRole.MANAGER){
-            throw new NotAuthenticatedException();
-        }
-
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         log.info("매니저 경기 할당 해제 >>>> 매니저 ID: {}, 경기 ID: {}", managerId, matchId);
