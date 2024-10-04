@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
@@ -60,8 +61,9 @@ public class CourtServiceImpl implements CourtService {
             criteria = criteria.and("gymRegion").in(regions);
         }
 
-        CriteriaQuery query = new CriteriaQuery(criteria);
-        List<Long> courtIds = elasticsearchOperations.search(query, CourtDocument.class)
+        CriteriaQuery query = new CriteriaQuery(criteria).setPageable(command.pageable());
+        SearchHits<CourtDocument> courtDocuments = elasticsearchOperations.search(query, CourtDocument.class);
+        List<Long> courtIds = courtDocuments
                 .map(searchHit -> searchHit.getContent().getCourtId())
                 .toList();
         List<CourtSimpleResponse> courts = courtRepository.findCourtsByCourtIds(courtIds)
@@ -73,7 +75,7 @@ public class CourtServiceImpl implements CourtService {
                 })
                 .toList();
 
-        return new PageImpl<>(courts, command.pageable(), courts.size());
+        return new PageImpl<>(courts, command.pageable(), courtDocuments.getTotalHits());
     }
 
     @Override
