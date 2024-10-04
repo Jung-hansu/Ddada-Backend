@@ -88,7 +88,7 @@ public class MatchServiceImpl implements MatchService {
                 command.pageable()
         );
 
-        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId)));
+        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId), s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
     }
 
     @Override
@@ -287,7 +287,7 @@ public class MatchServiceImpl implements MatchService {
                         command.statuses(),
                         command.pageable()
                 )
-                .map(match -> MatchSimpleResponse.from(match, true));
+                .map(match -> MatchSimpleResponse.from(match, true, s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
     }
 
     @Override
