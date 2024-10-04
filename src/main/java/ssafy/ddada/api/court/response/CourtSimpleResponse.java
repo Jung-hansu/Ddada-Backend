@@ -3,8 +3,6 @@ package ssafy.ddada.api.court.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.court.entity.Court;
-import ssafy.ddada.domain.court.entity.CourtDocument;
-import ssafy.ddada.domain.match.entity.MatchDocument;
 
 import java.util.List;
 import java.util.Map;
@@ -41,19 +39,24 @@ public record CourtSimpleResponse(
         );
     }
 
-    public static CourtSimpleResponse from(CourtDocument court, String presignedUrl) {
+    public static CourtSimpleResponse from(Court court, String presignedUrl) {
         return new CourtSimpleResponse(
-                court.getCourtId(),
-                court.getGymName(),
-                court.getGymAddress(),
+                court.getId(),
+                court.getGym().getName(),
+                court.getGym().getAddress(),
                 presignedUrl,
-                court.getGymRegion(),
+                court.getGym().getRegion().getKorValue(),
                 court.getMatches()
                         .stream()
-                        .collect(Collectors.groupingBy(
-                                MatchDocument::getMatchDate,
-                                Collectors.mapping(MatchDocument::getMatchTime, Collectors.toList())
-                        ))
+                        .collect(
+                                Collectors.groupingBy(
+                                        match -> match.getMatchDate().toString(),
+                                        Collectors.mapping(
+                                                match -> match.getMatchTime().toString(),
+                                                Collectors.toList()
+                                        )
+                                )
+                        )
         );
     }
 }

@@ -17,10 +17,8 @@ import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
 import ssafy.ddada.domain.court.entity.Gym;
-import ssafy.ddada.domain.court.entity.Region;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
-import ssafy.ddada.domain.match.entity.MatchDocument;
 
 import java.util.List;
 import java.util.Objects;
@@ -63,12 +61,15 @@ public class CourtServiceImpl implements CourtService {
         }
 
         CriteriaQuery query = new CriteriaQuery(criteria);
-        List<CourtSimpleResponse> courts = elasticsearchOperations.search(query, CourtDocument.class)
-                .map(searchHit -> {
-                    CourtDocument courtDocument = searchHit.getContent();
-                    String image = Objects.requireNonNull(courtDocument.getGymImage());
+        List<Long> courtIds = elasticsearchOperations.search(query, CourtDocument.class)
+                .map(searchHit -> searchHit.getContent().getCourtId())
+                .toList();
+        List<CourtSimpleResponse> courts = courtRepository.findCourtsByCourtIds(courtIds)
+                .stream()
+                .map(court -> {
+                    String image = Objects.requireNonNull(court.getGym().getImage());
                     String presignedUrl = s3Util.getPresignedUrlFromS3(image);
-                    return CourtSimpleResponse.from(courtDocument, presignedUrl);
+                    return CourtSimpleResponse.from(court, presignedUrl);
                 })
                 .toList();
 
@@ -93,15 +94,6 @@ public class CourtServiceImpl implements CourtService {
                 .courtId(court.getId())
                 .gymName(gym != null ? gym.getName() : null)
                 .gymAddress(gym != null ? gym.getAddress() : null)
-                .gymDescription(gym != null ? gym.getDescription() : null)
-                .gymContactNumber(gym != null ? gym.getContactNumber() : null)
-                .gymImage(gym != null ? gym.getImage() : null)
-                .gymUrl(gym != null ? gym.getUrl() : null)
-                .gymRegion(gym != null ? gym.getRegion().getKorValue() : null)
-                .matches(court.getMatches()
-                        .stream()
-                        .map(MatchDocument::from)
-                        .toList())
                 .build();
 
         courtElasticsearchRepository.save(courtDocument);
