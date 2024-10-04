@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
+import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
+import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.entity.Court;
@@ -297,6 +299,10 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
+
+        if (match.getManager() != null) {
+            throw new ManagerAlreadyExistException();
+        }
 
         int conflictCount = matchRepository.countByManagerAndDateTime(manager.getId(), match.getMatchDate(), match.getMatchTime());
         if (conflictCount > 0) {

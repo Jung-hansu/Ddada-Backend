@@ -20,8 +20,7 @@ public enum MatchErrorCode implements BaseErrorCode{
     TEAM_NOT_FOUND(NOT_FOUND, "TEAM_404_1", "존재하지 않는 팀입니다."),
     TEAM_PLAYER_NOT_FOUND(NOT_FOUND, "TEAM_404_2", "팀에 선수가 존재하지 않습니다."),
 
-    PLAYER_ALREADY_BOOKED(CONFLICT, "PLAYER_409_1", "같은 시간에 다른 경기가 이미 예약된 선수입니다."),
-    MANAGER_ALREADY_BOOKED(CONFLICT, "MANAGER_409_2", "같은 시간에 다른 경기가 이미 예약된 매니저입니다."),
+    MANAGER_ALREADY_EXIST(CONFLICT, "MATCH_409_1", "해당 경기에 매니저가 이미 존재합니다."),
     ;
 
     private final Integer httpStatus;

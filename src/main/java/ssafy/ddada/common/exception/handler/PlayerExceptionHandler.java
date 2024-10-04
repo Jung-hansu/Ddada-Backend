@@ -94,4 +94,11 @@ public class PlayerExceptionHandler {
         log.error("NickNameDuplicateException Error", e);
         return CommonResponse.conflict(e.getErrorCode());
     }
+
+    @ExceptionHandler(PlayerAlreadyBookedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public CommonResponse<?> handlePlayerAlreadyBookedException(PlayerAlreadyBookedException e) {
+        log.error("PlayerAlreadyBookedException occurs", e);
+        return CommonResponse.conflict(e.getErrorCode());
+    }
 }
