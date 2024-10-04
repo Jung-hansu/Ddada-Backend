@@ -2,6 +2,7 @@ package ssafy.ddada;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -9,7 +10,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 
 @EnableJpaAuditing
 @EnableFeignClients
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ssafy.ddada"})
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 public class DdadaApplication {
 

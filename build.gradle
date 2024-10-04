@@ -77,6 +77,10 @@ dependencies {
 
     // gmail 인증
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.0.5'
+
+    //fastapi 연결
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'io.projectreactor:reactor-core'
 }
 
 tasks.named('test') {
