@@ -454,8 +454,8 @@ public class MatchServiceImpl implements MatchService {
         for (Player player : losingTeam.getPlayers()) {
             player.incrementLoseStreak();
             List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
-            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            double earnedRate = winningTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
             RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
