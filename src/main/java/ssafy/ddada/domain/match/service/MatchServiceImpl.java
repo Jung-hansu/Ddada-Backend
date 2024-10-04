@@ -431,7 +431,7 @@ public class MatchServiceImpl implements MatchService {
 
         // 플레이어 레이팅 업데이트
         for (Player player : winningTeam.getPlayers()) {
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,winningTeamRating, losingTeamRating,-100, 100);
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,winningTeamRating, losingTeamRating);
 
             // 레이팅 변화 기록
             RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
