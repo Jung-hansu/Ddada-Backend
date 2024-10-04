@@ -33,12 +33,12 @@ public record CourtSimpleResponse(
         return court.getGym().getName() + " " + court.getCourtNumber() + "번 코트";
     }
 
-    public static CourtSimpleResponse onMatchListFrom(Court court) {
+    public static CourtSimpleResponse onMatchListFrom(Court court, String presignedUrl) {
         return new CourtSimpleResponse(
                 court.getId(),
                 getCourtName(court),
                 court.getGym().getAddress(),
-                null,
+                presignedUrl,
                 court.getGym().getRegion().getKorValue(),
                 null
         );
