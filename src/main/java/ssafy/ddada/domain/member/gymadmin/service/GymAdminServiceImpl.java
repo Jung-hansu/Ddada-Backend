@@ -8,6 +8,8 @@ import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 
+import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -18,13 +20,15 @@ public class GymAdminServiceImpl implements GymAdminService{
 
     @Override
     @Transactional
-    public GymAdmin settleAccount(Long gymAdminId, String account, Integer amount) {
-        log.info("계좌 {}에 {}원을 지급했습니다.", account, amount);
+    public void settleAccount(Long gymAdminId, String account) {
         GymAdmin gymAdmin = gymAdminRepository.findByIdWithInfos(gymAdminId)
                 .orElseThrow(GymAdminNotFoundException::new);
+        Integer amount = nullToZero(gymAdmin.getCumulativeIncome());
 
+        log.info("계좌 {}에 {}원을 지급했습니다.", account, amount);
+        // hook()
         gymAdmin.setCumulativeIncome(0);
-        return gymAdminRepository.save(gymAdmin);
+        gymAdminRepository.save(gymAdmin);
     }
 
 }
