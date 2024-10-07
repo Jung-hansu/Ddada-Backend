@@ -15,6 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ssafy.ddada.config.auth.DecodedJwtToken;
 import ssafy.ddada.config.auth.JwtProcessor;
+import ssafy.ddada.common.exception.security.TokenExpiredException;
+import ssafy.ddada.common.exception.security.InvalidSignatureTokenException;
+import ssafy.ddada.common.exception.security.InvalidTokenException;
+import ssafy.ddada.common.exception.token.TokenTypeNotMatchedException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +31,39 @@ import static ssafy.ddada.common.constant.redis.KEY_PREFIX.ACCESS_TOKEN;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtProcessor jwtProcessor;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = resolveToken(request);
-        if (Objects.nonNull(token)) {
-            Authentication authentication = getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication); //SecurityContextHolder에 담기
+        try {
+            String token = resolveToken(request);
+            if (Objects.nonNull(token)) {
+                Authentication authentication = getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (TokenExpiredException e) {
+            log.error("TokenExpiredException: {}", e.getMessage());
+            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token expired: " + e.getMessage());
+            return;
+        } catch (InvalidSignatureTokenException e) {
+            log.error("InvalidSignatureTokenException: {}", e.getMessage());
+            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid signature: " + e.getMessage());
+            return;
+        } catch (InvalidTokenException e) {
+            log.error("InvalidTokenException: {}", e.getMessage());
+            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: " + e.getMessage());
+            return;
+        } catch (TokenTypeNotMatchedException e) {
+            log.error("TokenTypeNotMatchedException: {}", e.getMessage());
+            setErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Token type mismatch: " + e.getMessage());
+            return;
+        } catch (Exception e) {
+            log.error("Unhandled exception: {}", e.getMessage());
+            setErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error: " + e.getMessage());
+            return;
         }
+
         filterChain.doFilter(request, response);
     }
 
@@ -58,5 +86,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken;
         }
         return null;
+    }
+
+    private void setErrorResponse(HttpServletResponse response, int statusCode, String message) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        response.getWriter().write("{ \"error\": \"" + statusCode + "\", \"message\": \"" + message + "\" }");
     }
 }
