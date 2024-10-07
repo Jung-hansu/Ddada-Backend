@@ -241,11 +241,11 @@ public class AuthServiceImpl implements AuthService {
         log.info(">>> role: {}, id: {}", role, id);
 
         return switch (role) {
-            case "선수" -> playerRepository.findById(id)
+            case "PLAYER" -> playerRepository.findById(id)
                     .map(member -> (Member) member);
-            case "체육관 관리자" -> gymAdminRepository.findById(id)
+            case "GYM_ADMIN" -> gymAdminRepository.findById(id)
                     .map(gymAdmin -> (Member) gymAdmin);
-            case "매니저" -> managerRepository.findById(id)
+            case "MANAGER" -> managerRepository.findById(id)
                     .map(manager -> (Member) manager);
             default -> throw new IllegalArgumentException("Unknown role: " + role);
         };
