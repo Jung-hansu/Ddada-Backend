@@ -26,7 +26,7 @@ public class DataController {
     }
 
     @Operation(summary = "선수 분석 조회", description = "선수의 분석 데이터를 조회하는 API입니다.")
-    @GetMapping("/player/")
+    @GetMapping("/player")
     public CommonResponse<PlayerAnalysticsResponse> PlayerAnalytics() {
         PlayerAnalysticsResponse response = dataService.PlayerAnalytics();
         return CommonResponse.ok(response);
