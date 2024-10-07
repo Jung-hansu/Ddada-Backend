@@ -438,10 +438,20 @@ public class MatchServiceImpl implements MatchService {
 
         // 플레이어 레이팅 업데이트
         for (Player player : winningTeam.getPlayers()) {
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,winningTeamRating, losingTeamRating);
+            player.incrementWinStreak();
+            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
+            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
+            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
+            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
 
             // 레이팅 변화 기록
-            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            if (ratingChange == null) {
+                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            }
+            else {
+                ratingChange.setRatingChange(newRating - player.getRating());
+            }
             ratingChangeRepository.save(ratingChange);
 
             // 플레이어의 레이팅 업데이트
@@ -469,6 +479,7 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
+            player.setGameCount(player.getGameCount()+1);
             playerRepository.save(player);
         }
 
