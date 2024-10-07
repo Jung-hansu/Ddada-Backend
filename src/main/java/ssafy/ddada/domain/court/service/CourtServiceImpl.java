@@ -21,6 +21,7 @@ import ssafy.ddada.domain.court.entity.Gym;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -80,25 +81,31 @@ public class CourtServiceImpl implements CourtService {
 
     @Override
     public void indexAll() {
+        final int batchSize = 10;
         List<Court> courts = courtRepository.findAll();
+        List<CourtDocument> courtDocuments = new ArrayList<>(batchSize);
         int size = courts.size(), cur = 0;
 
         for (Court court : courts) {
-            indexCourt(court);
-            log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
+            courtDocuments.add(createCourtDocument(court));
+            cur++;
+
+            if (cur % batchSize == 0 || cur == size) {
+                log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
+                courtElasticsearchRepository.saveAll(courtDocuments);
+                courtDocuments.clear();
+            }
         }
     }
 
-    private void indexCourt(Court court) {
+    private CourtDocument createCourtDocument(Court court) {
         Gym gym = court.getGym();
-        CourtDocument courtDocument = CourtDocument.builder()
+        return CourtDocument.builder()
                 .id(String.valueOf(court.getId()))
                 .courtId(court.getId())
                 .gymName(gym != null ? gym.getName() : null)
                 .gymAddress(gym != null ? gym.getAddress() : null)
                 .build();
-
-        courtElasticsearchRepository.save(courtDocument);
     }
 
 }
