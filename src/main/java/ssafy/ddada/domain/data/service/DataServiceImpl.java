@@ -1,55 +1,51 @@
 package ssafy.ddada.domain.data.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
+import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.util.SecurityUtil;
+import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class DataServiceImpl {
+@Slf4j
+public class DataServiceImpl implements DataService {
+
     private final WebClient webClient;
+    private final PlayerRepository playerRepository;
 
+    String url = "http://j11a509.p.ssafy.io:8000/"; // 실제 API 엔드포인트로 변경 필요
 
-    public String getFastApiData() {
-        // FastAPI 서버에 GET 요청 보내기
-        Mono<String> response = webClient.get()
-                .uri("http://localhost:8000/data")  // FastAPI 서버 주소
-                .retrieve()
-                .bodyToMono(String.class);
+    @Override
+    public PlayerMatchAnalyticsResponse PlayerMatchAnalytics(Long matchId) {
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(() -> new NotAuthenticatedException());
 
-        // 응답을 차단하여 동기식으로 변환 후 반환
-        return response.block();
-    }
+        String requestUrl = url + playerId + "/" + matchId + "/";
 
-    public String sendItemToFastApi(String name, String description, double price) {
-        // FastAPI로 보낼 데이터
-        ItemRequest itemRequest = new ItemRequest(name, description, price);
+        try {
+            // WebClient를 사용하여 GET 요청을 보내고 응답을 PlayerMatchAnalyticsResponse로 매핑
+            PlayerMatchAnalyticsResponse response = webClient.get()
+                    .uri(requestUrl)
+                    .retrieve()
+                    .bodyToMono(PlayerMatchAnalyticsResponse.class)
+                    .block(); // 동기적으로 응답을 기다림
 
-        Mono<String> response = webClient.post()
-                .uri("http://localhost:8000/item/")  // FastAPI 서버의 POST 엔드포인트
-                .bodyValue(itemRequest)
-                .retrieve()
-                .bodyToMono(String.class);
+            if (response == null) {
+                throw new RuntimeException("응답이 null입니다.");
+            }
+            log.info("PlayerMatchAnalyticsResponse: {}", response);
+            return response;
 
-        return response.block();
-    }
-
-    // 내부적으로 사용할 요청 모델
-    static class ItemRequest {
-        private String name;
-        private String description;
-        private double price;
-
-        public ItemRequest(String name, String description, double price) {
-            this.name = name;
-            this.description = description;
-            this.price = price;
+        } catch (Exception e) {
+            // 예외 처리 로직
+            e.printStackTrace();
+            throw new RuntimeException("PlayerMatchAnalytics 데이터를 가져오는 중 오류가 발생했습니다.", e);
         }
-
-        // getter와 setter 생략
     }
-
 }
