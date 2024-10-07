@@ -9,20 +9,20 @@ import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand
 
 public interface MatchService {
 
-    Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command);
-    void createMatch(Long creatorId, MatchCreateCommand command);
+    Page<MatchSimpleResponse> getFilteredMatches(MatchSearchCommand command);
+    void createMatch(MatchCreateCommand command);
     MatchDetailResponse getMatchByIdWithInfos(Long matchId);
     void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command);
     boolean CheckPlayerBooked(CheckPlayerBookedCommand command);
 
     // Team 관련 메소드
-    void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
-    void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber);
+    void setTeamPlayer(Long matchId, Integer teamNumber);
+    void unsetTeamPlayer(Long matchId, Integer teamNumber);
 
     // Manager 관련 메소드
     Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command);
-    void allocateManager(Long matchId, Long managerId);
-    void deallocateManager(Long matchId, Long managerId);
-    void saveMatch(Long matchId, Long managerId, MatchResultCommand command);
+    void allocateManager(Long matchId);
+    void deallocateManager(Long matchId);
+    void saveMatch(Long matchId, MatchResultCommand command);
 
 }

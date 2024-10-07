@@ -6,7 +6,6 @@ import ssafy.ddada.domain.match.entity.MatchStatus;
 import java.util.Set;
 
 public record ManagerSearchMatchCommand(
-        Long managerId,
         String keyword,
         boolean todayOnly,
         Set<MatchStatus> statuses,

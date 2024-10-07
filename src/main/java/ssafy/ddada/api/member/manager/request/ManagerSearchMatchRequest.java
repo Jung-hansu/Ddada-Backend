@@ -10,7 +10,6 @@ import static ssafy.ddada.common.util.ParameterUtil.nullToFalse;
 
 @Schema(description = "매니저 할당 경기 검색 결과")
 public record ManagerSearchMatchRequest(
-        Long managerId,
         String keyword,
         Boolean todayOnly,
         String statuses,
@@ -19,7 +18,6 @@ public record ManagerSearchMatchRequest(
 ) {
     public ManagerSearchMatchCommand toCommand(){
         return new ManagerSearchMatchCommand(
-                managerId,
                 keyword,
                 nullToFalse(todayOnly),
                 MatchStatus.toMatchStatusSet(statuses),

@@ -16,55 +16,49 @@ import ssafy.ddada.domain.member.player.service.PlayerService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/player")
-@Slf4j
 @Tag(name = "Player", description = "회원관리")
 public class PlayerController {
+
     private final PlayerService playerService;
 
     @Operation(summary = "회원가입", description = """
          소셜로그인 시 저장된 임시 회원 정보를 정식 회원으로 업데이트하는 API입니다.
          이 과정을 통해 해당 회원은 임시 회원이 아닌 정식 회원으로 전환됩니다.
-         """)
+     """)
     @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
-    public CommonResponse<PlayerSignupResponse> signup(
-            @ModelAttribute @Validated PlayerSignupRequest request
-    ) {
+    public CommonResponse<PlayerSignupResponse> signup(@ModelAttribute @Validated PlayerSignupRequest request) {
+        log.info("회원가입 >>>> request: {}", request);
         PlayerSignupResponse response = playerService.signupMember(request.toCommand());
-
         return CommonResponse.ok(response);
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
-    @PatchMapping(value="")
-    public CommonResponse<PlayerDeleteResponse> deleteMember() {
+    @PatchMapping
+    public CommonResponse<?> deleteMember() {
+        log.info("회원 탈퇴");
         String message = playerService.deleteMember();
-        return CommonResponse.ok(PlayerDeleteResponse.of(message));
+        return CommonResponse.ok(message, null);
     }
 
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
     @GetMapping("/nickname")
-    public CommonResponse<String> checkNickname(
-            @RequestParam("nickname") String nickname
-    ) {
-        Boolean isDuplicated = playerService.checkNickname(nickname);
-        if (isDuplicated) {
-            String message = "이미 사용중인 닉네임입니다.";
-            return CommonResponse.ok(message, null);
-        } else {
-            String message = "사용 가능한 닉네임입니다.";
-            return CommonResponse.ok(message, null);
-        }
+    public CommonResponse<String> checkNickname(@RequestParam String nickname) {
+        log.info("닉네임 중복 조회 >>>> nickname: {}", nickname);
+        boolean isDuplicated = playerService.checkNickname(nickname);
+        String message = isDuplicated ? "이미 사용중인 닉네임입니다." : "사용 가능한 닉네임입니다.";
+        return CommonResponse.ok(message, null);
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "로그인 시 회원 정보 조회", description = "로그인 시 회원 정보를 조회하는 API입니다.")
-    @GetMapping("")
-    public CommonResponse<PlayerDetailResponse> getMemberDetail(
-    ) {
+    @GetMapping
+    public CommonResponse<PlayerDetailResponse> getMemberDetail() {
+        log.info("로그인 시 회원 정보 조회");
         PlayerDetailResponse response = playerService.getMemberDetail();
         return CommonResponse.ok(response);
     }
@@ -72,8 +66,8 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "프로필에서 회원 정보 조회", description = "프로필에서 회원 정보를 조회하는 API입니다.")
     @GetMapping("/profile")
-    public CommonResponse<PlayerProfileDetailResponse> getMemberProfileDetail(
-    ) {
+    public CommonResponse<PlayerProfileDetailResponse> getMemberProfileDetail() {
+        log.info("프로필에서 회원 정보 조회");
         PlayerProfileDetailResponse response = playerService.getMemberProfileDetail();
         return CommonResponse.ok(response);
     }
@@ -81,18 +75,16 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정하는 API입니다.")
     @PutMapping(value = "/profile", consumes = { "multipart/form-data" })
-    public CommonResponse<PlayerDetailResponse> updateMemberProfile(
-            @ModelAttribute @Validated PlayerUpdateRequest request
-    ) {
+    public CommonResponse<PlayerDetailResponse> updateMemberProfile(@ModelAttribute @Validated PlayerUpdateRequest request) {
+        log.info("회원 정보 수정 >>>> request: {}", request);
         PlayerDetailResponse response = playerService.updateMemberProfile(request.toCommand());
         return CommonResponse.ok(response);
     }
 
     @Operation(summary = "회원 비밀번호 수정", description = "회원 비밀번호를 수정하는 API입니다.")
     @PatchMapping(value = "/password")
-    public CommonResponse<String> updateMemberPassword(
-            @RequestBody PasswordUpdateRequest request
-            ) {
+    public CommonResponse<String> updateMemberPassword(@RequestBody PasswordUpdateRequest request) {
+        log.info("회원 비밀번호 수정 >>>> request: {}", request);
         String response = playerService.updateMemberPassword(request.toCommand());
         return CommonResponse.ok(response);
     }
@@ -100,8 +92,8 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 경기 조회", description = "플레이어의 경기들을 조회하는 API입니다.")
     @GetMapping("/matches")
-    public CommonResponse<List<PlayerMatchResponse>> getPlayerMatches(
-    ) {
+    public CommonResponse<List<PlayerMatchResponse>> getPlayerMatches() {
+        log.info("플레이어의 경기 조회");
         List<PlayerMatchResponse> response = playerService.getPlayerMatches();
         return CommonResponse.ok(response);
     }
@@ -109,17 +101,17 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 완료된 경기 조회", description = "플레이어의 완료된 경기들을 조회하는 API입니다.")
     @GetMapping("/matches/finished")
-    public CommonResponse<List<PlayerMatchResponse>> getPlayerCompleteMatches(
-    ) {
+    public CommonResponse<List<PlayerMatchResponse>> getPlayerCompleteMatches() {
+        log.info("플레이어의 완료된 경기 조회");
         List<PlayerMatchResponse> response = playerService.getPlayerCompleteMatches();
         return CommonResponse.ok(response);
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
-    @Operation(summary = "플레이어의 id 조회", description = "나의 id를 조회하는 API입니다.")
+    @Operation(summary = "플레이어의 ID 조회", description = "나의 id를 조회하는 API입니다.")
     @GetMapping("/id")
-    public CommonResponse<PlayerIdResponse> getPlayerId(
-    ) {
+    public CommonResponse<PlayerIdResponse> getPlayerId() {
+        log.info("플레이어의 ID 조회");
         PlayerIdResponse response = playerService.getPlayerId();
         return CommonResponse.ok(response);
     }
