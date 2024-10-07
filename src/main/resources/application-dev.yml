@@ -33,3 +33,14 @@ springdoc:
     path: '/swagger'
     try-it-out-enabled: true
     operations-sorter: alpha
+
+management:
+  server:
+    port: 8081
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
