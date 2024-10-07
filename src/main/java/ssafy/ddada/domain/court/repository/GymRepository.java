@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface GymRepository extends JpaRepository<Gym, Long> {
 
-    @EntityGraph(attributePaths = {"gymAdmin", "courts", "courts.matches"})
+    @EntityGraph(attributePaths = {"gymAdmin", "courts"})
     @Query("""
         SELECT g
         FROM Gym g
