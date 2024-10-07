@@ -454,8 +454,8 @@ public class MatchServiceImpl implements MatchService {
         for (Player player : losingTeam.getPlayers()) {
             player.incrementLoseStreak();
             List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
-            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            double earnedRate = winningTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
             RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
@@ -496,7 +496,7 @@ public class MatchServiceImpl implements MatchService {
             // 각 세트의 점수 결과에 대해 반복
             for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
                 // 득점 확인
-                if (scoreResult.earnedPlayer().longValue() == playerId) {
+                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
                     totalScore++;
                 }
 
