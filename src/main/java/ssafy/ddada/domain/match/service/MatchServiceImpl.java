@@ -16,6 +16,7 @@ import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.util.RankingUtil;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -59,6 +60,7 @@ public class MatchServiceImpl implements MatchService {
     private final RatingUtil ratingUtil;
     private final RatingChangeRepository ratingChangeRepository;
     private final S3Util s3Util;
+    private final RankingUtil rankingUtil;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
@@ -496,7 +498,7 @@ public class MatchServiceImpl implements MatchService {
             double earnedRate = winTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winTeamTotalScore;
             double missedRate = loseTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / loseTeamTotalScore;
 
-            // 플레이어의 레이팅 업데이트
+            // 플레이어의 레이팅 및 랭킹 업데이트
             int newRating = ratingUtil.updatePlayerRating(
                     player,
                     oppositeTeamRating,
@@ -508,6 +510,7 @@ public class MatchServiceImpl implements MatchService {
             player.setRating(newRating);
             player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
 
             // 레이팅 변화 기록
             RatingChange ratingChange = ratingChangeRepository
@@ -515,7 +518,6 @@ public class MatchServiceImpl implements MatchService {
                     .orElse(RatingChange.createRatingChange(newRating - player.getRating(), player, match));
             ratingChange.setRatingChange(newRating - player.getRating());
             ratingChangeRepository.save(ratingChange);
-
         }
     }
 
