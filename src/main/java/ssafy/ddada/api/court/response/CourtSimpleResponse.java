@@ -47,7 +47,7 @@ public record CourtSimpleResponse(
     public static CourtSimpleResponse from(Court court, String presignedUrl) {
         return new CourtSimpleResponse(
                 court.getId(),
-                court.getGym().getName(),
+                getCourtName(court),
                 court.getGym().getAddress(),
                 presignedUrl,
                 court.getGym().getRegion().getKorValue(),
