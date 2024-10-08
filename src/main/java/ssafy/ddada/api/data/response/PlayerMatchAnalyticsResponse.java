@@ -29,7 +29,7 @@ public record PlayerMatchAnalyticsResponse(
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record SetInfoResponse(
             @Schema(description = "세트 번호")
-            int setNumber,
+            Integer setNumber,
 
             @Schema(description = "득점한 플레이어")
             List<Integer> earnedPlayer,
@@ -164,7 +164,7 @@ public record PlayerMatchAnalyticsResponse(
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record StrategyResponse(
             @Schema(description = "패배한 플레이어")
-            int loser,
+            Integer loser,
 
             @Schema(description = "실점 기술 정보")
             List<List<String>> loseSkill,

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.gym.request.SettleAccountRequest;
 import ssafy.ddada.api.gym.response.GymDetailResponse;
 import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;
 import ssafy.ddada.api.gym.response.GymMatchesResponse;
@@ -57,11 +58,10 @@ public class GymController {
 
     @Operation(summary = "체육관 수익 인출", description = "체육관 수익을 인출하는 API입니다.")
     @PatchMapping("/withdraw")
-    public CommonResponse<?> settleAccount(@RequestParam String account){
-        log.info("settleAccount >>>> account: {}", account);
-        gymAdminService.settleAccount(account);
+    public CommonResponse<?> settleAccount(@RequestBody SettleAccountRequest request){
+        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        log.info("settleAccount >>>> gymAdminId: {}, account: {}", gymAdminId, request);
+        gymAdminService.settleAccount(request.toCommand());
         return CommonResponse.ok("정상 송금 되었습니다.", null);
     }
-
-
 }

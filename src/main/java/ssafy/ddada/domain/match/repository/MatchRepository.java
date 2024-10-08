@@ -75,17 +75,21 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Optional<Match> findByIdWithInfos(@Param("matchId") Long matchId);
 
     @Query("""
-        SELECT m
-        FROM Match m
-        WHERE :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
-     """)
+    SELECT m
+    FROM Match m
+    WHERE :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
+    ORDER BY m.matchDate DESC, m.matchTime DESC
+    """)
     List<Match> findMatchesByPlayerId(Long playerId);
+
+
 
     @Query("""
         SELECT m
         FROM Match m
         WHERE m.status = 'COMPLETED' AND
             :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
+        ORDER BY m.matchDate DESC, m.matchTime DESC
     """)
     List<Match> findCompletedMatchesByPlayerId(Long playerId);
 

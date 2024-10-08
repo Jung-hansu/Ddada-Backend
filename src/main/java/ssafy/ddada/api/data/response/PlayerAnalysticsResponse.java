@@ -22,18 +22,18 @@ public record PlayerAnalysticsResponse(
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record Rate(
             @Schema(description = "득점 비율")
-            int scoreRate,
+            Integer scoreRate,
 
             @Schema(description = "실점 비율")
-            int loseRate,
+            Integer loseRate,
 
             @Schema(description = "기술 비율")
-            int skills,
+            Integer skills,
 
             @Schema(description = "전략 비율")
-            int strategy,
+            Integer strategy,
 
             @Schema(description = "회복 비율")
-            int recovery
+            Integer recovery
     ) {}
 }

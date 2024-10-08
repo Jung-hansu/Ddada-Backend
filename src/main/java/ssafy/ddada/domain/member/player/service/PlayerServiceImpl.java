@@ -185,6 +185,13 @@ public class PlayerServiceImpl implements PlayerService {
         return PlayerIdResponse.of(SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new));
     }
 
+    @Override
+    public Integer getPlayerTotalMatch() {
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        return playerRepository.countMatchesByPlayerId(playerId);
+    }
+
     private boolean isDuplicateEmail(Player existingPlayer) {
         return existingPlayer != null && !existingPlayer.getIsDeleted();
     }
