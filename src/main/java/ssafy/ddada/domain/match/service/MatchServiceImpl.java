@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.constant.s3.S3_IMAGE;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
@@ -424,107 +425,6 @@ public class MatchServiceImpl implements MatchService {
         return newMatch;
     }
 
-    @Override
-    @Transactional
-    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
-        Match match = matchRepository.findByIdWithInfos(matchId)
-                .orElseThrow(MatchNotFoundException::new);
-        Long managerId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
-
-        if (match.getManager() == null || !Objects.equals(match.getManager().getId(), managerId)) {
-            throw new UnauthorizedManagerException();
-        }
-
-        if (match.getStatus() != MatchStatus.PLAYING){
-            throw new InvalidMatchStatusException();
-        }
-
-        Match newMatch = buildMatchFrom(match, matchCommand);
-        matchRepository.save(newMatch);
-
-        // 팀 레이팅 업데이트
-        Team winningTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam1() : match.getTeam2();
-        Team losingTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam2() : match.getTeam1();
-
-        int winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
-        int losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
-
-        // 팀의 총 점수 계산
-        int winningTeamTotalScore = matchCommand.sets().stream()
-                .filter(set -> set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
-                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
-                .sum();
-
-        int losingTeamTotalScore = matchCommand.sets().stream()
-                .filter(set -> !set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
-                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
-                .sum();
-
-        // 플레이어 레이팅 업데이트
-        for (Player player : winningTeam.getPlayers()) {
-            player.incrementWinStreak();
-            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
-            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
-            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
-
-            // 레이팅 변화 기록
-            if (ratingChange == null) {
-                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
-            }
-            else {
-                ratingChange.setRatingChange(newRating - player.getRating());
-            }
-            ratingChangeRepository.save(ratingChange);
-
-            // 플레이어의 레이팅 업데이트
-            player.setRating(newRating);
-            player.setGameCount(player.getGameCount()+1);
-            playerRepository.save(player);
-            rankingUtil.updatePlayerRating(player);
-        }
-
-        // 진 팀 플레이어 점수 계산
-        for (Player player : losingTeam.getPlayers()) {
-            player.incrementLoseStreak();
-            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            double earnedRate = winningTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(0) / winningTeamTotalScore;
-            double missedRate = losingTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(1) / losingTeamTotalScore;
-            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
-            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
-            // 레이팅 변화 기록
-            if (ratingChange == null) {
-                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
-            }
-            else {
-                ratingChange.setRatingChange(newRating - player.getRating());
-            }
-            ratingChangeRepository.save(ratingChange);
-
-            // 플레이어의 레이팅 업데이트
-            player.setRating(newRating);
-            player.setGameCount(player.getGameCount()+1);
-            playerRepository.save(player);
-            rankingUtil.updatePlayerRating(player);
-        }
-
-        GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
-        Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
-        gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
-        gymAdminRepository.save(gymAdmin);
-    }
-
-    public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
-        Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
-        int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
-        if (conflictCount > 0) {
-            throw new PlayerAlreadyBookedException();
-        }
-        return true;
-    }
-
     private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
         int totalScore = 0;   // 총 득점
         int totalMissed = 0;  // 총 실점
@@ -551,23 +451,133 @@ public class MatchServiceImpl implements MatchService {
         return Arrays.asList(totalScore, totalMissed);
     }
 
-    private String getPlayerImage(Player player) {
-        // 기본 이미지 경로
-        String defaultImageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+    private Match validateMatch(Long matchId){
+        Match match = matchRepository.findByIdWithInfos(matchId)
+                .orElseThrow(MatchNotFoundException::new);
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
 
-        // 플레이어가 null인 경우 기본 이미지 URL 반환
+        if (match.getManager() == null || !Objects.equals(match.getManager().getId(), managerId)) {
+            throw new UnauthorizedManagerException();
+        }
+
+        if (match.getStatus() != MatchStatus.PLAYING){
+            throw new InvalidMatchStatusException();
+        }
+
+        return match;
+    }
+
+    private Team getTeamByTeamNumber(Match match, Integer teamNumber){
+        return switch (teamNumber){
+            case 1 -> match.getTeam1();
+            case 2 -> match.getTeam2();
+            default -> throw new InvalidTeamNumberException();
+        };
+    }
+
+    @Override
+    @Transactional
+    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
+        Match match = validateMatch(matchId);
+        Match newMatch = buildMatchFrom(match, matchCommand);
+        matchRepository.save(newMatch);
+
+        // 팀 레이팅 업데이트
+        Team winningTeam = getTeamByTeamNumber(match, match.getWinnerTeamNumber());
+        Team losingTeam = getTeamByTeamNumber(match, 3 - match.getWinnerTeamNumber());
+
+        int winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
+        int losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
+
+        // 팀의 총 점수 계산
+        int winningTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
+
+        int losingTeamTotalScore = matchCommand.sets().stream()
+                .filter(set -> !set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
+                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+                .sum();
+
+        // 이긴 팀 플레이어 점수 계산
+        for (Player player : winningTeam.getPlayers()) {
+            player.incrementWinStreak();
+            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
+            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
+            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
+
+            // 레이팅 변화 기록
+            if (ratingChange == null) {
+                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            }
+            else {
+                ratingChange.setRatingChange(newRating - player.getRating());
+            }
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            player.setGameCount(player.getGameCount() + 1);
+            playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
+        }
+
+        // 진 팀 플레이어 점수 계산
+        for (Player player : losingTeam.getPlayers()) {
+            player.incrementLoseStreak();
+            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
+            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
+            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
+            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
+            // 레이팅 변화 기록
+            if (ratingChange == null) {
+                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            }
+            else {
+                ratingChange.setRatingChange(newRating - player.getRating());
+            }
+            ratingChangeRepository.save(ratingChange);
+
+            // 플레이어의 레이팅 업데이트
+            player.setRating(newRating);
+            player.setGameCount(player.getGameCount() + 1);
+            playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
+        }
+
+        GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
+        Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
+        gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
+        gymAdminRepository.save(gymAdmin);
+    }
+
+    @Override
+    public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
+        Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+        return true;
+    }
+
+    private String getPlayerImage(Player player) {
+        String defaultImageUrl = S3_IMAGE.DEFAULT_URL;
+
         if (player == null) {
             log.warn("플레이어 객체가 null입니다.");
             return null;
         }
 
-        // 플레이어의 이미지 경로가 null이거나 비어있는 경우 기본 이미지 URL 반환
         if (player.getImage() == null || player.getImage().isEmpty()) {
             log.warn("{}의 이미지 경로가 null 또는 비어있습니다. 기본 이미지 URL 반환: {}", player.getNickname(), defaultImageUrl);
             return s3Util.getPresignedUrlFromS3(defaultImageUrl);
         }
-
-        // S3에서 presigned URL 생성
         return s3Util.getPresignedUrlFromS3(player.getImage());
     }
 
