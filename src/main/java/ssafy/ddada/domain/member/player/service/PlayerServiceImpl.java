@@ -10,6 +10,7 @@ import ssafy.ddada.api.member.player.response.*;
 import ssafy.ddada.common.exception.player.*;
 import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
+import ssafy.ddada.common.util.RankingUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.JwtProcessor;
@@ -26,6 +27,8 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final PasswordEncoder passwordEncoder;
     private final S3Util s3Util;
     private final MatchRepository matchRepository;
+    private final RankingUtil rankingUtil;
 
     @Override
     @Transactional
@@ -56,6 +60,8 @@ public class PlayerServiceImpl implements PlayerService {
         String encodedPassword = passwordEncoder.encode(signupCommand.password());
         playerToSave.signupMember(signupCommand, imageUrl, encodedPassword);
         playerRepository.save(playerToSave);
+
+        rankingUtil.savePlayerToRanking(playerToSave);
 
         try {
             String accessToken = jwtProcessor.generateAccessToken(playerToSave);
@@ -134,6 +140,7 @@ public class PlayerServiceImpl implements PlayerService {
         Player currentPlayer = getCurrentLoggedInMember();
         currentPlayer.delete();
         playerRepository.save(currentPlayer);
+        rankingUtil.removePlayerFromRanking(currentPlayer);
         return "회원 탈퇴가 성공적으로 처리되었습니다.";
     }
 
@@ -191,6 +198,44 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(NotAuthenticatedException::new);
         return PlayerTotalMatchResponse.of(playerRepository.countMatchesByPlayerId(playerId));
     }
+
+    @Override
+    public List<PlayerRankingResponse> getPlayersRanking() {
+        // 현재 로그인한 플레이어의 정보
+        Player currentPlayer = getCurrentLoggedInMember();
+        Integer currentPlayerRating = currentPlayer.getRating();
+        String currentPlayerNickname = currentPlayer.getNickname();
+        Integer currentPlayerRanking = rankingUtil.getPlayerRank(currentPlayerNickname).intValue();
+
+
+        // 레디스에서 상위 플레이어들의 닉네임과 레이팅 정보를 가져옴
+        List<List<Object>> topPlayers = rankingUtil.getAllPlayers(); // 2중 리스트로 [nickname, rating] 형태
+
+        AtomicInteger rank = new AtomicInteger(1);
+
+        // 플레이어 순위를 PlayerRankingResponse 객체로 변환
+        List<PlayerRankingResponse> rankings = topPlayers.stream()
+                .map(playerData -> {
+                    String nickname = (String) playerData.get(0);  // nickname
+                    Integer rating = ((Double) playerData.get(1)).intValue();
+                    return PlayerRankingResponse.of(
+                            rank.getAndIncrement(),
+                            nickname,
+                            rating
+                    );
+                })
+                .collect(Collectors.toList());
+
+        // 현재 플레이어 정보 추가
+        rankings.add(PlayerRankingResponse.of(
+                currentPlayerRanking,
+                currentPlayerNickname,
+                currentPlayerRating
+        ));
+
+        return rankings;
+    }
+
 
     private boolean isDuplicateEmail(Player existingPlayer) {
         return existingPlayer != null && !existingPlayer.getIsDeleted();
