@@ -10,6 +10,7 @@ import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
 import ssafy.ddada.common.exception.data.DataNotFoundException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.properties.WebClientProperties;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
@@ -21,8 +22,9 @@ public class DataServiceImpl implements DataService {
 
     private final WebClient webClient;
     private final PlayerRepository playerRepository;
+    private final WebClientProperties webClientProperties;
 
-    private final String url = "http://j11a509.p.ssafy.io:8000/"; // 실제 API 엔드포인트로 변경 필요
+    private final String url = webClientProperties.url(); // 실제 API 엔드포인트로 변경 필요
 
     @Override
     public PlayerMatchAnalyticsResponse PlayerMatchAnalytics(Long matchId) {
