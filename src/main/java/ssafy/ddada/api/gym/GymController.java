@@ -58,9 +58,8 @@ public class GymController {
     @Operation(summary = "체육관 수익 인출", description = "체육관 수익을 인출하는 API입니다.")
     @PatchMapping("/withdraw")
     public CommonResponse<?> settleAccount(@RequestParam String account){
-        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
-        log.info("settleAccount >>>> gymAdminId: {}, account: {}", gymAdminId, account);
-        gymAdminService.settleAccount(gymAdminId, account);
+        log.info("settleAccount >>>> account: {}", account);
+        gymAdminService.settleAccount(account);
         return CommonResponse.ok("정상 송금 되었습니다.", null);
     }
 

@@ -11,21 +11,35 @@ import java.util.Optional;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
+
     boolean existsByEmail(String email);
     Optional<Player> findByEmail(String email);
     boolean existsByNickname(String nickname);
-    Optional<Player> findByNumber(String number);
 
-    @Query("SELECT COUNT(m) FROM Match m WHERE m.team1.player1.id = ?1 AND m.team1SetScore > m.team2SetScore")
-    Integer countWinsByPlayerId(Long playerId);
+    @Query("""
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE m.team1.player1.id = :playerId AND
+            m.team1SetScore > m.team2SetScore
+    """)
+    Integer countWinsByPlayerId(@Param("playerId") Long playerId);
 
-    @Query("SELECT COUNT(m) FROM Match m WHERE m.team1.player1.id = ?1 AND m.team1SetScore < m.team2SetScore")
-    Integer countLossesByPlayerId(Long playerId);
+    @Query("""
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE m.team1.player1.id = :playerId AND
+            m.team1SetScore < m.team2SetScore
+    """)
+    Integer countLossesByPlayerId(@Param("playerId") Long playerId);
 
-    @Query("SELECT rc FROM RatingChange rc WHERE rc.player.id = :playerId AND rc.match.id = :matchId")
+    @Query("""
+        SELECT rc
+        FROM RatingChange rc
+        WHERE rc.player.id = :playerId AND
+            rc.match.id = :matchId
+    """)
     RatingChange findFirstByPlayerIdAndMatchId(@Param("playerId") Long playerId, @Param("matchId") Long matchId);
 
     @Query("SELECT COUNT(rc) FROM RatingChange rc WHERE rc.player.id = :playerId")
     Integer countMatchesByPlayerId(@Param("playerId") Long playerId);
-
 }

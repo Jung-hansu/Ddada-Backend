@@ -21,38 +21,36 @@ import java.util.Objects;
 @RequestMapping("/health")
 @Tag(name = "Health", description = "서버 상태 확인")
 public class HealthController {
+
     private final RedisTemplate<String, ?> redisTemplate;
     private final DataSource dataSource;
 
-    // Redis 연결 상태 확인을 위한 엔드포인트 추가
     @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
     @GetMapping("/redis/check")
     public CommonResponse<String> checkRedisConnection() {
         try {
             String pingResponse = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getClusterConnection().ping();
-            if ("PONG".equals(pingResponse)) {
-                return CommonResponse.ok("Redis 연결 성공: " + pingResponse);
-            } else {
-                return CommonResponse.ok("Redis 연결 실패: " + pingResponse);
+            if (!"PONG".equals(pingResponse)) {
+                return CommonResponse.ok("Redis 연결 실패", null);
             }
+            return CommonResponse.ok("Redis 연결 성공", null);
         } catch (Exception e) {
-            log.error("Redis 인식 오류 발생", e);
+            log.error("Redis 연결 오류 발생", e);
             return CommonResponse.internalServerError(GlobalErrorCode.SERVER_ERROR);
         }
     }
 
-    // PostgreSQL 연결 상태 확인을 위한 엔드포인트 추가
     @Operation(summary = "PostgreSQL 연결 확인", description = "PostgreSQL 데이터베이스와의 연결 상태를 확인합니다.")
     @GetMapping("/postgres/check")
     public CommonResponse<String> checkPostgresConnection() {
         try (Connection connection = dataSource.getConnection()) {
-            if (connection.isValid(2)) {  // 2초 내에 연결 확인
-                return CommonResponse.ok("PostgreSQL 연결 성공");
-            } else {
-                return CommonResponse.ok("PostgreSQL 연결 실패");
+            if (!connection.isValid(2)) {  // 2초 내에 연결 확인
+                return CommonResponse.ok("PostgreSQL 연결 실패", null);
             }
+            return CommonResponse.ok("PostgreSQL 연결 성공", null);
         } catch (Exception e) {
-            return CommonResponse.ok("PostgreSQL 연결 오류: " + e.getMessage());
+            log.error("PostgreSQL 연결 오류 발생", e);
+            return CommonResponse.internalServerError(GlobalErrorCode.SERVER_ERROR);
         }
     }
 

@@ -15,7 +15,8 @@ public interface RatingChangeRepository extends JpaRepository<RatingChange, Long
     @Query("""
         SELECT rc
         FROM RatingChange rc
-        WHERE rc.player.id = :playerId AND rc.match.id = :matchId
+        WHERE rc.player.id = :playerId AND
+            rc.match.id = :matchId
     """)
     Optional<RatingChange> findRatingChangeByMatchIdAndPlayerId(@Param("playerId") Long playerId, @Param("matchId") Long matchId);
 }

@@ -138,7 +138,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Boolean checkNickname(String nickname) {
+    public boolean checkNickname(String nickname) {
         boolean isDuplicated = playerRepository.existsByNickname(nickname);
         log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
         return isDuplicated;
