@@ -3,10 +3,7 @@ package ssafy.ddada.domain.racket.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -16,6 +13,7 @@ import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
 @Getter
 @Builder
+@ToString
 @Setting(replicas = 0)
 @Document(indexName = "racket")
 @NoArgsConstructor

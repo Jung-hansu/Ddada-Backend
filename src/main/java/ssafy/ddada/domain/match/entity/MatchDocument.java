@@ -7,6 +7,7 @@ import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchDocument {

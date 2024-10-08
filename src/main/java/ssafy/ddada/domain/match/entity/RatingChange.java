@@ -6,6 +6,7 @@ import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
 @Entity
+@ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RatingChange {

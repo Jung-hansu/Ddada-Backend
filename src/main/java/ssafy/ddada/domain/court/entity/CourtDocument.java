@@ -3,15 +3,12 @@ package ssafy.ddada.domain.court.entity;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
-import ssafy.ddada.domain.match.entity.MatchDocument;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
 @Getter
 @Builder
+@ToString
 @Setting(replicas = 0)
 @Document(indexName = "court")
 @NoArgsConstructor

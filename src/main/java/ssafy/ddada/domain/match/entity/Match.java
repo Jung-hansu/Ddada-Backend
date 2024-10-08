@@ -15,6 +15,7 @@ import java.util.List;
 @Getter
 @Builder
 @Entity
+@ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Match extends BaseMatchEntity {
