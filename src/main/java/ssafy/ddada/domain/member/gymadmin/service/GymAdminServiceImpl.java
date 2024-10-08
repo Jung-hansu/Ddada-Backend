@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
+import ssafy.ddada.domain.court.command.SettleAccountCommand;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 
@@ -22,14 +23,14 @@ public class GymAdminServiceImpl implements GymAdminService{
 
     @Override
     @Transactional
-    public void settleAccount(String account) {
-        log.info("settleAccount >>>> account: {}", account);
+    public void settleAccount(SettleAccountCommand command) {
+        log.info("settleAccount >>>> account: {}", command.AcountAddress());
         Long gymAdminId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         GymAdmin gymAdmin = gymAdminRepository.findByIdWithInfos(gymAdminId)
                 .orElseThrow(GymAdminNotFoundException::new);
 
-        doSettleAccount(gymAdmin, account);
+        doSettleAccount(gymAdmin, command.AcountAddress());
     }
 
     private void doSettleAccount(GymAdmin gymAdmin, String account) {
