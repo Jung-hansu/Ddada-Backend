@@ -60,7 +60,7 @@ public class JwtParser {
     }
 
     public UserInfo getUserInfo(KakaoLoginCommand kakaoLoginCommand) {
-        PublicKey key = kakaoLoginCommand.publicKeys().stream()
+        PublicKey key = kakaoLoginCommand.publicKeys().keys().stream()
                 .filter(k -> k.kid().equals(kakaoLoginCommand.kid()))
                 .findFirst()
                 .orElseThrow(IssuerTokenIncorrectException::new);
