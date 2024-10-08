@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import ssafy.ddada.common.kakao.model.KakaoToken;
 import ssafy.ddada.common.kakao.util.KakaoTokenErrorDecoder;
-import ssafy.ddada.domain.auth.model.PublicKey;
-
-import java.util.List;
+import ssafy.ddada.domain.auth.model.PublicKeys;
 
 @FeignClient(
         name = "KakaoTokenClient",
@@ -27,7 +25,7 @@ public interface KakaoOauthClient {
     );
 
     @GetMapping("/.well-known/jwks.json")
-    List<PublicKey> getPublicKeys();
+    PublicKeys getPublicKeys();
 
     @GetMapping("/oauth/logout")
     void logout(
