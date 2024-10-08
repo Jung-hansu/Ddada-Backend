@@ -19,16 +19,16 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("""
         SELECT COUNT(m)
         FROM Match m
-        WHERE m.team1.player1.id = :playerId AND
-            m.team1SetScore > m.team2SetScore
+        WHERE (m.winnerTeamNumber = 1 AND :playerId IN (m.team1.player1.id , m.team1.player2.id)) OR
+            (m.winnerTeamNumber = 2 AND :playerId IN (m.team2.player1.id, m.team2.player2.id))
     """)
     Integer countWinsByPlayerId(@Param("playerId") Long playerId);
 
     @Query("""
         SELECT COUNT(m)
         FROM Match m
-        WHERE m.team1.player1.id = :playerId AND
-            m.team1SetScore < m.team2SetScore
+        WHERE (m.winnerTeamNumber = 2 AND :playerId IN (m.team1.player1.id, m.team1.player2.id)) OR
+            (m.winnerTeamNumber = 1 AND :playerId IN (m.team2.player1.id, m.team2.player2.id))
     """)
     Integer countLossesByPlayerId(@Param("playerId") Long playerId);
 
