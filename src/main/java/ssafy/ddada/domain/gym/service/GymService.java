@@ -8,8 +8,8 @@ import java.time.LocalDate;
 
 public interface GymService {
 
-    GymDetailResponse getGymInfo(Long gymAdminId);
-    GymMatchesResponse getGymMatches(Long gymAdminId, LocalDate date);
-    GymMatchesHistoryResponse getGymMatchesHistory(Long gymAdminId);
+    GymDetailResponse getGymInfo();
+    GymMatchesResponse getGymMatches(LocalDate date);
+    GymMatchesHistoryResponse getGymMatchesHistory();
 
 }

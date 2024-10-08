@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.gym.response.GymDetailResponse;
 import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;
 import ssafy.ddada.api.gym.response.GymMatchesResponse;
+import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.gym.GymNotFoundException;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.gym.repository.GymRepository;
 import ssafy.ddada.domain.match.entity.Match;
@@ -28,20 +30,22 @@ public class GymServiceImpl implements GymService {
     private final MatchRepository matchRepository;
 
     @Override
-    public GymDetailResponse getGymInfo(Long gymAdminId) {
-        Gym gym = gymRepository.getGymsById(gymAdminId)
-                .orElseThrow(GymNotFoundException::new);
+    public GymDetailResponse getGymInfo() {
+        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        Gym gym = gymRepository.getGymsById(gymAdminId).orElseThrow(GymNotFoundException::new);
         return GymDetailResponse.from(gym);
     }
 
     @Override
-    public GymMatchesResponse getGymMatches(Long gymAdminId, LocalDate date) {
+    public GymMatchesResponse getGymMatches(LocalDate date) {
+        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         List<Match> matches = matchRepository.getMatchesByGymIdAndDate(gymAdminId, date);
         return GymMatchesResponse.from(matches);
     }
 
     @Override
-    public GymMatchesHistoryResponse getGymMatchesHistory(Long gymAdminId) {
+    public GymMatchesHistoryResponse getGymMatchesHistory() {
+        Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         Map<LocalDate, Integer> history = new HashMap<>();
         LocalDate aWeekAgo = LocalDate.now().minusWeeks(1);
 

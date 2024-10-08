@@ -27,10 +27,10 @@ public class CourtController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String regions,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("[CourtController] 코트 검색 결과 조회 >>>> 검색어: {}, 검색 지역: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, regions, page, size);
         CourtSearchRequest request = new CourtSearchRequest(keyword, regions, page, size);
-        log.info("코트 검색 결과 조회 >>>> 검색어: {}, 검색 지역: {}, 페이지 번호: {}, 페이지 크기: {}", request.keyword(), request.regions(), request.page(), request.size());
-
         Page<CourtSimpleResponse> response = courtService.getElasticFilteredCourts(request.toCommand());
         return CommonResponse.ok(response);
     }
@@ -38,7 +38,7 @@ public class CourtController {
     @Operation(summary = "코트 세부 조회", description = "코트 세부 정보를 조회하는 api입니다.")
     @GetMapping("/{court_id}")
     public CommonResponse<CourtDetailResponse> getCourtById(@PathVariable("court_id") Long courtId){
-        log.info("코트 세부 조회 >>>> 코트 ID: {}", courtId);
+        log.info("[CourtController] 코트 세부 조회 >>>> 코트 ID: {}", courtId);
 
         CourtDetailResponse response = courtService.getCourtById(courtId);
         return CommonResponse.ok(response);
