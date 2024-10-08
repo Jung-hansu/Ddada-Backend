@@ -2,14 +2,15 @@ package ssafy.ddada.api.data;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.api.data.request.RacketRecommendRequest;
 import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
+import ssafy.ddada.api.data.response.RacketRecommendResponse;
 import ssafy.ddada.domain.data.service.DataService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +30,20 @@ public class DataController {
     @GetMapping("/player")
     public CommonResponse<PlayerAnalysticsResponse> PlayerAnalytics() {
         PlayerAnalysticsResponse response = dataService.PlayerAnalytics();
+        return CommonResponse.ok(response);
+    }
+
+    @Operation(summary = "추천 라켓 조회", description = "추천 라켓을 조회하는 API입니다")
+    @GetMapping("/rackets/{balance}/{weight}/{shaft}/{price}")
+    public CommonResponse<RacketRecommendResponse> ReccommandRacket(
+            @PathVariable("balance") String balance,
+            @PathVariable("weight") String weight,
+            @PathVariable("shaft") String shaft,
+            @PathVariable("price") String price,
+            @RequestParam(value = "racket_id", required = false) List<Integer> racketIds
+    ) {
+        RacketRecommendRequest request = new RacketRecommendRequest(balance, weight, shaft, price, racketIds);
+        RacketRecommendResponse response = dataService.ReccommandRacket(request.toCommand());
         return CommonResponse.ok(response);
     }
 }

@@ -40,4 +40,10 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     """)
     RatingChange findFirstByPlayerIdAndMatchId(@Param("playerId") Long playerId, @Param("matchId") Long matchId);
 
+    @Query("""
+        SELECT COUNT(rc) 
+        FROM RatingChange rc 
+        WHERE rc.player.id = :playerId
+    """)
+    Integer countMatchesByPlayerId(@Param("playerId") Long playerId);
 }
