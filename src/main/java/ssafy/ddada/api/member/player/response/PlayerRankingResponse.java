@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record PlayerRankingResponse(
         @Schema(description = "선수 랭킹", example = "1")
         Integer ranking,
+
         @Schema(description = "선수 닉네임", example = "JohnDoe")
         String nickname,
+
         @Schema(description = "선수 점수", example = "1500")
         Integer rating
 ) {
