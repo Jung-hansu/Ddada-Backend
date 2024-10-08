@@ -20,18 +20,17 @@ public record PlayerAnalysticsResponse(
         @JsonProperty("type_message")
         String typeMessage
 ) {
-    // 내부 Rate 레코드 정의
     public record Rate(
             @JsonProperty("score_rate")
-            @Schema(description = "득점 비율") int scoreRate,
+            @Schema(description = "득점 비율") Integer scoreRate,
 
             @JsonProperty("lose_rate")
-            @Schema(description = "실점 비율") int loseRate,
+            @Schema(description = "실점 비율") Integer loseRate,
 
-            @Schema(description = "기술 비율") int skills,
+            @Schema(description = "기술 비율") Integer skills,
 
-            @Schema(description = "전략 비율") int strategy,
+            @Schema(description = "전략 비율") Integer strategy,
 
-            @Schema(description = "회복 비율") int recovery
+            @Schema(description = "회복 비율") Integer recovery
     ) {}
 }

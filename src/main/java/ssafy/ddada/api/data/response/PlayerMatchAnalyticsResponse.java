@@ -28,7 +28,7 @@ public record PlayerMatchAnalyticsResponse(
 ) {
     public record SetInfoResponse(
             @JsonProperty("set_number")
-            @Schema(description = "세트 번호") int setNumber,
+            @Schema(description = "세트 번호") Integer setNumber,
 
             @JsonProperty("earned_player")
             @Schema(description = "득점한 플레이어") List<Integer> earnedPlayer,
@@ -149,7 +149,7 @@ public record PlayerMatchAnalyticsResponse(
     ) {}
 
     public record StrategyResponse(
-            @Schema(description = "패배한 플레이어") int loser,
+            @Schema(description = "패배한 플레이어") Integer loser,
 
             @JsonProperty("lose_skill")
             @Schema(description = "실점 기술 정보") List<List<String>> loseSkill,

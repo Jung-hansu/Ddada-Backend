@@ -64,6 +64,4 @@ public class GymController {
         gymAdminService.settleAccount(request.toCommand());
         return CommonResponse.ok("정상 송금 되었습니다.", null);
     }
-
-
 }
