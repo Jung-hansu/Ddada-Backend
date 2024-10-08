@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Schema(description = "Player Analytics 응답 DTO")
-public record PlayerAnalyticsResponse(
+public record PlayerAnalysticsResponse(
         @Schema(description = "매치 수")
         int match,
 
