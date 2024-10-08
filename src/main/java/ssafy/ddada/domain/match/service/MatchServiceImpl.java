@@ -423,9 +423,33 @@ public class MatchServiceImpl implements MatchService {
         return newMatch;
     }
 
-    @Override
-    @Transactional
-    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
+    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
+        int totalScore = 0;   // 총 득점
+        int totalMissed = 0;  // 총 실점
+
+        // 각 세트에 대해 반복
+        for (MatchResultCommand.SetResultCommand setResult : matchResultCommand.sets()) {
+            // 각 세트의 점수 결과에 대해 반복
+            for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
+                // 득점 확인
+                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
+                    totalScore++;
+                }
+
+                // 실점 확인
+                if (scoreResult.missedPlayer1() != null && scoreResult.missedPlayer1().longValue() == playerId) {
+                    totalMissed++;
+                }
+                if (scoreResult.missedPlayer2() != null && scoreResult.missedPlayer2().longValue() == playerId) {
+                    totalMissed++;
+                }
+            }
+        }
+
+        return Arrays.asList(totalScore, totalMissed);
+    }
+
+    private Match validateMatch(Long matchId){
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         Long managerId = SecurityUtil.getLoginMemberId()
@@ -439,12 +463,27 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidMatchStatusException();
         }
 
+        return match;
+    }
+
+    private Team getTeamByTeamNumber(Match match, Integer teamNumber){
+        return switch (teamNumber){
+            case 1 -> match.getTeam1();
+            case 2 -> match.getTeam2();
+            default -> throw new InvalidTeamNumberException();
+        };
+    }
+
+    @Override
+    @Transactional
+    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
+        Match match = validateMatch(matchId);
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
 
         // 팀 레이팅 업데이트
-        Team winningTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam1() : match.getTeam2();
-        Team losingTeam = (match.getWinnerTeamNumber() == 1) ? match.getTeam2() : match.getTeam1();
+        Team winningTeam = getTeamByTeamNumber(match, match.getWinnerTeamNumber());
+        Team losingTeam = getTeamByTeamNumber(match, 3 - match.getWinnerTeamNumber());
 
         int winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
         int losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
@@ -463,7 +502,7 @@ public class MatchServiceImpl implements MatchService {
         // 이긴 팀 플레이어 점수 계산
         for (Player player : winningTeam.getPlayers()) {
             player.incrementWinStreak();
-            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
+            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
             double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
             double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
@@ -487,7 +526,7 @@ public class MatchServiceImpl implements MatchService {
         // 진 팀 플레이어 점수 계산
         for (Player player : losingTeam.getPlayers()) {
             player.incrementLoseStreak();
-            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
+            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
             double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
             double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
@@ -521,32 +560,6 @@ public class MatchServiceImpl implements MatchService {
             throw new PlayerAlreadyBookedException();
         }
         return true;
-    }
-
-    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
-        int totalScore = 0;   // 총 득점
-        int totalMissed = 0;  // 총 실점
-
-        // 각 세트에 대해 반복
-        for (MatchResultCommand.SetResultCommand setResult : matchResultCommand.sets()) {
-            // 각 세트의 점수 결과에 대해 반복
-            for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
-                // 득점 확인
-                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
-                    totalScore++;
-                }
-
-                // 실점 확인
-                if (scoreResult.missedPlayer1() != null && scoreResult.missedPlayer1().longValue() == playerId) {
-                    totalMissed++;
-                }
-                if (scoreResult.missedPlayer2() != null && scoreResult.missedPlayer2().longValue() == playerId) {
-                    totalMissed++;
-                }
-            }
-        }
-
-        return Arrays.asList(totalScore, totalMissed);
     }
 
     private String getPlayerImage(Player player) {
