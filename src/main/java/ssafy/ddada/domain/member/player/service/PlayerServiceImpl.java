@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.member.player.response.*;
+import ssafy.ddada.common.constant.s3.S3_IMAGE;
 import ssafy.ddada.common.exception.player.*;
 import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
@@ -108,7 +109,7 @@ public class PlayerServiceImpl implements PlayerService {
         Player currentPlayer = getCurrentLoggedInMember();
 
         MultipartFile profileImageFile = command.profileImagePath();
-        String imageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+        String imageUrl = S3_IMAGE.DEFAULT_URL;
         if (!command.deleteImage()) {
             imageUrl = handleProfileImage(profileImageFile, currentPlayer.getId(), currentPlayer.getImage());
         }// MultipartFile로 변경
@@ -225,7 +226,7 @@ public class PlayerServiceImpl implements PlayerService {
             if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
                 return existingImageUrl; // 기존 이미지가 있으면 반환
             } else {
-                return "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg"; // 기본 이미지 URL 반환
+                return S3_IMAGE.DEFAULT_URL; // 기본 이미지 URL 반환
             }
         }
         // 이미지 파일이 있는 경우 S3에 업로드

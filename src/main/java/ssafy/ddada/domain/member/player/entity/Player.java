@@ -2,6 +2,7 @@ package ssafy.ddada.domain.member.player.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ssafy.ddada.common.constant.s3.S3_IMAGE;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.common.Member;
@@ -130,7 +131,7 @@ public class Player extends BaseMemberEntity implements Member {
             this.role = MemberRole.PLAYER;  // 기본값 설정
         }
         if (image == null){
-            image = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+            image = S3_IMAGE.DEFAULT_URL;
         }
         if (rating == null){
             rating = 800;
