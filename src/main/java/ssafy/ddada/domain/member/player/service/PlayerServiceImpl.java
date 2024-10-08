@@ -186,10 +186,10 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Integer getPlayerTotalMatch() {
+    public PlayerTotalMatchResponse getPlayerTotalMatch() {
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
-        return playerRepository.countMatchesByPlayerId(playerId);
+        return PlayerTotalMatchResponse.of(playerRepository.countMatchesByPlayerId(playerId));
     }
 
     private boolean isDuplicateEmail(Player existingPlayer) {

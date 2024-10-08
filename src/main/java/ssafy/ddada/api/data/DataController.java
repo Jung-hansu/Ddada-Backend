@@ -36,10 +36,10 @@ public class DataController {
     @Operation(summary = "추천 라켓 조회", description = "추천 라켓을 조회하는 API입니다")
     @GetMapping("/rackets/{balance}/{weight}/{shaft}/{price}")
     public CommonResponse<RacketRecommendResponse> ReccommandRacket(
-            @PathVariable("balance") String balance,
-            @PathVariable("weight") String weight,
-            @PathVariable("shaft") String shaft,
-            @PathVariable("price") String price,
+            @RequestParam(value = "balance") String balance,
+            @RequestParam(value = "weight") String weight,
+            @RequestParam(value = "shaft") String shaft,
+            @RequestParam(value = "price") String price,
             @RequestParam(value = "racket_id", required = false) List<Integer> racketIds
     ) {
         RacketRecommendRequest request = new RacketRecommendRequest(balance, weight, shaft, price, racketIds);
