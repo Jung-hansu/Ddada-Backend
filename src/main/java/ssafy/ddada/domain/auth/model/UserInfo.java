@@ -1,4 +1,4 @@
-package ssafy.ddada.config.auth;
+package ssafy.ddada.domain.auth.model;
 
 public record UserInfo(
         String nickname,

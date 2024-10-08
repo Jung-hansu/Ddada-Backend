@@ -1,24 +1,26 @@
 package ssafy.ddada.domain.auth.command;
 
-import ssafy.ddada.common.client.response.KakaoTokenInfo;
+import ssafy.ddada.common.kakao.model.KakaoToken;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
 import ssafy.ddada.common.util.JwtParser;
-import ssafy.ddada.config.auth.PublicKeys;
+import ssafy.ddada.domain.auth.model.PublicKey;
+
+import java.util.List;
 
 public record KakaoLoginCommand(
         String idToken,
         String oauthAccessToken,
-        PublicKeys publicKeys,
+        List<PublicKey> publicKeys,
         String kid,
         String iss,
         String aud
 ) {
-    public static KakaoLoginCommand byKakao(KakaoTokenInfo info, PublicKeys publicKeys, JwtParser jwtParser, KakaoLoginProperties properties) {
+    public static KakaoLoginCommand byKakao(KakaoToken token, List<PublicKey> publicKeys, JwtParser jwtParser, KakaoLoginProperties properties) {
         return new KakaoLoginCommand(
-                info.idToken(),
-                info.accessToken(),
+                token.idToken(),
+                token.accessToken(),
                 publicKeys,
-                jwtParser.getKid(info.idToken()),
+                jwtParser.getKid(token.idToken()),
                 properties.iss(),
                 properties.clientId()
         );

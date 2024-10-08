@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.auth.response.AuthResponse;
 import ssafy.ddada.api.auth.request.TokenRefreshRequest;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
-import ssafy.ddada.common.client.KakaoOauthClient;
-import ssafy.ddada.common.client.response.KakaoTokenInfo;
+import ssafy.ddada.common.kakao.client.KakaoOauthClient;
+import ssafy.ddada.common.kakao.model.KakaoToken;
 import ssafy.ddada.common.exception.player.LoginTypeNotSupportedException;
 import ssafy.ddada.common.exception.player.*;
 import ssafy.ddada.common.exception.security.InvalidTokenException;
@@ -24,9 +24,10 @@ import ssafy.ddada.common.util.JwtParser;
 import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
-import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
+import ssafy.ddada.domain.auth.model.DecodedJwtToken;
 import ssafy.ddada.domain.auth.model.LoginToken;
+import ssafy.ddada.domain.auth.model.UserInfo;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
@@ -256,12 +257,12 @@ public class AuthServiceImpl implements AuthService {
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
         log.info(">>> code: {}", code);
-        KakaoTokenInfo kakaoTokenInfo = getKakaoToken(code);
-        log.info(">>> kakaoTokenInfo: {}", kakaoTokenInfo);
-        return KakaoLoginCommand.byKakao(kakaoTokenInfo, kakaoOauthClient.getPublicKeys(), jwtParser, kakaoLoginProperties);
+        KakaoToken kakaoToken = getKakaoToken(code);
+        log.info(">>> kakaoTokenInfo: {}", kakaoToken);
+        return KakaoLoginCommand.byKakao(kakaoToken, kakaoOauthClient.getPublicKeys(), jwtParser, kakaoLoginProperties);
     }
 
-    private KakaoTokenInfo getKakaoToken(String code) {
+    private KakaoToken getKakaoToken(String code) {
         return kakaoOauthClient.getToken(
                 kakaoLoginProperties.contentType(),
                 kakaoLoginProperties.clientId(),

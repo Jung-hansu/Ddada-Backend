@@ -1,4 +1,4 @@
-package ssafy.ddada.config.auth;
+package ssafy.ddada.common.kakao.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
@@ -6,7 +6,7 @@ import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ssafy.ddada.common.client.response.KakaoErrorResponse;
+import ssafy.ddada.common.kakao.response.KakaoErrorResponse;
 import ssafy.ddada.common.exception.other.KakaoTokenException;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class KakaoTokenErrorDecoder implements ErrorDecoder {
                         errorResponseForm.errorDescription()
                 );
             } catch (IOException e) {
-                log.error(methodKey + "Error Deserializing response body from failed feign request response.", e);
+                log.error("{}: Error Deserializing response body from failed feign request response.", methodKey, e);
             }
         }
 

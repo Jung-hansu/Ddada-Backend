@@ -1,4 +1,4 @@
-package ssafy.ddada.config.auth;
+package ssafy.ddada.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
@@ -12,6 +12,8 @@ import ssafy.ddada.common.exception.security.IssuerTokenIncorrectException;
 import ssafy.ddada.common.exception.security.TokenExpiredException;
 import ssafy.ddada.common.exception.security.InvalidSignatureTokenException;
 import ssafy.ddada.common.exception.security.InvalidTokenException;
+import ssafy.ddada.domain.auth.model.PublicKey;
+import ssafy.ddada.domain.auth.model.UserInfo;
 import ssafy.ddada.domain.auth.command.KakaoLoginCommand;
 
 import java.nio.charset.StandardCharsets;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class JwtParser {
+
     private final ObjectMapper objectMapper;
 
     public String getKid(String idToken) {
@@ -57,8 +60,8 @@ public class JwtParser {
     }
 
     public UserInfo getUserInfo(KakaoLoginCommand kakaoLoginCommand) {
-        PublicKey key = kakaoLoginCommand.publicKeys().getKeys().stream()
-                .filter(k -> k.getKid().equals(kakaoLoginCommand.kid()))
+        PublicKey key = kakaoLoginCommand.publicKeys().stream()
+                .filter(k -> k.kid().equals(kakaoLoginCommand.kid()))
                 .findFirst()
                 .orElseThrow(IssuerTokenIncorrectException::new);
         try {
@@ -80,4 +83,5 @@ public class JwtParser {
             throw new InvalidTokenException();
         }
     }
+
 }

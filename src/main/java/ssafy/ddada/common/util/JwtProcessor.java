@@ -1,4 +1,4 @@
-package ssafy.ddada.config.auth;
+package ssafy.ddada.common.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -11,7 +11,8 @@ import ssafy.ddada.common.exception.security.InvalidSignatureTokenException;
 import ssafy.ddada.common.exception.security.InvalidTokenException;
 import ssafy.ddada.common.exception.token.TokenTypeNotMatchedException;
 import ssafy.ddada.common.properties.JwtProperties;
-import ssafy.ddada.domain.auth.model.LoginTokenModel;
+import ssafy.ddada.domain.auth.model.DecodedJwtToken;
+import ssafy.ddada.domain.auth.model.LoginToken;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.redis.BlacklistTokenRedisRepository;
@@ -60,7 +61,7 @@ public class JwtProcessor {
         refreshTokenRedisRepository.save(accessToken, refreshToken);
     }
 
-    public void saveRefreshToken(LoginTokenModel tokens) {
+    public void saveRefreshToken(LoginToken tokens) {
         refreshTokenRedisRepository.save(tokens.accessToken(), tokens.refreshToken());
     }
 

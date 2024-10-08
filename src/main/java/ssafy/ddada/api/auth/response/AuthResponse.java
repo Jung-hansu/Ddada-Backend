@@ -3,7 +3,7 @@ package ssafy.ddada.api.auth.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.common.exception.player.AbnormalLoginProgressException;
-import ssafy.ddada.config.auth.UserInfo;
+import ssafy.ddada.domain.auth.model.UserInfo;
 
 @Schema(description = "인증 응답 DTO")
 public record AuthResponse(

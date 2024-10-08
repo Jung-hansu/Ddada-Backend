@@ -13,7 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ssafy.ddada.config.auth.DecodedJwtToken;
+import ssafy.ddada.domain.auth.model.DecodedJwtToken;
 import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.common.exception.security.TokenExpiredException;
 import ssafy.ddada.common.exception.security.InvalidSignatureTokenException;

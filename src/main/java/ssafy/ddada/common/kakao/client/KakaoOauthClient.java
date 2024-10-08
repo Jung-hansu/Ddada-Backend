@@ -1,13 +1,15 @@
-package ssafy.ddada.common.client;
+package ssafy.ddada.common.kakao.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import ssafy.ddada.common.client.response.KakaoTokenInfo;
-import ssafy.ddada.config.auth.KakaoTokenErrorDecoder;
-import ssafy.ddada.config.auth.PublicKeys;
+import ssafy.ddada.common.kakao.model.KakaoToken;
+import ssafy.ddada.common.kakao.util.KakaoTokenErrorDecoder;
+import ssafy.ddada.domain.auth.model.PublicKey;
+
+import java.util.List;
 
 @FeignClient(
         name = "KakaoTokenClient",
@@ -16,7 +18,7 @@ import ssafy.ddada.config.auth.PublicKeys;
 )
 public interface KakaoOauthClient {
     @PostMapping("/oauth/token?grant_type=authorization_code")
-    KakaoTokenInfo getToken(
+    KakaoToken getToken(
             @RequestHeader("Content-Type") String contentType,
             @RequestParam("client_id") String clientId,
             @RequestParam("redirect_uri") String redirectUri,
@@ -25,7 +27,7 @@ public interface KakaoOauthClient {
     );
 
     @GetMapping("/.well-known/jwks.json")
-    PublicKeys getPublicKeys();
+    List<PublicKey> getPublicKeys();
 
     @GetMapping("/oauth/logout")
     void logout(

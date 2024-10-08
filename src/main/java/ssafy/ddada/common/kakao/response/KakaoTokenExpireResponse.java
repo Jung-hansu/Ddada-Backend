@@ -1,4 +1,4 @@
-package ssafy.ddada.common.client.response;
+package ssafy.ddada.common.kakao.response;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
