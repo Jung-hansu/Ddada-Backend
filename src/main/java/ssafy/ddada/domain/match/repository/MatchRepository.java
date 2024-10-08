@@ -93,7 +93,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
         SELECT m
         FROM Match m
         WHERE (m.status = 'CREATED' OR m.status = 'RESERVED') AND
-            m.matchDate > CURRENT_DATE
+            m.matchDate < CURRENT_DATE
     """)
     List<Match> findAllOutDatedMatches();
 
