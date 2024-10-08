@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.constant.s3.S3_IMAGE;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
@@ -459,12 +460,12 @@ public class MatchServiceImpl implements MatchService {
                 .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
                 .sum();
 
-        // 플레이어 레이팅 업데이트
+        // 이긴 팀 플레이어 점수 계산
         for (Player player : winningTeam.getPlayers()) {
             player.incrementWinStreak();
             List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
-            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
             RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
 
@@ -479,7 +480,7 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
-            player.setGameCount(player.getGameCount()+1);
+            player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
         }
 
@@ -487,8 +488,8 @@ public class MatchServiceImpl implements MatchService {
         for (Player player : losingTeam.getPlayers()) {
             player.incrementLoseStreak();
             List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            double earnedRate = winningTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(0) / winningTeamTotalScore;
-            double missedRate = losingTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(1) / losingTeamTotalScore;
+            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
             RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
@@ -502,7 +503,7 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
-            player.setGameCount(player.getGameCount()+1);
+            player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
         }
 
@@ -512,6 +513,7 @@ public class MatchServiceImpl implements MatchService {
         gymAdminRepository.save(gymAdmin);
     }
 
+    @Override
     public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
         Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
@@ -548,22 +550,17 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private String getPlayerImage(Player player) {
-        // 기본 이미지 경로
-        String defaultImageUrl = "https://ddada-image.s3.ap-northeast-2.amazonaws.com/profileImg/default.jpg";
+        String defaultImageUrl = S3_IMAGE.DEFAULT_URL;
 
-        // 플레이어가 null인 경우 기본 이미지 URL 반환
         if (player == null) {
             log.warn("플레이어 객체가 null입니다.");
             return null;
         }
 
-        // 플레이어의 이미지 경로가 null이거나 비어있는 경우 기본 이미지 URL 반환
         if (player.getImage() == null || player.getImage().isEmpty()) {
             log.warn("{}의 이미지 경로가 null 또는 비어있습니다. 기본 이미지 URL 반환: {}", player.getNickname(), defaultImageUrl);
             return s3Util.getPresignedUrlFromS3(defaultImageUrl);
         }
-
-        // S3에서 presigned URL 생성
         return s3Util.getPresignedUrlFromS3(player.getImage());
     }
 
