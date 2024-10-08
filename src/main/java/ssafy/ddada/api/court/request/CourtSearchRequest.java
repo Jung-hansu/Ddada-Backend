@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
-import ssafy.ddada.domain.court.entity.Region;
+import ssafy.ddada.domain.gym.entity.Region;
 
 import static ssafy.ddada.common.util.ParameterUtil.blankToNull;
 

@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SchedulerService {
+public class ExpiredMatchScheduler {
 
     private final MatchRepository matchRepository;
 

@@ -1,10 +1,10 @@
-package ssafy.ddada.domain.court.repository;
+package ssafy.ddada.domain.gym.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ssafy.ddada.domain.court.entity.Gym;
+import ssafy.ddada.domain.gym.entity.Gym;
 import java.util.Optional;
 
 public interface GymRepository extends JpaRepository<Gym, Long> {

@@ -12,7 +12,7 @@ import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;
 import ssafy.ddada.api.gym.response.GymMatchesResponse;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.domain.court.service.GymService;
+import ssafy.ddada.domain.gym.service.GymService;
 import ssafy.ddada.domain.member.gymadmin.service.GymAdminService;
 
 import java.time.LocalDate;

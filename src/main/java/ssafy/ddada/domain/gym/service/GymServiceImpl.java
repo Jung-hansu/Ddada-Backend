@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.court.service;
+package ssafy.ddada.domain.gym.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import ssafy.ddada.api.gym.response.GymDetailResponse;
 import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;
 import ssafy.ddada.api.gym.response.GymMatchesResponse;
 import ssafy.ddada.common.exception.gym.GymNotFoundException;
-import ssafy.ddada.domain.court.entity.Gym;
-import ssafy.ddada.domain.court.repository.GymRepository;
+import ssafy.ddada.domain.gym.entity.Gym;
+import ssafy.ddada.domain.gym.repository.GymRepository;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.repository.MatchRepository;
 

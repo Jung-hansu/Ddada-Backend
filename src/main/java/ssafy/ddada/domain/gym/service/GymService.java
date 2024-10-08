@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.court.service;
+package ssafy.ddada.domain.gym.service;
 
 import ssafy.ddada.api.gym.response.GymDetailResponse;
 import ssafy.ddada.api.gym.response.GymMatchesHistoryResponse;

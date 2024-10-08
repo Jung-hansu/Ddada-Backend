@@ -1,7 +1,8 @@
-package ssafy.ddada.domain.court.entity;
+package ssafy.ddada.domain.gym.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Gym extends BaseCourtEntity {
+public class Gym extends BaseGymEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

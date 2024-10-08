@@ -1,7 +1,7 @@
 package ssafy.ddada.api.gym.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.court.entity.Gym;
+import ssafy.ddada.domain.gym.entity.Gym;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

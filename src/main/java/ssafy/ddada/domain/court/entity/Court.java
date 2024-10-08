@@ -2,6 +2,7 @@ package ssafy.ddada.domain.court.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.util.ArrayList;
