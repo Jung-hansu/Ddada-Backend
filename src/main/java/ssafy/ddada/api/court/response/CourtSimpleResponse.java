@@ -13,14 +13,19 @@ import java.util.stream.Collectors;
 public record CourtSimpleResponse(
         @Schema(description = "코트 ID")
         Long id,
+
         @Schema(description = "코트명")
         String name,
+
         @Schema(description = "체육관 주소")
         String address,
+
         @Schema(description = "체육관 사진")
         String image,
+
         @Schema(description = "체육관 지역")
         String region,
+
         @Schema(description = "예약된 경기 시간 리스트")
         Map<String, List<String>> reservations
 ) {

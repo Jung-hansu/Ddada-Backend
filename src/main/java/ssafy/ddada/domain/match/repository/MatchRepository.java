@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ssafy.ddada.domain.court.entity.Region;
+import ssafy.ddada.domain.gym.entity.Region;
 import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.entity.Match;
@@ -97,7 +97,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
         SELECT m
         FROM Match m
         WHERE (m.status = 'CREATED' OR m.status = 'RESERVED') AND
-            m.matchDate > CURRENT_DATE
+            m.matchDate < CURRENT_DATE
     """)
     List<Match> findAllOutDatedMatches();
 

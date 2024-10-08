@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
+import ssafy.ddada.api.data.response.PlayerAnalysticResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
 import ssafy.ddada.api.data.response.RacketRecommendResponse;
 import ssafy.ddada.common.exception.data.DataNotFoundException;
@@ -18,7 +18,6 @@ import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.properties.WebClientProperties;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.data.command.RacketRecommendCommand;
-import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public PlayerAnalysticsResponse PlayerAnalytics() {
+    public PlayerAnalysticResponse PlayerAnalytics() {
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
 
@@ -68,13 +67,13 @@ public class DataServiceImpl implements DataService {
                                 .flatMap(errorBody -> Mono.error(new DataNotFoundException())
                                 )
                 )
-                .bodyToMono(PlayerAnalysticsResponse.class)
+                .bodyToMono(PlayerAnalysticResponse.class)
                 .blockOptional()
                 .orElseThrow(DataNotFoundException::new);
     }
 
     @Override
-    public RacketRecommendResponse ReccommandRacket(RacketRecommendCommand command) {
+    public RacketRecommendResponse RecommendRacket(RacketRecommendCommand command) {
         // 기본 URL
         String baseUrl = webClientProperties.url();
 

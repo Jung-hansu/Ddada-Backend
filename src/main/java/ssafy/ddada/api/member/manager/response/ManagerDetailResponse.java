@@ -7,12 +7,16 @@ import ssafy.ddada.domain.member.manager.entity.Manager;
 public record ManagerDetailResponse(
         @Schema(description = "매니저 ID")
         Long id,
+
         @Schema(description = "매니저 이메일")
         String email,
+
         @Schema(description = "매니저 별명")
         String nickname,
+
         @Schema(description = "매니저 전화번호")
         String phoneNumber,
+
         @Schema(description = "매니저 프로필 이미지")
         String profileImg
 ) {

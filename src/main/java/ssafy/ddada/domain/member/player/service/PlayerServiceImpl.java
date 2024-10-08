@@ -12,7 +12,7 @@ import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.config.auth.JwtProcessor;
+import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.RatingChange;
 import ssafy.ddada.domain.match.entity.Team;

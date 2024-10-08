@@ -1,21 +1,20 @@
 package ssafy.ddada.api.data.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Schema(description = "추천 라켓 응답 DTO")
 public record RacketRecommendResponse(
         @Schema(description = "플레이어 타입 정보")
-        @JsonProperty("my_type")
         PlayerType myType,
 
         @Schema(description = "추천 라켓 리스트")
         List<Racket> racket
 ) {
-    // PlayerType 내부 레코드 정의
     @Schema(description = "플레이어 타입 정보")
     public record PlayerType(
             @Schema(description = "닉네임", example = "날카로운 공격형")
@@ -25,11 +24,10 @@ public record RacketRecommendResponse(
             String explanation
     ) {}
 
-    // Racket 내부 레코드 정의
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     @Schema(description = "라켓 정보")
     public record Racket(
             @Schema(description = "라켓 ID", example = "533")
-            @JsonProperty("racket_id")
             int racketId,
 
             @Schema(description = "라켓 이름", example = "아디다스 부흐트 P7")

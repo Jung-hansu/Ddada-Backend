@@ -1,16 +1,15 @@
 package ssafy.ddada.api.auth.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import ssafy.ddada.domain.auth.command.SmsCommand;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class SmsRequest {
-    @NotEmpty(message = "휴대폰 번호를 입력해주세요")
-    private String phoneNum;
+@Schema(description = "SMS 요청 DTO")
+public record SmsRequest (
+        @NotEmpty(message = "휴대폰 번호를 입력해주세요")
+        String phoneNum
+){
+    public SmsCommand toCommand(){
+        return new SmsCommand(phoneNum);
+    }
 }

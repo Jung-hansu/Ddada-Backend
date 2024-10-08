@@ -4,17 +4,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.racket.entity.Racket;
 import ssafy.ddada.domain.racket.entity.RacketDocument;
 
+@Schema(description = "라켓 정보 DTO")
 public record RacketSimpleResponse(
         @Schema(description = "라켓 ID")
         Long id,
+
         @Schema(description = "라켓명")
         String name,
+
         @Schema(description = "라켓 제조사")
         String manufacturer,
+
         @Schema(description = "라켓 무게")
         String weight,
+
         @Schema(description = "라켓 소재")
         String material,
+
         @Schema(description = "라켓 이미지")
         String image
 ) {

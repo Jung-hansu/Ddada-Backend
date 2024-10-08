@@ -17,7 +17,7 @@ import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
-import ssafy.ddada.domain.court.entity.Gym;
+import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
