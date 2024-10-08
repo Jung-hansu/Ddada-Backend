@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.data.request.RacketRecommendRequest;
-import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
+import ssafy.ddada.api.data.response.PlayerAnalysticResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
 import ssafy.ddada.api.data.response.RacketRecommendResponse;
 import ssafy.ddada.domain.data.service.DataService;
@@ -28,8 +28,8 @@ public class DataController {
 
     @Operation(summary = "선수 분석 조회", description = "선수의 분석 데이터를 조회하는 API입니다.")
     @GetMapping("/player")
-    public CommonResponse<PlayerAnalysticsResponse> PlayerAnalytics() {
-        PlayerAnalysticsResponse response = dataService.PlayerAnalytics();
+    public CommonResponse<PlayerAnalysticResponse> PlayerAnalytics() {
+        PlayerAnalysticResponse response = dataService.PlayerAnalytics();
         return CommonResponse.ok(response);
     }
 
@@ -43,7 +43,7 @@ public class DataController {
             @RequestParam(value = "racket_id", required = false) List<Integer> racketIds
     ) {
         RacketRecommendRequest request = new RacketRecommendRequest(balance, weight, shaft, price, racketIds);
-        RacketRecommendResponse response = dataService.ReccommandRacket(request.toCommand());
+        RacketRecommendResponse response = dataService.RecommendRacket(request.toCommand());
         return CommonResponse.ok(response);
     }
 }

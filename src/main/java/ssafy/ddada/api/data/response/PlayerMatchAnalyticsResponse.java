@@ -9,7 +9,7 @@ import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Player Match Analytics 응답 DTO")
+@Schema(description = "선수 경기 분석 응답 DTO")
 public record PlayerMatchAnalyticsResponse(
         @Schema(description = "세트 정보")
         List<SetInfoResponse> setInfo,
