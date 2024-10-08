@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
-import ssafy.ddada.common.constant.s3.S3_IMAGE;
+import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
@@ -286,17 +286,24 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(MemberNotFoundException::new);
         Court court = courtRepository.findById(command.courtId())
                 .orElseThrow(CourtNotFoundException::new);
-        Team team1 = teamRepository.save(Team.createNewTeam(creator));
-        Team team2 = teamRepository.save(Team.createNewTeam());
-        Match match = Match.createNewMatch(
-                court,
-                team1,
-                team2,
-                command.rankType(),
-                command.matchType(),
-                command.matchDate(),
-                command.matchTime()
+        Team team1 = teamRepository.save(
+                Team.builder()
+                        .player1(creator)
+                        .playerCount(1)
+                        .rating(creator.getRating())
+                        .build()
         );
+        Team team2 = teamRepository.save(Team.builder().build());
+
+        Match match = Match.builder()
+                .court(court)
+                .team1(team1)
+                .team2(team2)
+                .rankType(command.rankType())
+                .matchType(command.matchType())
+                .matchDate(command.matchDate())
+                .matchTime(command.matchTime())
+                .build();
 
         matchRepository.save(match);
     }
@@ -515,7 +522,13 @@ public class MatchServiceImpl implements MatchService {
             // 레이팅 변화 기록
             RatingChange ratingChange = ratingChangeRepository
                     .findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId())
-                    .orElse(RatingChange.createRatingChange(newRating - player.getRating(), player, match));
+                    .orElse(
+                            RatingChange.builder()
+                                    .ratingChange(newRating - player.getRating())
+                                    .player(player)
+                                    .match(match)
+                                    .build()
+                    );
             ratingChange.setRatingChange(newRating - player.getRating());
             ratingChangeRepository.save(ratingChange);
         }

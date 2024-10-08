@@ -70,21 +70,6 @@ public class Match extends BaseMatchEntity {
     @Builder.Default
     private List<Set> sets = new ArrayList<>();
 
-    public Match(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
-        this.court = court;
-        this.team1 = team1;
-        this.team2 = team2;
-        this.status = MatchStatus.CREATED;
-        this.rankType = rankType;
-        this.matchType = matchType;
-        this.matchDate = matchDate;
-        this.matchTime = matchTime;
-    }
-
-    public static Match createNewMatch(Court court, Team team1, Team team2, RankType rankType, MatchType matchType, LocalDate matchDate, LocalTime matchTime) {
-        return new Match(court, team1, team2, rankType, matchType, matchDate, matchTime);
-    }
-
     public List<String> getTeamGender(Team team) {
         List<String> teamGender = new ArrayList<>();
 

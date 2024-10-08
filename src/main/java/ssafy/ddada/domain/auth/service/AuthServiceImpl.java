@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
 
-                if (notRegisteredPlayer(userInfo)) {
+                if (isNotRegisteredPlayer(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
                 log.debug(">>> hasSignupMember: {}", userInfo.email());
@@ -206,18 +206,16 @@ public class AuthServiceImpl implements AuthService {
         return message;
     }
 
-    private Boolean notRegisteredPlayer(UserInfo userInfo) {
+    private boolean isNotRegisteredPlayer(UserInfo userInfo) {
         log.debug(">>> noSignupMember: {}", userInfo.email());
+        String email = userInfo.email();
+        Member member = findMemberByEmail(email).orElse(null);
 
-        if (playerRepository.existsByEmail(userInfo.email()) ||
-                gymAdminRepository.existsByEmail(userInfo.email()) ||
-                managerRepository.existsByEmail(userInfo.email())) {
-            return isTempPlayer(findMemberByEmail(userInfo.email())
-                    .orElseThrow(AbnormalLoginProgressException::new));
+        if (member == null){
+            playerRepository.save(Player.createTempPlayer());
+            return true;
         }
-
-        playerRepository.save(Player.createTempPlayer(userInfo.email()));
-        return true;
+        return isTempPlayer(member);
     }
 
     private Optional<Member> findMemberByEmail(String email) {
@@ -232,11 +230,8 @@ public class AuthServiceImpl implements AuthService {
         return new LoginToken(accessToken, refreshToken);
     }
 
-    private Boolean isTempPlayer(Object member) {
-        if (member instanceof Player) {
-            return ((Player) member).getNickname() == null;
-        }
-        return true;
+    private Boolean isTempPlayer(Member member) {
+        return member.getRole() == MemberRole.TEMP;
     }
 
     private Optional<Member> findMemberById(DecodedJwtToken decodedJwtToken) {

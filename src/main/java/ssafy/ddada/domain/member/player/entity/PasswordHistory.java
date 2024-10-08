@@ -1,14 +1,18 @@
 package ssafy.ddada.domain.member.player.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
-@NoArgsConstructor
+@Builder
+@Entity
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class PasswordHistory {
 
     @Id
@@ -22,12 +26,8 @@ public class PasswordHistory {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
     private LocalDateTime changedAt;
 
-    public PasswordHistory(Player player, String password) {
-        this.player = player;
-        this.password = password;
-        this.changedAt = LocalDateTime.now();
-    }
 }
