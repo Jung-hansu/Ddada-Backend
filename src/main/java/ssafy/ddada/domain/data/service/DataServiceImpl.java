@@ -21,17 +21,14 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 public class DataServiceImpl implements DataService {
 
     private final WebClient webClient;
-    private final PlayerRepository playerRepository;
     private final WebClientProperties webClientProperties;
-
-    private final String url = webClientProperties.url(); // 실제 API 엔드포인트로 변경 필요
 
     @Override
     public PlayerMatchAnalyticsResponse PlayerMatchAnalytics(Long matchId) {
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
 
-        String requestUrl = url + playerId + "/" + matchId + "/";
+        String requestUrl = webClientProperties.url() + playerId + "/" + matchId + "/";
 
         return webClient.get()
                 .uri(requestUrl)
@@ -53,7 +50,7 @@ public class DataServiceImpl implements DataService {
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
 
-        String requestUrl = url + playerId + "/";
+        String requestUrl = webClientProperties.url() + playerId + "/";
 
         return webClient.get()
                 .uri(requestUrl)

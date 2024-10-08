@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import ssafy.ddada.domain.match.entity.RatingChange;
 import ssafy.ddada.domain.member.player.entity.Player;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,4 +24,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     @Query("SELECT rc FROM RatingChange rc WHERE rc.player.id = :playerId AND rc.match.id = :matchId")
     RatingChange findFirstByPlayerIdAndMatchId(@Param("playerId") Long playerId, @Param("matchId") Long matchId);
+
+    @Query("SELECT COUNT(rc) FROM RatingChange rc WHERE rc.player.id = :playerId")
+    Integer countMatchesByPlayerId(@Param("playerId") Long playerId);
+
 }
