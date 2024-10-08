@@ -119,9 +119,9 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 총 경기 수 조회", description = "플레이어의 총 경기 수를 조회하는 API입니다.")
     @GetMapping("/matches/total")
-    public CommonResponse<Integer> getPlayerTotalMatch(
+    public CommonResponse<PlayerTotalMatchResponse> getPlayerTotalMatch(
     ) {
-        Integer response = playerService.getPlayerTotalMatch();
+        PlayerTotalMatchResponse response = playerService.getPlayerTotalMatch();
         return CommonResponse.ok(response);
     }
 }
