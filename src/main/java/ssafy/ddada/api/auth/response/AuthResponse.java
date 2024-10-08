@@ -1,18 +1,23 @@
-package ssafy.ddada.config.auth;
+package ssafy.ddada.api.auth.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.common.exception.player.AbnormalLoginProgressException;
+import ssafy.ddada.config.auth.UserInfo;
 
+@Schema(description = "인증 응답 DTO")
 public record AuthResponse(
         @Schema(description = "액세스 토큰", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNjM2MzQwMjM2LCJleHAiOjE2MzYzNDAyMzZ9.1J7")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String accessToken,
+
         @Schema(description = "리프레시 토큰", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNjMzNjMzNjM2LCJleHAiOjE2MzYzNDAyMzZ9.1J7")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String refreshToken,
+
         @Schema(description = "회원가입 여부", example = "true")
         Boolean isRegistered,
+
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Schema(description = "카카오 이메일", example = "example@example.com")
         String kakaoEmail

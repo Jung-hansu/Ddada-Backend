@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
+import ssafy.ddada.api.data.response.PlayerAnalyticsResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
 import ssafy.ddada.common.exception.data.DataNotFoundException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
@@ -47,7 +47,7 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public PlayerAnalysticsResponse PlayerAnalytics() {
+    public PlayerAnalyticsResponse PlayerAnalytics() {
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
 
@@ -63,7 +63,7 @@ public class DataServiceImpl implements DataService {
                                 .flatMap(errorBody -> Mono.error(new DataNotFoundException())
                                 )
                 )
-                .bodyToMono(PlayerAnalysticsResponse.class)
+                .bodyToMono(PlayerAnalyticsResponse.class)
                 .blockOptional()
                 .orElseThrow(DataNotFoundException::new);
     }

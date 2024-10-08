@@ -1,6 +1,6 @@
 package ssafy.ddada.domain.auth.model;
 
-public record LoginTokenModel(
+public record LoginToken(
         String accessToken,
         String refreshToken
 ) {

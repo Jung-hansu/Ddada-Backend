@@ -15,28 +15,40 @@ import java.util.List;
 public record MatchSimpleResponse(
         @Schema(description = "경기 ID")
         Long id,
+
         @Schema(description = "경기 일자")
         LocalDate date,
+
         @Schema(description = "경기 시간")
         LocalTime time,
+
         @Schema(description = "경기 상태")
         MatchStatus status,
+
         @Schema(description = "랭크 타입")
         RankType rankType,
+
         @Schema(description = "경기 타입")
         MatchType matchType,
+
         @Schema(description = "경기 평균 레이팅")
         Integer rating,
+
         @Schema(description = "팀1 인원 수")
         Integer team1PlayerCount,
+
         @Schema(description = "팀2 인원 수")
         Integer team2PlayerCount,
+
         @Schema(description = "팀1 성별")
         List<String> team1Gender,
+
         @Schema(description = "팀2 성별")
         List<String> team2Gender,
+
         @Schema(description = "예약 여부")
         boolean isReserved,
+
         @Schema(description = "코트 정보")
         CourtSimpleResponse court
 ) {

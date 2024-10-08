@@ -12,10 +12,13 @@ import static ssafy.ddada.common.util.ParameterUtil.blankToNull;
 public record CourtSearchRequest(
         @Schema(description = "검색 키워드", example = "문화체육관")
         String keyword,
+
         @Schema(description = "지역 목록", example = "[\"서울\", \"부산\"]")
         String regions,
+
         @Schema(description = "페이지 번호")
         int page,
+
         @Schema(description = "페이지 크기")
         int size
 ) {

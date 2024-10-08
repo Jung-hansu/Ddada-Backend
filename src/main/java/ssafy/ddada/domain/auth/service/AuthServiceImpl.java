@@ -9,7 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ssafy.ddada.api.auth.request.SmsRequest;
+import ssafy.ddada.api.auth.response.AuthResponse;
+import ssafy.ddada.api.auth.request.TokenRefreshRequest;
 import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.client.KakaoOauthClient;
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
@@ -19,11 +20,13 @@ import ssafy.ddada.common.exception.security.InvalidTokenException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
+import ssafy.ddada.common.util.JwtParser;
+import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.common.util.SmsCertificationUtil;
 import ssafy.ddada.config.auth.*;
 import ssafy.ddada.domain.auth.command.*;
-import ssafy.ddada.domain.auth.model.LoginTokenModel;
+import ssafy.ddada.domain.auth.model.LoginToken;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
@@ -60,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginCommand command) {
-        LoginTokenModel tokens;
+        LoginToken tokens;
         log.info(">>> loginType: {}", command.authCode());
 
         switch (command.loginType()) {
@@ -143,16 +146,16 @@ public class AuthServiceImpl implements AuthService {
 
     }
     @Transactional
-    public void sendSms(SmsRequest smsRequest) {
+    public void sendSms(SmsCommand command) {
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
 
         try {
-            smsCertificationUtil.sendSMS(smsRequest.getPhoneNum(), certificationCode);
+            smsCertificationUtil.sendSMS(command.phoneNum(), certificationCode);
         } catch (MessageSendingException e) {
             throw new MessageSendingException();
         }
 
-        redisTemplate.opsForValue().set(smsRequest.getPhoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(command.phoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
     }
 
     public Boolean verifyCertificationCode(VerifyCommand command) {
@@ -222,10 +225,10 @@ public class AuthServiceImpl implements AuthService {
                 .or(() -> managerRepository.findByEmail(email).map(member -> (Member) member));
     }
 
-    private LoginTokenModel generateTokens(Member member) {
+    private LoginToken generateTokens(Member member) {
         String accessToken = jwtProcessor.generateAccessToken(member);
         String refreshToken = jwtProcessor.generateRefreshToken(member);
-        return new LoginTokenModel(accessToken, refreshToken);
+        return new LoginToken(accessToken, refreshToken);
     }
 
     private Boolean isTempPlayer(Object member) {

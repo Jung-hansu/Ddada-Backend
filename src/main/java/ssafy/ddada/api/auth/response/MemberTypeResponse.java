@@ -7,8 +7,7 @@ import ssafy.ddada.domain.member.common.MemberRole;
 public record MemberTypeResponse (
     @Schema(description = "회원 타입", example = "manager")
     String memberType
-)
-{
+) {
     public static MemberTypeResponse of(MemberRole memberRole) {
         return new MemberTypeResponse(memberRole.name());
     }

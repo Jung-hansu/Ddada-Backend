@@ -6,14 +6,15 @@ import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ssafy.ddada.api.auth.response.KakaoErrorResponse;
+import ssafy.ddada.common.client.response.KakaoErrorResponse;
 import ssafy.ddada.common.exception.other.KakaoTokenException;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class KakaoTokenErrorDecoder implements ErrorDecoder {
+
     private final ObjectMapper objectMapper;
 
     @Override

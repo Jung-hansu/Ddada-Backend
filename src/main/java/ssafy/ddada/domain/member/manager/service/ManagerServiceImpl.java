@@ -9,7 +9,7 @@ import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.config.auth.JwtProcessor;
+import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.domain.member.manager.command.ManagerSignupCommand;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;

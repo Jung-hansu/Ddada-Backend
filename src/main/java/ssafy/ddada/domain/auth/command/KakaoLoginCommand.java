@@ -2,7 +2,7 @@ package ssafy.ddada.domain.auth.command;
 
 import ssafy.ddada.common.client.response.KakaoTokenInfo;
 import ssafy.ddada.common.properties.KakaoLoginProperties;
-import ssafy.ddada.config.auth.JwtParser;
+import ssafy.ddada.common.util.JwtParser;
 import ssafy.ddada.config.auth.PublicKeys;
 
 public record KakaoLoginCommand(

@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.auth.command;
+package ssafy.ddada.domain.auth.model;
 
 import static ssafy.ddada.common.constant.requestheader.AUTHORIZATION.BEARER;
 

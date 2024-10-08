@@ -11,19 +11,26 @@ import ssafy.ddada.domain.match.entity.RankType;
 
 import static ssafy.ddada.common.util.ParameterUtil.blankToNull;
 
+@Schema(description = "경기 검색 요청 DTO")
 public record MatchSearchRequest(
         @Schema(description = "검색 키워드", example = "문화체육관")
         String keyword,
+
         @Schema(description = "랭크 타입", example = "친선")
         String rankType,
+
         @Schema(description = "경기 타입", example = "남성복식,혼합복식")
         String matchTypes,
+
         @Schema(description = "경기 상태", example = "CREATED,RESERVED,PLAYING")
         String statuses,
+
         @Schema(description = "경기 지역", example = "서울,경기,부산")
         String regions,
+
         @Schema(description = "페이지 번호")
         int page,
+
         @Schema(description = "페이지 크기")
         int size
 ) {

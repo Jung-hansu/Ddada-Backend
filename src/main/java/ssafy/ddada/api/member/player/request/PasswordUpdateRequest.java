@@ -3,6 +3,7 @@ package ssafy.ddada.api.member.player.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.member.player.command.PasswordUpdateCommand;
 
+@Schema(description = "비밀번호 변경 요청 DTO")
 public record PasswordUpdateRequest(
         @Schema(description = "현재 비밀번호", example = "password123")
         String currentPassword,

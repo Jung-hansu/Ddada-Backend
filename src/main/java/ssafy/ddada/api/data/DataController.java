@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.data.response.PlayerAnalysticsResponse;
+import ssafy.ddada.api.data.response.PlayerAnalyticsResponse;
 import ssafy.ddada.api.data.response.PlayerMatchAnalyticsResponse;
 import ssafy.ddada.domain.data.service.DataService;
 
@@ -27,8 +27,8 @@ public class DataController {
 
     @Operation(summary = "선수 분석 조회", description = "선수의 분석 데이터를 조회하는 API입니다.")
     @GetMapping("/player")
-    public CommonResponse<PlayerAnalysticsResponse> PlayerAnalytics() {
-        PlayerAnalysticsResponse response = dataService.PlayerAnalytics();
+    public CommonResponse<PlayerAnalyticsResponse> PlayerAnalytics() {
+        PlayerAnalyticsResponse response = dataService.PlayerAnalytics();
         return CommonResponse.ok(response);
     }
 }

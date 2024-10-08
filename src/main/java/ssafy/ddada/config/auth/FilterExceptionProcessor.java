@@ -14,6 +14,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class FilterExceptionProcessor {
+
     private final ObjectMapper objectMapper;
 
     public void excute(HttpServletResponse response, BaseException e) throws IOException {
@@ -29,4 +30,5 @@ public class FilterExceptionProcessor {
         response.setContentType("application/json");
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
+
 }

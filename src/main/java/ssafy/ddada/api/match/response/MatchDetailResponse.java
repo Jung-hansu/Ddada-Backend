@@ -18,35 +18,47 @@ import java.util.List;
 public record MatchDetailResponse(
         @Schema(description = "경기 ID")
         Long id,
+
         @Schema(description = "코트")
         CourtDetailResponse court,
+
         @Schema(description = "팀1")
         TeamDetailResponse team1,
+
         @Schema(description = "팀2")
         TeamDetailResponse team2,
+
         @Schema(description = "담당 매니저")
         ManagerSimpleResponse manager,
+
         @Schema(description = "승리 팀 번호")
         Integer winnerTeamNumber,
+
         @Schema(description = "팀1의 세트 점수")
         Integer team1SetScore,
+
         @Schema(description = "팀2의 세트 점수")
         Integer team2SetScore,
+
         @Schema(description = "경기 상태")
         MatchStatus status,
+
         @Schema(description = "랭크 타입")
         RankType rankType,
+
         @Schema(description = "경기 타입")
         MatchType matchType,
+
         @Schema(description = "경기 일자")
         LocalDate date,
+
         @Schema(description = "경기 시간")
         LocalTime time,
+
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Schema(description = "세트 정보 요약 리스트")
         List<SetSimpleResponse> sets
 ) {
-
     public static MatchDetailResponse from(Match match,String GymImage, String Team1Player1Image, String Team1Player2Image, String Team2Player1Image, String Team2Player2Image) {
         return new MatchDetailResponse(
                 match.getId(),
@@ -69,5 +81,4 @@ public record MatchDetailResponse(
                         .toList()
         );
     }
-
 }
