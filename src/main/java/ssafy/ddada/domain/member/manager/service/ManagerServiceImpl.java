@@ -25,7 +25,9 @@ public class ManagerServiceImpl implements ManagerService {
     private final JwtProcessor jwtProcessor;
 
     @Override
-    public ManagerDetailResponse getManagerById(Long managerId) {
+    public ManagerDetailResponse getManager() {
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(ManagerNotFoundException::new);
         return ManagerDetailResponse.from(manager);

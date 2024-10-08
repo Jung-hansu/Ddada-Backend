@@ -14,6 +14,7 @@ import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
 import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
+import ssafy.ddada.common.exception.security.NotAuthenticatedException;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -82,7 +83,8 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public Page<MatchSimpleResponse> getFilteredMatches(Long memberId, MatchSearchCommand command) {
+    public Page<MatchSimpleResponse> getFilteredMatches(MatchSearchCommand command) {
+        Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
         Page<Match> matchPage = matchRepository.findMatchesByKeywordAndTypeAndStatus(
                 command.keyword(),
                 command.rankType(),
@@ -175,7 +177,9 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void setTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
+    public void setTeamPlayer(Long matchId, Integer teamNumber) {
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
 
@@ -194,7 +198,6 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Team team;
-
         if (teamNumber == 1) {
             team = match.getTeam1();
         } else if (teamNumber == 2) {
@@ -216,18 +219,27 @@ public class MatchServiceImpl implements MatchService {
         if (isMatchFull(match) && match.getManager() != null) {
             match.setStatus(MatchStatus.RESERVED);
         }
+
         teamRepository.save(team);
     }
 
     @Override
     @Transactional
-    public void unsetTeamPlayer(Long matchId, Long playerId, Integer teamNumber) {
+    public void unsetTeamPlayer(Long matchId, Integer teamNumber) {
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
+
+        // 비어있지 않은 경기만 선수 제외 가능
+        if (isMatchEmpty(match)) {
+            throw new InvalidTeamNumberException();
+        }
+
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
-        Team team;
 
+        Team team;
         if (teamNumber == 1) {
             team = match.getTeam1();
         } else if (teamNumber == 2) {
@@ -258,15 +270,19 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void createMatch(Long creatorId, MatchCreateCommand command) {
+    public void createMatch(MatchCreateCommand command) {
+        Long creatorId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+
         int conflictCount = matchRepository.countByPlayerAndDateTime(creatorId, command.matchDate(), command.matchTime());
         if (conflictCount > 0) {
             throw new PlayerAlreadyBookedException();
         }
-        Court court = courtRepository.findById(command.courtId())
-                .orElseThrow(CourtNotFoundException::new);
+
         Player creator = playerRepository.findById(creatorId)
                 .orElseThrow(MemberNotFoundException::new);
+        Court court = courtRepository.findById(command.courtId())
+                .orElseThrow(CourtNotFoundException::new);
         Team team1 = teamRepository.save(Team.createNewTeam(creator));
         Team team2 = teamRepository.save(Team.createNewTeam());
         Match match = Match.createNewMatch(
@@ -284,33 +300,40 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command) {
-        return matchRepository.findFilteredMatches(
-                        command.managerId(),
-                        command.keyword(),
-                        command.todayOnly(),
-                        command.statuses(),
-                        command.pageable()
-                )
-                .map(match -> MatchSimpleResponse.from(match, true, s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        Page<Match> matchPage = matchRepository.findFilteredMatches(
+                managerId,
+                command.keyword(),
+                command.todayOnly(),
+                command.statuses(),
+                command.pageable()
+        );
+
+        return matchPage.map(match -> {
+            String presignedUrl = s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage());
+            return MatchSimpleResponse.from(match, true, presignedUrl);
+        });
     }
 
     @Override
     @Transactional
-    public void allocateManager(Long matchId, Long managerId) {
+    public void allocateManager(Long matchId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        Manager manager = managerRepository.findById(managerId)
-                .orElseThrow(ManagerNotFoundException::new);
-
         if (match.getManager() != null) {
             throw new ManagerAlreadyExistException();
         }
 
-        int conflictCount = matchRepository.countByManagerAndDateTime(manager.getId(), match.getMatchDate(), match.getMatchTime());
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        int conflictCount = matchRepository.countByManagerAndDateTime(managerId, match.getMatchDate(), match.getMatchTime());
         if (conflictCount > 0) {
             throw new ManagerAlreadyBookedException();
         }
 
+        Manager manager = managerRepository.findById(managerId)
+                .orElseThrow(ManagerNotFoundException::new);
         match.setManager(manager);
 
         if (isMatchFull(match)) {
@@ -321,17 +344,16 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void deallocateManager(Long matchId, Long managerId) {
+    public void deallocateManager(Long matchId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-        Manager manager = managerRepository.findById(managerId)
-                .orElseThrow(ManagerNotFoundException::new);
-
         if (match.getManager() == null) {
             throw new ManagerNotFoundException();
         }
 
-        if (!Objects.equals(match.getManager().getId(), manager.getId())) {
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        if (!Objects.equals(match.getManager().getId(), managerId)) {
             throw new UnauthorizedManagerException();
         }
 
@@ -402,12 +424,13 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void saveMatch(Long matchId, Long managerId, MatchResultCommand matchCommand) {
+    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
 
-        Manager manager = match.getManager();
-        if (manager == null || !Objects.equals(manager.getId(), managerId)) {
+        if (match.getManager() == null || !Objects.equals(match.getManager().getId(), managerId)) {
             throw new UnauthorizedManagerException();
         }
 

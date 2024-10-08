@@ -7,7 +7,7 @@ import ssafy.ddada.domain.member.manager.command.ManagerSignupCommand;
 
 public interface ManagerService {
 
-    ManagerDetailResponse getManagerById(Long managerId);
+    ManagerDetailResponse getManager();
     ManagerSignupResponse signupManager(ManagerSignupCommand managerSignupCommand);
     ManagerIdResponse getManagerId();
 }
