@@ -9,14 +9,15 @@ import java.util.List;
 
 @Schema(description = "체육관 정보 요약 응답 DTO")
 public record GymDetailResponse(
-        @Schema(description = "관리자 ID")
+        @Schema(description = "관리자 정보")
         GymAdminInfoResponse gymAdmin,
         @Schema(description = "경기 통계")
         List<MatchStatisticResponse> matchStatistics
 ) {
     public record GymAdminInfoResponse(
             Long id,
-            String nickname
+            String nickname,
+            Integer income
     ) { }
 
     public record MatchStatisticResponse(
@@ -33,7 +34,11 @@ public record GymDetailResponse(
     }
 
     public static GymDetailResponse from(Gym gym) {
-        GymAdminInfoResponse gymAdminInfo = new GymAdminInfoResponse(gym.getGymAdmin().getId(), gym.getGymAdmin().getNickname());
+        GymAdminInfoResponse gymAdminInfo = new GymAdminInfoResponse(
+                gym.getGymAdmin().getId(),
+                gym.getGymAdmin().getNickname(),
+                gym.getGymAdmin().getCumulativeIncome()
+        );
         List<MatchStatisticResponse> matchStatistics = new ArrayList<>();
 
         LocalDate today = LocalDate.now();

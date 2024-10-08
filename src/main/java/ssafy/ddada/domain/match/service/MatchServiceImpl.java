@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
+import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.manager.UnauthorizedManagerException;
@@ -15,6 +16,7 @@ import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
+import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
@@ -436,10 +438,20 @@ public class MatchServiceImpl implements MatchService {
 
         // 플레이어 레이팅 업데이트
         for (Player player : winningTeam.getPlayers()) {
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,winningTeamRating, losingTeamRating);
+            player.incrementWinStreak();
+            List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
+            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
+            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
+            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
 
             // 레이팅 변화 기록
-            RatingChange ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            if (ratingChange == null) {
+                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
+            }
+            else {
+                ratingChange.setRatingChange(newRating - player.getRating());
+            }
             ratingChangeRepository.save(ratingChange);
 
             // 플레이어의 레이팅 업데이트
@@ -452,8 +464,8 @@ public class MatchServiceImpl implements MatchService {
         for (Player player : losingTeam.getPlayers()) {
             player.incrementLoseStreak();
             List<Integer> playerScoreList=calculatePlayerMatchStats(matchCommand, player.getId());
-            int earnedRate = playerScoreList.get(0)/winningTeamTotalScore;
-            int missedRate = playerScoreList.get(1)/losingTeamTotalScore;
+            double earnedRate = winningTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(0) / winningTeamTotalScore;
+            double missedRate = losingTeamTotalScore == 0 ? 0 : (double) playerScoreList.get(1) / losingTeamTotalScore;
             Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
             RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
@@ -467,6 +479,7 @@ public class MatchServiceImpl implements MatchService {
 
             // 플레이어의 레이팅 업데이트
             player.setRating(newRating);
+            player.setGameCount(player.getGameCount()+1);
             playerRepository.save(player);
         }
 
@@ -476,7 +489,16 @@ public class MatchServiceImpl implements MatchService {
         gymAdminRepository.save(gymAdmin);
     }
 
-    public List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
+    public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
+        Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
+        int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
+        if (conflictCount > 0) {
+            throw new PlayerAlreadyBookedException();
+        }
+        return true;
+    }
+
+    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
         int totalScore = 0;   // 총 득점
         int totalMissed = 0;  // 총 실점
 
@@ -485,7 +507,7 @@ public class MatchServiceImpl implements MatchService {
             // 각 세트의 점수 결과에 대해 반복
             for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
                 // 득점 확인
-                if (scoreResult.earnedPlayer().longValue() == playerId) {
+                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
                     totalScore++;
                 }
 

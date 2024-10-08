@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import ssafy.ddada.domain.court.entity.Gym;
 import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -60,8 +62,9 @@ public class CourtServiceImpl implements CourtService {
             criteria = criteria.and("gymRegion").in(regions);
         }
 
-        CriteriaQuery query = new CriteriaQuery(criteria);
-        List<Long> courtIds = elasticsearchOperations.search(query, CourtDocument.class)
+        CriteriaQuery query = new CriteriaQuery(criteria).setPageable(command.pageable());
+        SearchHits<CourtDocument> courtDocuments = elasticsearchOperations.search(query, CourtDocument.class);
+        List<Long> courtIds = courtDocuments
                 .map(searchHit -> searchHit.getContent().getCourtId())
                 .toList();
         List<CourtSimpleResponse> courts = courtRepository.findCourtsByCourtIds(courtIds)
@@ -73,30 +76,36 @@ public class CourtServiceImpl implements CourtService {
                 })
                 .toList();
 
-        return new PageImpl<>(courts, command.pageable(), courts.size());
+        return new PageImpl<>(courts, command.pageable(), courtDocuments.getTotalHits());
     }
 
     @Override
     public void indexAll() {
+        final int batchSize = 10;
         List<Court> courts = courtRepository.findAll();
+        List<CourtDocument> courtDocuments = new ArrayList<>(batchSize);
         int size = courts.size(), cur = 0;
 
         for (Court court : courts) {
-            indexCourt(court);
-            log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
+            courtDocuments.add(createCourtDocument(court));
+            cur++;
+
+            if (cur % batchSize == 0 || cur == size) {
+                log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
+                courtElasticsearchRepository.saveAll(courtDocuments);
+                courtDocuments.clear();
+            }
         }
     }
 
-    private void indexCourt(Court court) {
+    private CourtDocument createCourtDocument(Court court) {
         Gym gym = court.getGym();
-        CourtDocument courtDocument = CourtDocument.builder()
+        return CourtDocument.builder()
                 .id(String.valueOf(court.getId()))
                 .courtId(court.getId())
                 .gymName(gym != null ? gym.getName() : null)
                 .gymAddress(gym != null ? gym.getAddress() : null)
                 .build();
-
-        courtElasticsearchRepository.save(courtDocument);
     }
 
 }

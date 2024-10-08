@@ -74,7 +74,12 @@ public class JwtProcessor {
         expireToken(oldRefreshToken);
     }
 
-    public void expireToken(String refreshToken) {
+    public void expireToken(String accessToken) {
+        String refreshToken = getRefreshToken(accessToken);
+        if (refreshToken == null) {
+            log.info("리프레시 토큰을 찾지 못해 토큰 만료 처리 건너뜀: {}", accessToken);
+            return;
+        }
         blacklistTokenRedisRepository.save(refreshToken, getRemainingTime(refreshToken));
         refreshTokenRedisRepository.delete(refreshToken);
         log.info("Token added to blacklist: {}", refreshToken);
@@ -133,4 +138,9 @@ public class JwtProcessor {
             throw new TokenTypeNotMatchedException();
         }
     }
+
+    private String getRefreshToken(String accessToken) {
+        return refreshTokenRedisRepository.findById(accessToken).orElse(null);
+    }
+
 }

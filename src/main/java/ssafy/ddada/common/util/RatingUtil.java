@@ -23,7 +23,7 @@ public class RatingUtil {
         return (int) Math.round(team.stream().mapToInt(Player::getRating).average().orElse(0));
     }
 
-    public Integer updatePlayerRating(Player player, double opponentTeamRating, boolean isWin, Integer teamScore, int earnedRate, int missedRate) {
+    public Integer updatePlayerRating(Player player, double opponentTeamRating, boolean isWin, Integer teamScore, double earnedRate, double missedRate) {
         int minChange = -100;
         int maxChange = 100;
 
@@ -33,9 +33,6 @@ public class RatingUtil {
 
         // 승리 시 레이팅 증가, 패배 시 감소
         ratingChange += isWin ? performanceBonus : -performanceBonus;
-
-        // 변화량 제한
-        ratingChange = Math.max(minChange, Math.min(maxChange, ratingChange));
 
         // 개인 득실 반영
         ratingChange += ratingChange * (earnedRate - 0.5);
@@ -50,6 +47,8 @@ public class RatingUtil {
             double loseStreakRatio = (player.getLoseStreak() > 0) ? (1 - (0.10 * player.getLoseStreak())) : 1; // 연패에 따라 10%씩 감소
             ratingChange = ratingChange * loseStreakRatio; // 연패 비율 적용
         }
+
+        ratingChange = Math.max(minChange, Math.min(maxChange, ratingChange));
 
         // 새로운 레이팅 계산
         double newRating = player.getRating() + ratingChange;

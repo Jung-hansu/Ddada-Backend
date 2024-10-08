@@ -14,6 +14,7 @@ import ssafy.ddada.domain.racket.entity.RacketDocument;
 import ssafy.ddada.domain.racket.repository.RacketElasticsearchRepository;
 import ssafy.ddada.domain.racket.repository.RacketRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -41,17 +42,25 @@ public class RacketServiceImpl implements RacketService {
 
     @Override
     public void indexAll() {
+        final int batchSize = 100;
         List<Racket> rackets = racketRepository.findAll();
+        List<RacketDocument> racketDocuments = new ArrayList<>(batchSize);
         int size = rackets.size(), cur = 0;
 
         for (Racket racket : rackets) {
-            indexRacket(racket);
-            log.info("라켓 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
+            racketDocuments.add(createRacketDocument(racket));
+            cur++;
+
+            if (cur % batchSize == 0 || cur == size) {
+                log.info("라켓 인덱싱 진행도: {}%", Math.round(1000.0 * cur / size) / 10.0);
+                racketElasticsearchRepository.saveAll(racketDocuments);
+                racketDocuments.clear();
+            }
         }
     }
 
-    private void indexRacket(Racket racket){
-        RacketDocument racketDocument = RacketDocument.builder()
+    private RacketDocument createRacketDocument(Racket racket){
+        return RacketDocument.builder()
                 .racketId(racket.getId())
                 .name(racket.getName())
                 .manufacturer(racket.getManufacturer())
@@ -59,8 +68,6 @@ public class RacketServiceImpl implements RacketService {
                 .material(racket.getMaterial())
                 .image(racket.getImage())
                 .build();
-
-        racketElasticsearchRepository.save(racketDocument);
     }
 
 }
