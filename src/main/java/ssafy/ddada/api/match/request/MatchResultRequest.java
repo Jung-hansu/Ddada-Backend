@@ -2,6 +2,8 @@ package ssafy.ddada.api.match.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.match.command.MatchResultCommand;
+import ssafy.ddada.domain.match.command.ScoreResultCommand;
+import ssafy.ddada.domain.match.command.SetResultCommand;
 import ssafy.ddada.domain.match.entity.EarnedType;
 import ssafy.ddada.domain.match.entity.MissedType;
 
@@ -56,8 +58,8 @@ public record MatchResultRequest(
                 @Schema(description = "실점 방식", nullable = true)
                 MissedType missedType
         ) {
-            public MatchResultCommand.SetResultCommand.ScoreResultCommand toCommand() {
-                return new MatchResultCommand.SetResultCommand.ScoreResultCommand(
+            public ScoreResultCommand toCommand() {
+                return new ScoreResultCommand(
                         scoreNumber,
                         earnedPlayer,
                         missedPlayer1,
@@ -68,8 +70,8 @@ public record MatchResultRequest(
             }
         }
 
-        public MatchResultCommand.SetResultCommand toCommand() {
-            return new MatchResultCommand.SetResultCommand(
+        public SetResultCommand toCommand() {
+            return new SetResultCommand(
                     setNumber,
                     setWinnerTeamNumber,
                     team1Score,

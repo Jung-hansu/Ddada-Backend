@@ -138,13 +138,14 @@ public class Player extends BaseMemberEntity implements Member {
         }
     }
 
-    public void incrementWinStreak() {
-        this.winStreak++;
-        this.loseStreak = 0; // 연승이 계속되면 연패는 초기화
+    public void incrementStreak(boolean isWin) {
+        if (isWin) {
+            this.winStreak++;
+            this.loseStreak = 0; // 연승이 계속되면 연패는 초기화
+        } else {
+            this.loseStreak++;
+            this.winStreak = 0;
+        }
     }
 
-    public void incrementLoseStreak() {
-        this.loseStreak++;
-        this.winStreak = 0; // 연패가 계속되면 연승은 초기화
-    }
 }

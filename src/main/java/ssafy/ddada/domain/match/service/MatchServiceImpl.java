@@ -365,19 +365,56 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.save(match);
     }
 
-    private Score buildScoreFrom(Set set, MatchResultCommand.SetResultCommand.ScoreResultCommand scoreCommand) {
+    @Override
+    @Transactional
+    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
+        Match match = validateMatch(matchId);
+        Match newMatch = buildMatchFrom(match, matchCommand);
+        matchRepository.save(newMatch);
+
+        int winTeamNumber = match.getWinnerTeamNumber();
+        int loseTeamNumber = 3 - winTeamNumber;
+
+        int winTeamTotalScore = getTotalTeamScore(matchCommand, winTeamNumber);
+        int loseTeamTotalScore = getTotalTeamScore(matchCommand, loseTeamNumber);
+
+        // 팀 플레이어 점수 계산
+        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, true);
+        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, false);
+
+        updateGymIncome(match);
+    }
+
+    private Match validateMatch(Long matchId){
+        Match match = matchRepository.findByIdWithInfos(matchId)
+                .orElseThrow(MatchNotFoundException::new);
+        Long managerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+
+        if (match.getManager() == null || !Objects.equals(match.getManager().getId(), managerId)) {
+            throw new UnauthorizedManagerException();
+        }
+
+        if (match.getStatus() != MatchStatus.PLAYING){
+            throw new InvalidMatchStatusException();
+        }
+
+        return match;
+    }
+
+    private Score buildScoreFrom(Set set, ScoreResultCommand scoreCommand) {
         return Score.builder()
                 .set(set)
                 .scoreNumber(scoreCommand.scoreNumber())
-                .earnedPlayer(scoreCommand.earnedPlayer())
-                .missedPlayer1(scoreCommand.missedPlayer1())
-                .missedPlayer2(scoreCommand.missedPlayer2())
+                .earnedPlayer(scoreCommand.earnedPlayerNumber())
+                .missedPlayer1(scoreCommand.missedPlayer1Number())
+                .missedPlayer2(scoreCommand.missedPlayer2Number())
                 .earnedType(scoreCommand.earnedType())
                 .missedType(scoreCommand.missedType())
                 .build();
     }
 
-    private Set buildSetFrom(Match match, MatchResultCommand.SetResultCommand setCommand) {
+    private Set buildSetFrom(Match match, SetResultCommand setCommand) {
         Set newSet = Set.builder()
                 .match(match)
                 .setNumber(setCommand.setNumber())
@@ -423,49 +460,6 @@ public class MatchServiceImpl implements MatchService {
         return newMatch;
     }
 
-    private List<Integer> calculatePlayerMatchStats(MatchResultCommand matchResultCommand, Long playerId) {
-        int totalScore = 0;   // 총 득점
-        int totalMissed = 0;  // 총 실점
-
-        // 각 세트에 대해 반복
-        for (MatchResultCommand.SetResultCommand setResult : matchResultCommand.sets()) {
-            // 각 세트의 점수 결과에 대해 반복
-            for (MatchResultCommand.SetResultCommand.ScoreResultCommand scoreResult : setResult.scores()) {
-                // 득점 확인
-                if (scoreResult.earnedPlayer() != null && scoreResult.earnedPlayer().longValue() == playerId) {
-                    totalScore++;
-                }
-
-                // 실점 확인
-                if (scoreResult.missedPlayer1() != null && scoreResult.missedPlayer1().longValue() == playerId) {
-                    totalMissed++;
-                }
-                if (scoreResult.missedPlayer2() != null && scoreResult.missedPlayer2().longValue() == playerId) {
-                    totalMissed++;
-                }
-            }
-        }
-
-        return Arrays.asList(totalScore, totalMissed);
-    }
-
-    private Match validateMatch(Long matchId){
-        Match match = matchRepository.findByIdWithInfos(matchId)
-                .orElseThrow(MatchNotFoundException::new);
-        Long managerId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
-
-        if (match.getManager() == null || !Objects.equals(match.getManager().getId(), managerId)) {
-            throw new UnauthorizedManagerException();
-        }
-
-        if (match.getStatus() != MatchStatus.PLAYING){
-            throw new InvalidMatchStatusException();
-        }
-
-        return match;
-    }
-
     private Team getTeamByTeamNumber(Match match, Integer teamNumber){
         return switch (teamNumber){
             case 1 -> match.getTeam1();
@@ -474,78 +468,89 @@ public class MatchServiceImpl implements MatchService {
         };
     }
 
-    @Override
-    @Transactional
-    public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
-        Match match = validateMatch(matchId);
-        Match newMatch = buildMatchFrom(match, matchCommand);
-        matchRepository.save(newMatch);
+    private Player getPlayerByPlayerNumber(Team team, Integer playerNumber){
+        return switch (playerNumber){
+            case 1 -> team.getPlayer1();
+            case 2 -> team.getPlayer2();
+            default -> throw new InvalidTeamPlayerNumberException();
+        };
+    }
 
-        // 팀 레이팅 업데이트
-        Team winningTeam = getTeamByTeamNumber(match, match.getWinnerTeamNumber());
-        Team losingTeam = getTeamByTeamNumber(match, 3 - match.getWinnerTeamNumber());
-
-        int winningTeamRating = RatingUtil.calculateTeamRating(winningTeam.getPlayers());
-        int losingTeamRating = RatingUtil.calculateTeamRating(losingTeam.getPlayers());
-
-        // 팀의 총 점수 계산
-        int winningTeamTotalScore = matchCommand.sets().stream()
-                .filter(set -> set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
-                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
+    private int getTotalTeamScore(MatchResultCommand matchCommand, Integer teamNumber) {
+        return matchCommand.sets().stream()
+                .filter(set -> teamNumber.equals(set.setWinnerTeamNumber()))
+                .mapToInt(set -> set.getTeamScoreByTeamNumber(teamNumber))
                 .sum();
+    }
 
-        int losingTeamTotalScore = matchCommand.sets().stream()
-                .filter(set -> !set.setWinnerTeamNumber().equals(matchCommand.winnerTeamNumber()))
-                .mapToInt(set -> set.setWinnerTeamNumber().equals(1) ? set.team1Score() : set.team2Score())
-                .sum();
+    private void updatePlayersRatings(Match match, MatchResultCommand matchCommand, int loseTeamTotalScore, int winTeamTotalScore, boolean isWin) {
+        int teamNumber = isWin ? match.getWinnerTeamNumber() : 3 - match.getWinnerTeamNumber();
+        Team team = getTeamByTeamNumber(match, teamNumber);
 
-        // 이긴 팀 플레이어 점수 계산
-        for (Player player : winningTeam.getPlayers()) {
-            player.incrementWinStreak();
-            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
-            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
-            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
-            Integer newRating = ratingUtil.updatePlayerRating(player, losingTeamRating, true, winningTeamTotalScore,earnedRate, missedRate);
-            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
+        Team oppositeTeam = getTeamByTeamNumber(match, 3 - teamNumber);
+        int oppositeTeamRating = RatingUtil.calculateTeamRating(oppositeTeam.getPlayers());
 
-            // 레이팅 변화 기록
-            if (ratingChange == null) {
-                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
-            }
-            else {
-                ratingChange.setRatingChange(newRating - player.getRating());
-            }
-            ratingChangeRepository.save(ratingChange);
+        for (Player player : team.getPlayers()) {
+            player.incrementStreak(isWin);
+            List<Integer> playerScoreList = calculatePlayerMatchStats(match, player, matchCommand);
+            double earnedRate = winTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winTeamTotalScore;
+            double missedRate = loseTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / loseTeamTotalScore;
 
             // 플레이어의 레이팅 업데이트
+            int newRating = ratingUtil.updatePlayerRating(
+                    player,
+                    oppositeTeamRating,
+                    winTeamTotalScore,
+                    earnedRate,
+                    missedRate,
+                    true
+            );
             player.setRating(newRating);
             player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
-        }
 
-        // 진 팀 플레이어 점수 계산
-        for (Player player : losingTeam.getPlayers()) {
-            player.incrementLoseStreak();
-            List<Integer> playerScoreList = calculatePlayerMatchStats(matchCommand, player.getId());
-            double earnedRate = winningTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winningTeamTotalScore;
-            double missedRate = losingTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / losingTeamTotalScore;
-            Integer newRating = ratingUtil.updatePlayerRating(player, winningTeamRating, false, losingTeamTotalScore, earnedRate, missedRate);
-            RatingChange ratingChange = ratingChangeRepository.findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId()).orElse(null);
             // 레이팅 변화 기록
-            if (ratingChange == null) {
-                ratingChange = RatingChange.createRatingChange(newRating - player.getRating(), player, match);
-            }
-            else {
-                ratingChange.setRatingChange(newRating - player.getRating());
-            }
+            RatingChange ratingChange = ratingChangeRepository
+                    .findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId())
+                    .orElse(RatingChange.createRatingChange(newRating - player.getRating(), player, match));
+            ratingChange.setRatingChange(newRating - player.getRating());
             ratingChangeRepository.save(ratingChange);
 
-            // 플레이어의 레이팅 업데이트
-            player.setRating(newRating);
-            player.setGameCount(player.getGameCount() + 1);
-            playerRepository.save(player);
+        }
+    }
+
+    private List<Integer> calculatePlayerMatchStats(Match match, Player player, MatchResultCommand matchResultCommand) {
+        int totalScore = 0;
+        int totalMiss = 0;
+
+        for (SetResultCommand setResult : matchResultCommand.sets()) {
+            for (ScoreResultCommand scoreResult : setResult.scores()) {
+                if (isMatchedPlayer(match, player, scoreResult.earnedPlayerNumber())) {
+                    totalScore++;
+                }
+                if (isMatchedPlayer(match, player, scoreResult.missedPlayer1Number())) {
+                    totalMiss++;
+                }
+                if (isMatchedPlayer(match, player, scoreResult.missedPlayer2Number())) {
+                    totalMiss++;
+                }
+            }
         }
 
+        return Arrays.asList(totalScore, totalMiss);
+    }
+
+    private boolean isMatchedPlayer(Match match, Player player, Integer teamPlayerNumber){
+        if (teamPlayerNumber == null){
+            return false;
+        }
+
+        Team team = getTeamByTeamNumber(match, teamPlayerNumber / 10);
+        Player earnedPlayer = getPlayerByPlayerNumber(team, teamPlayerNumber % 10);
+        return Objects.equals(player.getId(), earnedPlayer.getId());
+    }
+
+    private void updateGymIncome(Match match){
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
         Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
         gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
