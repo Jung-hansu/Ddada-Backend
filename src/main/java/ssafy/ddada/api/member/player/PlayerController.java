@@ -119,9 +119,16 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어의 총 경기 수 조회", description = "플레이어의 총 경기 수를 조회하는 API입니다.")
     @GetMapping("/matches/total")
-    public CommonResponse<PlayerTotalMatchResponse> getPlayerTotalMatch(
-    ) {
+    public CommonResponse<PlayerTotalMatchResponse> getPlayerTotalMatch() {
         PlayerTotalMatchResponse response = playerService.getPlayerTotalMatch();
+        return CommonResponse.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @Operation(summary = "플레이어들의 랭킹 조회", description = "플레이어들의 랭킹을 조회하는 API입니다.")
+    @GetMapping("/rankings")
+    public CommonResponse<List<PlayerRankingResponse>> getPlayersRanking() {
+        List<PlayerRankingResponse> response = playerService.getPlayersRanking();
         return CommonResponse.ok(response);
     }
 }

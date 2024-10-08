@@ -16,6 +16,7 @@ import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.util.RankingUtil;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
@@ -59,6 +60,7 @@ public class MatchServiceImpl implements MatchService {
     private final RatingUtil ratingUtil;
     private final RatingChangeRepository ratingChangeRepository;
     private final S3Util s3Util;
+    private final RankingUtil rankingUtil;
 
     private boolean isReserved(Match match, Long memberId) {
         Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
@@ -521,6 +523,7 @@ public class MatchServiceImpl implements MatchService {
             player.setRating(newRating);
             player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
         }
 
         // 진 팀 플레이어 점수 계산
@@ -544,6 +547,7 @@ public class MatchServiceImpl implements MatchService {
             player.setRating(newRating);
             player.setGameCount(player.getGameCount() + 1);
             playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
         }
 
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
