@@ -17,23 +17,19 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     boolean existsByNickname(String nickname);
 
     @Query("""
-    SELECT COUNT(m)
-    FROM Match m
-    WHERE (m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId) AND
-          m.winnerTeamNumber = 1
-       OR (m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId) AND
-          m.winnerTeamNumber = 2
-""")
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE (m.winnerTeamNumber = 1 AND :playerId IN (m.team1.player1.id , m.team1.player2.id)) OR
+            (m.winnerTeamNumber = 2 AND :playerId IN (m.team2.player1.id, m.team2.player2.id))
+    """)
     Integer countWinsByPlayerId(@Param("playerId") Long playerId);
 
     @Query("""
-    SELECT COUNT(m)
-    FROM Match m
-    WHERE (m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId) AND
-          m.winnerTeamNumber = 2
-       OR (m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId) AND
-          m.winnerTeamNumber = 1
-""")
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE (m.winnerTeamNumber = 2 AND :playerId IN (m.team1.player1.id, m.team1.player2.id)) OR
+            (m.winnerTeamNumber = 1 AND :playerId IN (m.team2.player1.id, m.team2.player2.id))
+    """)
     Integer countLossesByPlayerId(@Param("playerId") Long playerId);
 
     @Query("""
