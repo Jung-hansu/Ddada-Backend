@@ -5,10 +5,12 @@ import ssafy.ddada.domain.member.manager.entity.Manager;
 
 @Schema(description = "매니저 정보 요약 응답 DTO")
 public record ManagerSimpleResponse (
-        @Schema(description = "매니저ID")
+        @Schema(description = "매니저 ID")
         Long id,
+
         @Schema(description = "매니저 별명")
         String nickname,
+
         @Schema(description = "매니저 이미지")
         String image
 ){

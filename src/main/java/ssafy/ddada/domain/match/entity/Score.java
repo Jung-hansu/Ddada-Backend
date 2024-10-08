@@ -6,6 +6,7 @@ import lombok.*;
 @Getter
 @Builder
 @Entity
+@ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Score extends BaseMatchEntity {

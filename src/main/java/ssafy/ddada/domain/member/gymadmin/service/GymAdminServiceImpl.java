@@ -5,8 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
+import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.util.SecurityUtil;
+import ssafy.ddada.domain.court.command.SettleAccountCommand;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
+
+import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
 
 @Slf4j
 @Service
@@ -18,13 +23,22 @@ public class GymAdminServiceImpl implements GymAdminService{
 
     @Override
     @Transactional
-    public GymAdmin settleAccount(Long gymAdminId, String account, Integer amount) {
-        log.info("계좌 {}에 {}원을 지급했습니다.", account, amount);
+    public void settleAccount(SettleAccountCommand command) {
+        log.info("settleAccount >>>> account: {}", command.AcountAddress());
+        Long gymAdminId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         GymAdmin gymAdmin = gymAdminRepository.findByIdWithInfos(gymAdminId)
                 .orElseThrow(GymAdminNotFoundException::new);
 
+        doSettleAccount(gymAdmin, command.AcountAddress());
+    }
+
+    private void doSettleAccount(GymAdmin gymAdmin, String account) {
+        Integer amount = nullToZero(gymAdmin.getCumulativeIncome());
+
         gymAdmin.setCumulativeIncome(0);
-        return gymAdminRepository.save(gymAdmin);
+        gymAdminRepository.save(gymAdmin);
+        log.info("계좌 {}에 {}원을 지급했습니다.", account, amount);
     }
 
 }

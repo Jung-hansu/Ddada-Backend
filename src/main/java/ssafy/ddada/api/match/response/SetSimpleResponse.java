@@ -10,14 +10,19 @@ import java.util.List;
 public record SetSimpleResponse(
         @Schema(description = "세트 ID")
         Long id,
+
         @Schema(description = "세트 번호")
         Integer setNumber,
+
         @Schema(description = "세트 승리 팀 번호")
         Integer setWinnerTeamNumber,
+
         @Schema(description = "팀1 점수")
         Integer team1Score,
+
         @Schema(description = "팀2 점수")
         Integer team2Score,
+
         @Schema(description = "득점 목록")
         List<ScoreDetailResponse> scores
 ) {

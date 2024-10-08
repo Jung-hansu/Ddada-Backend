@@ -1,8 +1,8 @@
 package ssafy.ddada.api.member.player.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ssafy.ddada.domain.member.common.Gender;
 
+@Schema(description = "선수 정보 응답 DTO")
 public record PlayerDetailResponse(
         @Schema(description = "프로필 이미지 경로", example = "https://my-bucket.s3.amazonaws.com/sample-image.jpg\n")
         String profilePreSignedUrl,

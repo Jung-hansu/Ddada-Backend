@@ -4,11 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import ssafy.ddada.domain.auth.command.LoginCommand;
 
+@Schema(description = "로그인 요청 DTO")
 public record  LoginRequest(
         @Schema(description = "인가코드", example = "oIZqkpBr0z8b-PmDRKlsyX05Hxs-XTNyUeSVXXTcVp-wUn4Q3yQhYwAAAAQKKwzUAAABkRB4UCIicpf3YNJZ6g")
         String authcode,
 
-        @Schema(description = "loginType", example = "kakao")
+        @Schema(description = "로그인 종류", example = "basic")
         String loginType,
 
         @Schema(description = "이메일", example = "example@example.com", format = "email")

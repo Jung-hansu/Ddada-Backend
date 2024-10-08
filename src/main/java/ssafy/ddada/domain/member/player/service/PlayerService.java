@@ -13,9 +13,10 @@ public interface PlayerService {
     PlayerDetailResponse getMemberDetail();
     PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command);
     String deleteMember();
-    Boolean checkNickname(String nickname);
+    boolean checkNickname(String nickname);
     String updateMemberPassword(PasswordUpdateCommand command);
     List<PlayerMatchResponse> getPlayerMatches();
     List<PlayerMatchResponse> getPlayerCompleteMatches();
     PlayerIdResponse getPlayerId();
+    PlayerTotalMatchResponse getPlayerTotalMatch();
 }

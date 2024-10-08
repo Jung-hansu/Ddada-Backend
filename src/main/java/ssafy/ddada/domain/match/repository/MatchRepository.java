@@ -7,13 +7,11 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ssafy.ddada.domain.court.entity.Region;
+import ssafy.ddada.domain.gym.entity.Region;
 import ssafy.ddada.domain.match.entity.MatchType;
 import ssafy.ddada.domain.match.entity.RankType;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.MatchStatus;
-import ssafy.ddada.domain.member.manager.entity.Manager;
-import ssafy.ddada.domain.member.player.entity.Player;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -77,43 +75,58 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Optional<Match> findByIdWithInfos(@Param("matchId") Long matchId);
 
     @Query("""
-        SELECT m
-        FROM Match m
-        WHERE m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId OR
-             m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId
-     """)
+    SELECT m
+    FROM Match m
+    WHERE :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
+    ORDER BY m.matchDate DESC, m.matchTime DESC
+    """)
     List<Match> findMatchesByPlayerId(Long playerId);
+
+
 
     @Query("""
         SELECT m
         FROM Match m
         WHERE m.status = 'COMPLETED' AND
-            (m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId OR
-            m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId)
+            :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
+        ORDER BY m.matchDate DESC, m.matchTime DESC
     """)
     List<Match> findCompletedMatchesByPlayerId(Long playerId);
 
     @Query("""
         SELECT m
         FROM Match m
-        WHERE m.matchDate > CURRENT_DATE AND
-            (m.status = 'CREATED' OR m.status = 'RESERVED')
+        WHERE (m.status = 'CREATED' OR m.status = 'RESERVED') AND
+            m.matchDate < CURRENT_DATE
     """)
     List<Match> findAllOutDatedMatches();
 
     @EntityGraph(attributePaths = {"team1.player1", "team1.player2", "team2.player1", "team2.player2"})
-    @Query("SELECT COUNT(m) FROM Match m WHERE (m.team1.player1.id = :playerId OR m.team1.player2.id = :playerId OR m.team2.player1.id = :playerId OR m.team2.player2.id = :playerId) AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    @Query("""
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE m.matchDate = :matchDate AND
+            m.matchTime = :matchTime AND
+            :playerId IN (m.team1.player1.id, m.team1.player2.id, m.team2.player1.id, m.team2.player2.id)
+    """)
     int countByPlayerAndDateTime(@Param("playerId") Long playerId, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 
     @EntityGraph(attributePaths = {"manager"})
-    @Query("SELECT COUNT(m) FROM Match m WHERE m.manager.id = :managerId AND m.matchDate = :matchDate AND m.matchTime = :matchTime")
+    @Query("""
+        SELECT COUNT(m)
+        FROM Match m
+        WHERE m.manager.id = :managerId AND
+            m.matchDate = :matchDate AND
+            m.matchTime = :matchTime
+    """)
     int countByManagerAndDateTime(@Param("managerId") Long managerId, @Param("matchDate") LocalDate matchDate, @Param("matchTime") LocalTime matchTime);
 
     @EntityGraph(attributePaths = {"court", "court.gym", "manager", "team1", "team2"})
     @Query("""
         SELECT m
         FROM Match m
-        WHERE m.court.gym.id = :gymAdminId AND m.matchDate = :date
+        WHERE m.matchDate = :date AND
+            m.court.gym.id = :gymAdminId
     """)
     List<Match> getMatchesByGymIdAndDate(@Param("gymAdminId") Long gymAdminId, @Param("date") LocalDate date);
 
@@ -121,7 +134,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     @Query("""
         SELECT COUNT(m)
         FROM Match m
-        WHERE m.court.gym.id = :gymId AND m.matchDate = :date AND m.status = "FINISHED"
+        WHERE m.status = "FINISHED" AND
+            m.matchDate = :date AND
+            m.court.gym.id = :gymId
     """)
     int countByGymIdAndMatchDate(@Param("gymId") Long gymId, @Param("matchDate") LocalDate date);
 

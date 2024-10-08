@@ -1,10 +1,8 @@
 package ssafy.ddada.domain.court.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.match.entity.Match;
 
 import java.util.ArrayList;
@@ -12,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Court extends BaseCourtEntity {

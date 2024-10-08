@@ -12,7 +12,7 @@ import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
 import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.common.util.SecurityUtil;
-import ssafy.ddada.config.auth.JwtProcessor;
+import ssafy.ddada.common.util.JwtProcessor;
 import ssafy.ddada.domain.match.entity.Match;
 import ssafy.ddada.domain.match.entity.RatingChange;
 import ssafy.ddada.domain.match.entity.Team;
@@ -138,7 +138,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Boolean checkNickname(String nickname) {
+    public boolean checkNickname(String nickname) {
         boolean isDuplicated = playerRepository.existsByNickname(nickname);
         log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
         return isDuplicated;
@@ -183,6 +183,13 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerIdResponse getPlayerId() {
         return PlayerIdResponse.of(SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new));
+    }
+
+    @Override
+    public PlayerTotalMatchResponse getPlayerTotalMatch() {
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        return PlayerTotalMatchResponse.of(playerRepository.countMatchesByPlayerId(playerId));
     }
 
     private boolean isDuplicateEmail(Player existingPlayer) {

@@ -79,3 +79,6 @@ coolsms:
   api-key: ${COOLSMS_APIKEY}
   api-secret: ${COOLSMS_APISECRET}
   from-number: ${COOLSMS_FROMNUMBER}
+
+WebClient:
+  url: ${WEBCLIENT_URL}

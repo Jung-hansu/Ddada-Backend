@@ -1,17 +1,15 @@
 package ssafy.ddada.domain.member.gymadmin.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ssafy.ddada.domain.court.entity.Gym;
+import lombok.*;
+import ssafy.ddada.domain.gym.entity.Gym;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 public class GymAdmin extends BaseMemberEntity implements Member {
     @Id

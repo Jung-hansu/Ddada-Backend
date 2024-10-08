@@ -1,9 +1,7 @@
 package ssafy.ddada.domain.member.gymadmin.service;
 
-import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
+import ssafy.ddada.domain.court.command.SettleAccountCommand;
 
 public interface GymAdminService {
-
-    GymAdmin settleAccount(Long gymAdminId, String account, Integer amount);
-
+    void settleAccount(SettleAccountCommand command);
 }

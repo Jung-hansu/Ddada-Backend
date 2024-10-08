@@ -9,14 +9,19 @@ import ssafy.ddada.domain.match.entity.Score;
 public record ScoreDetailResponse(
         @Schema(description = "득점 번호(정렬 기준)")
         Integer scoreNumber,
+
         @Schema(description = "득점 선수 번호")
         Integer earnedMember,
+
         @Schema(description = "실점 선수 번호1")
         Integer missedMember1,
+
         @Schema(description = "실점 선수 번호2")
         Integer missedMember2,
+
         @Schema(description = "득점 방식")
         EarnedType earnedType,
+
         @Schema(description = "실점 방식")
         MissedType missedType
 ) {

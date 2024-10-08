@@ -3,6 +3,7 @@ package ssafy.ddada.api.member.player.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ssafy.ddada.domain.member.common.Gender;
 
+@Schema(description = "선수 프로필 응답 DTO")
 public record PlayerProfileDetailResponse(
         @Schema(description = "프로필 이미지 경로", example = "https://my-bucket.s3.amazonaws.com/sample-image.jpg\n")
         String profilePreSignedUrl,
@@ -34,7 +35,6 @@ public record PlayerProfileDetailResponse(
         @Schema(description = "패배 횟수", example = "5")
         Integer loseCount
 ) {
-    // 모든 필드를 받는 메서드
     public static PlayerProfileDetailResponse of(String profileImageBase64, String nickname, Gender gender, Integer rating, Integer GameCount, String phoneNumber, String email, String description, Integer winCount, Integer loseCount) {
         return new PlayerProfileDetailResponse(
                 profileImageBase64,

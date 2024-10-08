@@ -10,16 +10,23 @@ import static ssafy.ddada.common.util.ParameterUtil.nullToFalse;
 
 @Schema(description = "매니저 할당 경기 검색 결과")
 public record ManagerSearchMatchRequest(
-        Long managerId,
+        @Schema(description = "검색어")
         String keyword,
+
+        @Schema(description = "오늘 경기만 조회할 지 여부")
         Boolean todayOnly,
+
+        @Schema(description = "comma-separated 경기 상태 목록")
         String statuses,
+
+        @Schema(description = "페이지 번호")
         int page,
+
+        @Schema(description = "페이지 크기")
         int size
 ) {
     public ManagerSearchMatchCommand toCommand(){
         return new ManagerSearchMatchCommand(
-                managerId,
                 keyword,
                 nullToFalse(todayOnly),
                 MatchStatus.toMatchStatusSet(statuses),
