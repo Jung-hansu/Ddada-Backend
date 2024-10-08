@@ -89,7 +89,7 @@ public class DataServiceImpl implements DataService {
         // 쿼리 파라미터 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(requestUrl);
         if (command.racketIds() != null && !command.racketIds().isEmpty()) {
-            command.racketIds().forEach(racket -> uriBuilder.queryParam("racket_id", racket.byteValue()));
+            command.racketIds().forEach(racket -> uriBuilder.queryParam("racket_id", racket.longValue()));
         }
         log.info("Request URL: {}", uriBuilder.toUriString());
 
