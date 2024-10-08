@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
-@Entity
 @Getter
+@Entity
+@ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class Manager extends BaseMemberEntity implements Member {
     @Id
