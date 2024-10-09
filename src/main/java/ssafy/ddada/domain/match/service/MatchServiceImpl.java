@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.constant.global.COURT;
 import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
@@ -49,8 +50,6 @@ import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
 @RequiredArgsConstructor
 public class MatchServiceImpl implements MatchService {
 
-    private static final int INCOME = 3000;
-
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
     private final CourtRepository courtRepository;
@@ -62,31 +61,9 @@ public class MatchServiceImpl implements MatchService {
     private final S3Util s3Util;
     private final RankingUtil rankingUtil;
 
-    private boolean isReserved(Match match, Long memberId) {
-        Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
-        Player B1 = match.getTeam2().getPlayer1(), B2 = match.getTeam2().getPlayer2();
-
-        if (A1 != null && Objects.equals(A1.getId(), memberId)) {
-            return true;
-        }
-
-        if (A2 != null && Objects.equals(A2.getId(), memberId)) {
-            return true;
-        }
-
-        if (B1 != null && Objects.equals(B1.getId(), memberId)) {
-            return true;
-        }
-
-        if (B2 != null && Objects.equals(B2.getId(), memberId)) {
-            return true;
-        }
-
-        return false;
-    }
-
     @Override
     public Page<MatchSimpleResponse> getFilteredMatches(MatchSearchCommand command) {
+        log.info("[MatchService] 경기 리스트 조회");
         Long memberId = SecurityUtil.getLoginMemberId().orElse(null);
         Page<Match> matchPage = matchRepository.findMatchesByKeywordAndTypeAndStatus(
                 command.keyword(),
@@ -97,11 +74,26 @@ public class MatchServiceImpl implements MatchService {
                 command.pageable()
         );
 
-        return matchPage.map(match -> MatchSimpleResponse.from(match, isReserved(match, memberId), s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage())));
+        return matchPage.map(match -> MatchSimpleResponse.from(
+                match,
+                isReserved(match, memberId),
+                s3Util.getPresignedUrlFromS3(match.getCourt().getGym().getImage()))
+        );
+    }
+
+    private boolean isReserved(Match match, Long memberId) {
+        Player A1 = match.getTeam1().getPlayer1(), A2 = match.getTeam1().getPlayer2();
+        Player B1 = match.getTeam2().getPlayer1(), B2 = match.getTeam2().getPlayer2();
+
+        return A1 != null && Objects.equals(A1.getId(), memberId) ||
+                A2 != null && Objects.equals(A2.getId(), memberId) ||
+                B1 != null && Objects.equals(B1.getId(), memberId) ||
+                B2 != null && Objects.equals(B2.getId(), memberId);
     }
 
     @Override
     public MatchDetailResponse getMatchByIdWithInfos(Long matchId) {
+        log.info("[MatchService] 경기 조회 >>>> 경기 ID: {}", matchId);
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
 
@@ -118,6 +110,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
+        log.info("[MatchService] 경기 상태 변경 >>>> 경기 ID: {}, 변경할 경기 상태: {}", matchId, command.status());
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
 
@@ -125,7 +118,8 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidMatchStatusException();
         }
         match.setStatus(command.status());
-        matchRepository.save(match);
+        match = matchRepository.save(match);
+        log.info("[MatchService] 경기 상태 변경 성공 >>>> 변경된 경기 상태: {}", match.getStatus());
     }
 
     private void updateTeamPlayerCount(Team team) {
@@ -181,6 +175,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void setTeamPlayer(Long matchId, Integer teamNumber) {
+        log.info("[MatchService] 선수를 팀에 배치 >>>> 경기 ID: {}, 배치할 팀 번호: {}", matchId, teamNumber);
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
@@ -200,22 +195,8 @@ public class MatchServiceImpl implements MatchService {
             throw new PlayerAlreadyBookedException();
         }
 
-        Team team;
-        if (teamNumber == 1) {
-            team = match.getTeam1();
-        } else if (teamNumber == 2) {
-            team = match.getTeam2();
-        } else {
-            throw new InvalidTeamNumberException();
-        }
-
-        if (team.getPlayer1() == null) {
-            team.setPlayer1(player);
-        } else if (team.getPlayer2() == null) {
-            team.setPlayer2(player);
-        } else {
-            throw new TeamFullException();
-        }
+        Team team = getTeamByTeamNumber(match, teamNumber);
+        allocatePlayerToTeam(team, player);
 
         // 경기 모집 완료 시 경기 상태 변경
         updateTeam(team);
@@ -226,9 +207,20 @@ public class MatchServiceImpl implements MatchService {
         teamRepository.save(team);
     }
 
+    private void allocatePlayerToTeam(Team team, Player player){
+        if (team.getPlayer1() == null) {
+            team.setPlayer1(player);
+        } else if (team.getPlayer2() == null) {
+            team.setPlayer2(player);
+        } else {
+            throw new TeamFullException();
+        }
+    }
+
     @Override
     @Transactional
     public void unsetTeamPlayer(Long matchId, Integer teamNumber) {
+        log.info("[MatchService] 선수를 팀에서 제외 >>>> 경기 ID: {}, 팀 번호: {}", matchId, teamNumber);
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
@@ -242,14 +234,7 @@ public class MatchServiceImpl implements MatchService {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
 
-        Team team;
-        if (teamNumber == 1) {
-            team = match.getTeam1();
-        } else if (teamNumber == 2) {
-            team = match.getTeam2();
-        } else {
-            throw new InvalidTeamNumberException();
-        }
+        Team team = getTeamByTeamNumber(match, teamNumber);
 
         if (team.getPlayer1() != null && Objects.equals(team.getPlayer1().getId(), player.getId())) {
             team.setPlayer1(null);
@@ -568,7 +553,7 @@ public class MatchServiceImpl implements MatchService {
     private void updateGymIncome(Match match){
         GymAdmin gymAdmin = match.getCourt().getGym().getGymAdmin();
         Integer cumulativeIncome = nullToZero(gymAdmin.getCumulativeIncome());
-        gymAdmin.setCumulativeIncome(cumulativeIncome + INCOME);
+        gymAdmin.setCumulativeIncome(cumulativeIncome + COURT.DEFAULT_PRICE);
         gymAdminRepository.save(gymAdmin);
     }
 

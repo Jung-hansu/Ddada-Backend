@@ -31,6 +31,7 @@ public class GymServiceImpl implements GymService {
 
     @Override
     public GymDetailResponse getGymInfo() {
+        log.info("[GymService] 체육관 정보 조회");
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         Gym gym = gymRepository.getGymsById(gymAdminId).orElseThrow(GymNotFoundException::new);
         return GymDetailResponse.from(gym);
@@ -38,6 +39,7 @@ public class GymServiceImpl implements GymService {
 
     @Override
     public GymMatchesResponse getGymMatches(LocalDate date) {
+        log.info("[GymService] 체육관 경기 조회 >>>> 날짜: {}", date);
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         List<Match> matches = matchRepository.getMatchesByGymIdAndDate(gymAdminId, date);
         return GymMatchesResponse.from(matches);
@@ -45,6 +47,7 @@ public class GymServiceImpl implements GymService {
 
     @Override
     public GymMatchesHistoryResponse getGymMatchesHistory() {
+        log.info("[GymService] 체육관 최근 경기 현황 조회");
         Long gymAdminId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         Map<LocalDate, Integer> history = new HashMap<>();
         LocalDate aWeekAgo = LocalDate.now().minusWeeks(1);
