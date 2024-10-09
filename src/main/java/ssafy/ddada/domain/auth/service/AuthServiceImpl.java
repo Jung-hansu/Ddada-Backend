@@ -38,15 +38,17 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static ssafy.ddada.common.constant.redis.CONST_VALUE.CERTIFICATION_CODE_EXPIRE_TIME;
 import static ssafy.ddada.common.constant.redis.KEY_PREFIX.REFRESH_TOKEN;
 import static ssafy.ddada.common.constant.security.LOGIN_TYPE.BASIC;
 import static ssafy.ddada.common.constant.security.LOGIN_TYPE.KAKAO;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
+
     private final KakaoOauthClient kakaoOauthClient;
     private final KakaoLoginProperties kakaoLoginProperties;
     private final JwtParser jwtParser;
@@ -58,7 +60,6 @@ public class AuthServiceImpl implements AuthService {
     private final SmsCertificationUtil smsCertificationUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final JavaMailSender javaMailSender;
-    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 5L;
     private final HttpServletRequest request;
 
     @Override
@@ -96,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
                         .orElseThrow(EmailNotFoundException::new);
 
 
-                if (!passwordEncoder.matches(password, ((Member) basicMember).getPassword())) {
+                if (!passwordEncoder.matches(password, basicMember.getPassword())) {
                     throw new PasswordNotMatchException();
                 }
 
