@@ -55,7 +55,7 @@ public class MatchController {
     @Operation(summary = "경기 생성", description = "경기를 생성하는 api입니다.")
     @PostMapping
     public CommonResponse<MatchDetailResponse> createMatch(@RequestBody MatchCreateRequest request) {
-        log.info("[MatchController] 경기 생성 >>>> 경기 정보: {}", request);
+        log.info("[MatchController] 경기 생성 >>>> 경기 ID: {}, 랭크 타입: {}, 경기 타입: {}, 경기 일자: {}, 경기 시간: {}", request.courtId(), request.rankType(), request.matchType(), request.date(), request.time());
         matchService.createMatch(request.toCommand());
         return CommonResponse.created("경기가 성공적으로 생성되었습니다.", null);
     }
@@ -82,7 +82,7 @@ public class MatchController {
     @Operation(summary = "선수 예약된 경기 확인", description = "같은 시간에 이미 예약된 경기가 있는지 확인하는 api입니다.")
     @GetMapping("/player/bookings")
     public CommonResponse<Boolean> checkPlayerBooked(@RequestParam LocalDate date, @RequestParam LocalTime time) {
-        log.info("[MatchController] 선수 예약된 경기 확인 >>>> 날짜: {}, 시간: {}",date, time);
+        log.info("[MatchController] 선수 예약 여부 확인 >>>> 날짜: {}, 시간: {}",date, time);
         CheckPlayerBookedRequest request = new CheckPlayerBookedRequest(date, time);
         Boolean response = matchService.CheckPlayerBooked(request.toCommand());
         return CommonResponse.ok(response);

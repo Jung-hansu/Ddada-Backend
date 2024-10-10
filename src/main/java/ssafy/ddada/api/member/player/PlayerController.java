@@ -85,8 +85,8 @@ public class PlayerController {
     @PatchMapping(value = "/password")
     public CommonResponse<String> updateMemberPassword(@RequestBody PasswordUpdateRequest request) {
         log.info("[PlayerController] 회원 비밀번호 수정 >>>> request: {}", request);
-        String response = playerService.updateMemberPassword(request.toCommand());
-        return CommonResponse.ok(response);
+        playerService.updateMemberPassword(request.toCommand());
+        return CommonResponse.ok("비밀번호가 성공적으로 변경되었습니다.", null);
     }
 
     @PreAuthorize("hasRole('ROLE_PLAYER')")
@@ -127,8 +127,8 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어들의 랭킹 조회", description = "플레이어들의 랭킹을 조회하는 API입니다.")
     @GetMapping("/rankings")
-    public CommonResponse<List<PlayerRankingResponse>> getPlayersRanking() {
-        List<PlayerRankingResponse> response = playerService.getPlayersRanking();
+    public CommonResponse<PlayerRankingResponse> getPlayersRanking() {
+        PlayerRankingResponse response = playerService.getPlayersRanking();
         return CommonResponse.ok(response);
     }
 }
