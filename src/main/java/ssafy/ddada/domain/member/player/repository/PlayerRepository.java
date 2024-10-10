@@ -7,12 +7,12 @@ import org.springframework.stereotype.Repository;
 import ssafy.ddada.domain.match.entity.RatingChange;
 import ssafy.ddada.domain.member.player.entity.Player;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
 
-    boolean existsByEmail(String email);
     Optional<Player> findByEmail(String email);
     boolean existsByNickname(String nickname);
 
@@ -41,9 +41,17 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     RatingChange findFirstByPlayerIdAndMatchId(@Param("playerId") Long playerId, @Param("matchId") Long matchId);
 
     @Query("""
-        SELECT COUNT(rc) 
-        FROM RatingChange rc 
+        SELECT COUNT(rc)
+        FROM RatingChange rc
         WHERE rc.player.id = :playerId
     """)
     Integer countMatchesByPlayerId(@Param("playerId") Long playerId);
+
+    @Query("""
+        SELECT p
+        FROM Player p
+        WHERE p.isDeleted = true AND p.updatedAt < CURRENT_DATE - 1 MONTH
+    """)
+    List<Player> findDeletedPlayers();
+
 }
