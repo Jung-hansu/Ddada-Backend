@@ -29,15 +29,14 @@ import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 import ssafy.ddada.domain.match.command.*;
 import ssafy.ddada.domain.match.entity.*;
-import ssafy.ddada.domain.match.repository.RatingChangeRepository;
+import ssafy.ddada.domain.match.repository.*;
+import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
 import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
-import ssafy.ddada.domain.match.repository.MatchRepository;
-import ssafy.ddada.domain.match.repository.TeamRepository;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
@@ -55,15 +54,19 @@ import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
 public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
-    private final PlayerRepository playerRepository;
-    private final CourtRepository courtRepository;
-    private final ManagerRepository managerRepository;
+    private final SetRepository setRepository;
+    private final ScoreRepository scoreRepository;
     private final TeamRepository teamRepository;
+    private final PlayerRepository playerRepository;
+    private final ManagerRepository managerRepository;
     private final GymAdminRepository gymAdminRepository;
-    private final RatingUtil ratingUtil;
+    private final CourtRepository courtRepository;
     private final RatingChangeRepository ratingChangeRepository;
+
+    private final RatingUtil ratingUtil;
     private final S3Util s3Util;
     private final RankingUtil rankingUtil;
+
     private final WebClient webClient;
     private final WebClientProperties webClientProperties;
 
@@ -182,8 +185,6 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public void setTeamPlayer(Long matchId, Integer teamNumber) {
         log.info("[MatchService] 선수를 팀에 배치 >>>> 경기 ID: {}, 배치할 팀 번호: {}", matchId, teamNumber);
-        Long playerId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
 
@@ -192,6 +193,8 @@ public class MatchServiceImpl implements MatchService {
             throw new TeamFullException();
         }
 
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -202,7 +205,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Team team = getTeamByTeamNumber(match, teamNumber);
-        allocatePlayerToTeam(team, player);
+        allocatePlayerToTeam(match, team, player);
 
         // 경기 모집 완료 시 경기 상태 변경
         updateTeam(team);
@@ -213,13 +216,40 @@ public class MatchServiceImpl implements MatchService {
         teamRepository.save(team);
     }
 
-    private void allocatePlayerToTeam(Team team, Player player){
-        if (team.getPlayer1() == null) {
-            team.setPlayer1(player);
-        } else if (team.getPlayer2() == null) {
-            team.setPlayer2(player);
-        } else {
-            throw new TeamFullException();
+    private void allocatePlayerToTeam(Match match, Team team, Player player){
+        switch (team.getPlayerCount()) {
+            case 0 -> team.setPlayer1(player);
+            case 1 -> {
+                if (team.getPlayer1() != null) {
+                    validateGender(match, team.getPlayer1(), player);
+                    team.setPlayer2(player);
+                } else {
+                    validateGender(match, team.getPlayer2(), player);
+                    team.setPlayer1(player);
+                }
+            }
+            case 2 -> throw new TeamFullException();
+            default -> throw new InvalidTeamNumberException();
+        }
+    }
+
+    private void validateGender(Match match, Player player1, Player player2) {
+        switch (match.getMatchType()) {
+            case FEMALE_DOUBLE -> {
+                if (player1.getGender() != Gender.FEMALE || player2.getGender() != Gender.FEMALE) {
+                    throw new InvalidMatchTypeException();
+                }
+            }
+            case MALE_DOUBLE -> {
+                if (player1.getGender() != Gender.MALE || player2.getGender() != Gender.MALE) {
+                    throw new InvalidMatchTypeException();
+                }
+            }
+            case MIXED_DOUBLE -> {
+                if (player1.getGender() == player2.getGender()) {
+                    throw new InvalidTeamNumberException();
+                }
+            }
         }
     }
 
@@ -227,8 +257,6 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public void unsetTeamPlayer(Long matchId, Integer teamNumber) {
         log.info("[MatchService] 선수를 팀에서 제외 >>>> 경기 ID: {}, 팀 번호: {}", matchId, teamNumber);
-        Long playerId = SecurityUtil.getLoginMemberId()
-                .orElseThrow(NotAuthenticatedException::new);
         Match match = matchRepository.findByIdWithTeams(matchId)
                 .orElseThrow(TeamNotFoundException::new);
 
@@ -237,6 +265,8 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidTeamNumberException();
         }
 
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -374,9 +404,8 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
         log.info("[MatchService] 경기 저장 >>>> 경기 ID: {}", matchId);
-        Match match = validateMatch(matchId);
-        Match newMatch = buildMatchFrom(match, matchCommand);
-        matchRepository.save(newMatch);
+        Match match = getValidatedMatch(matchId);
+        saveMatchResult(match, matchCommand);
 
         int winTeamNumber = match.getWinnerTeamNumber();
         int loseTeamNumber = 3 - winTeamNumber;
@@ -393,7 +422,7 @@ public class MatchServiceImpl implements MatchService {
         savedMatchAnalysis(matchId);
     }
 
-    private Match validateMatch(Long matchId){
+    private Match getValidatedMatch(Long matchId){
         Match match = matchRepository.findByIdWithInfos(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         Long managerId = SecurityUtil.getLoginMemberId()
@@ -410,38 +439,7 @@ public class MatchServiceImpl implements MatchService {
         return match;
     }
 
-    private Score buildScoreFrom(Set set, ScoreResultCommand scoreCommand) {
-        return Score.builder()
-                .set(set)
-                .scoreNumber(scoreCommand.scoreNumber())
-                .earnedPlayer(scoreCommand.earnedPlayerNumber())
-                .missedPlayer1(scoreCommand.missedPlayer1Number())
-                .missedPlayer2(scoreCommand.missedPlayer2Number())
-                .earnedType(scoreCommand.earnedType())
-                .missedType(scoreCommand.missedType())
-                .build();
-    }
-
-    private Set buildSetFrom(Match match, SetResultCommand setCommand) {
-        Set newSet = Set.builder()
-                .match(match)
-                .setNumber(setCommand.setNumber())
-                .setWinnerTeamNumber(setCommand.setWinnerTeamNumber())
-                .team1Score(setCommand.team1Score())
-                .team2Score(setCommand.team2Score())
-                .build();
-
-        newSet.getScores().addAll(
-                setCommand.scores()
-                        .stream()
-                        .map(scoreCommand -> buildScoreFrom(newSet, scoreCommand))
-                        .sorted(Comparator.comparingInt(Score::getScoreNumber))
-                        .toList()
-        );
-        return newSet;
-    }
-
-    private Match buildMatchFrom(Match match, MatchResultCommand matchCommand) {
+    private void saveMatchResult(Match match, MatchResultCommand matchCommand) {
         Match newMatch = Match.builder()
                 .id(match.getId())
                 .court(match.getCourt())
@@ -458,14 +456,39 @@ public class MatchServiceImpl implements MatchService {
                 .team2SetScore(matchCommand.team2SetScore())
                 .build();
 
-        newMatch.getSets().addAll(
-                matchCommand.sets()
-                        .stream()
-                        .map(setCommand -> buildSetFrom(match, setCommand))
-                        .sorted(Comparator.comparingInt(Set::getSetNumber))
-                        .toList()
-        );
-        return newMatch;
+        newMatch = matchRepository.save(newMatch);
+        for (SetResultCommand setCommand : matchCommand.sets()){
+            saveSetResult(newMatch, setCommand);
+        }
+    }
+
+    private void saveSetResult(Match match, SetResultCommand setCommand) {
+        Set newSet = Set.builder()
+                .match(match)
+                .setNumber(setCommand.setNumber())
+                .setWinnerTeamNumber(setCommand.setWinnerTeamNumber())
+                .team1Score(setCommand.team1Score())
+                .team2Score(setCommand.team2Score())
+                .build();
+
+        newSet = setRepository.save(newSet);
+        for (ScoreResultCommand scoreCommand : setCommand.scores()){
+            saveScoreResult(newSet, scoreCommand);
+        }
+    }
+
+    private void saveScoreResult(Set set, ScoreResultCommand scoreCommand) {
+        Score newScore = Score.builder()
+                .set(set)
+                .scoreNumber(scoreCommand.scoreNumber())
+                .earnedPlayer(scoreCommand.earnedPlayerNumber())
+                .missedPlayer1(scoreCommand.missedPlayer1Number())
+                .missedPlayer2(scoreCommand.missedPlayer2Number())
+                .earnedType(scoreCommand.earnedType())
+                .missedType(scoreCommand.missedType())
+                .build();
+
+        scoreRepository.save(newScore);
     }
 
     private Team getTeamByTeamNumber(Match match, Integer teamNumber){

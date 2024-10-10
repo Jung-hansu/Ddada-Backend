@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.init;
+package ssafy.ddada.domain.initializer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.common.exception.match.MatchNotFoundException;
@@ -31,7 +30,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ssafy.ddada.domain.init.ExcelUtil.*;
+import static ssafy.ddada.common.util.ExcelUtil.*;
 import static ssafy.ddada.common.util.ParameterUtil.*;
 
 @Slf4j
@@ -50,7 +49,6 @@ public class MatchInitializer {
     private static List<Match> matches = new ArrayList<>();
     private static List<Set> sets = new ArrayList<>();
 
-    @Transactional
     @PostConstruct
     public void init() {
         initMatch();
@@ -142,11 +140,12 @@ public class MatchInitializer {
             }
             matches = matchRepository.saveAll(matches);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("[MatchInitializer] 경기 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
     private void initSet() {
+        log.info("[MatchInitializer] 세트 초기화");
         String filePath = "init/set_data.xlsx";
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (inputStream == null) {
@@ -184,11 +183,12 @@ public class MatchInitializer {
             }
             sets = setRepository.saveAll(sets);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("[MatchInitializer] 세트 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
     private void initScore(){
+        log.info("[MatchInitializer] 점수 초기화");
         String filePath = "init/score_data.xlsx";
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (inputStream == null) {
@@ -231,7 +231,7 @@ public class MatchInitializer {
             }
             scoreRepository.saveAll(scores);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("[MatchInitializer] 점수 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
