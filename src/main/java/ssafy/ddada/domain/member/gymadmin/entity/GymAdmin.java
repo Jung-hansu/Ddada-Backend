@@ -41,4 +41,16 @@ public class GymAdmin extends BaseMemberEntity implements Member {
             this.role = MemberRole.GYM_ADMIN;  // 기본값 설정
         }
     }
+
+    @Builder
+    public GymAdmin(Gym gym, String email, String password, String nickname, String number, Integer cumulativeIncome) {
+        this.gym = gym;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.number = number;
+        this.cumulativeIncome = cumulativeIncome;
+        this.role = MemberRole.GYM_ADMIN;
+        this.isDeleted = false;
+    }
 }
