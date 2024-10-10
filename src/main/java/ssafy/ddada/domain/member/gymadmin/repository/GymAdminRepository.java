@@ -1,5 +1,6 @@
 package ssafy.ddada.domain.member.gymadmin.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,9 +18,12 @@ public interface GymAdminRepository extends JpaRepository<GymAdmin, Long> {
     """)
     Optional<GymAdmin> findByIdWithInfos(Long gymAdminId);
 
-    boolean existsByEmail(String email);
-
-    Optional<GymAdmin> findByEmail(String email);
+    @Query("""
+        SELECT ga
+        FROM GymAdmin ga
+        WHERE ga.email = :email AND ga.isDeleted = false
+    """)
+    Optional<GymAdmin> findByEmail(@Param("email") String email);
 
 }
 

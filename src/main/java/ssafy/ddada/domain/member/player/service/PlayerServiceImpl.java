@@ -26,8 +26,6 @@ import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -300,8 +298,13 @@ public class PlayerServiceImpl implements PlayerService {
     private Player getCurrentLoggedInMember() {
         Long userId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
-        return playerRepository.findById(userId)
+        Player player = playerRepository.findById(userId)
                 .orElseThrow(MemberNotFoundException::new);
+
+        if (player.getIsDeleted()){
+            throw new NotAuthenticatedException();
+        }
+        return player;
     }
 
     private Player getPlayerForPasswordUpdate(PasswordUpdateCommand command) {
