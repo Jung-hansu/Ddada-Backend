@@ -20,7 +20,7 @@ public class Court extends BaseCourtEntity {
     @Column(name = "court_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
