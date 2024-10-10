@@ -1,18 +1,17 @@
 package ssafy.ddada.domain.member.manager.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
 @Getter
 @Entity
+@Builder
 @ToString
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Manager extends BaseMemberEntity implements Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,18 +33,6 @@ public class Manager extends BaseMemberEntity implements Member {
 
     @Column(nullable = false)
     private String description;
-
-    // 매니저 회원가입 메서드
-    public void signupManager(String email, String password, String nickname, String profileImg, String number, String description) {
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.profileImg = profileImg;
-        this.number = number;
-        this.description = description;
-        this.isDeleted = false;
-        this.role = MemberRole.MANAGER;  // 기본값 설정
-    }
 
     // 저장 전에 기본 role 설정
     @Override

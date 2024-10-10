@@ -2,12 +2,13 @@ package ssafy.ddada.domain.member.player.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.member.player.response.*;
-import ssafy.ddada.common.constant.s3.S3_IMAGE;
+import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.common.exception.player.*;
 import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
@@ -22,18 +23,15 @@ import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.member.player.command.*;
 import ssafy.ddada.domain.member.player.entity.PasswordHistory;
 import ssafy.ddada.domain.member.player.entity.Player;
-import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class PlayerServiceImpl implements PlayerService {
 
@@ -47,6 +45,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public PlayerSignupResponse signupMember(MemberSignupCommand signupCommand) {
+        log.info("[PlayerService] 선수 회원가입");
         Player existingPlayer = playerRepository.findByEmail(signupCommand.email())
                 .orElse(null);
 
@@ -62,8 +61,6 @@ public class PlayerServiceImpl implements PlayerService {
         playerToSave.signupMember(signupCommand, imageUrl, encodedPassword);
         playerRepository.save(playerToSave);
 
-        rankingUtil.savePlayerToRanking(playerToSave);
-
         try {
             String accessToken = jwtProcessor.generateAccessToken(playerToSave);
             String refreshToken = jwtProcessor.generateRefreshToken(playerToSave);
@@ -76,6 +73,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public PlayerDetailResponse getMemberDetail() {
+        log.info("[PlayerService] 선수 정보 조회");
         Player currentPlayer = getCurrentLoggedInMember();
         String preSignedProfileImage = generatePreSignedUrl(currentPlayer.getImage());
 
@@ -89,6 +87,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public PlayerProfileDetailResponse getMemberProfileDetail() {
+        log.info("[PlayerService] 선수 상세 프로필 조회");
         Player currentPlayer = getCurrentLoggedInMember();
         String preSignedProfileImage = generatePreSignedUrl(currentPlayer.getImage());
 
@@ -112,6 +111,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public PlayerDetailResponse updateMemberProfile(UpdateProfileCommand command) {
+        log.info("[PlayerService] 선수 정보 변경");
         Player currentPlayer = getCurrentLoggedInMember();
 
         MultipartFile profileImageFile = command.profileImagePath();
@@ -138,6 +138,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public String deleteMember() {
+        log.info("[PlayerService] 선수 탈퇴");
         Player currentPlayer = getCurrentLoggedInMember();
         currentPlayer.delete();
         playerRepository.save(currentPlayer);
@@ -147,29 +148,29 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public boolean checkNickname(String nickname) {
+        log.info("[PlayerService] 닉네임 중복 체크");
         boolean isDuplicated = playerRepository.existsByNickname(nickname);
-        log.debug(">>> 닉네임 중복 체크: {}, 중복 여부: {}", nickname, isDuplicated);
+        log.debug("[PlayerService] >>>> 닉네임: {}, 중복 여부: {}", nickname, isDuplicated);
         return isDuplicated;
     }
 
     @Override
     @Transactional
-    public String updateMemberPassword(PasswordUpdateCommand command) {
-        validateNewPassword(command.newPassword());
-
+    public void updateMemberPassword(PasswordUpdateCommand command) {
+        log.info("[PlayerService] 비밀번호 변경");
         Player player = getPlayerForPasswordUpdate(command);
 
-        ensureNewPasswordIsNotUsed(command.newPassword(), player);
+        verifyCurrentPassword(command.currentPassword(), player);
+        verifyNewPassword(command.newPassword(), player);
 
         String encodedNewPassword = passwordEncoder.encode(command.newPassword());
         player.updatePassword(encodedNewPassword);
         playerRepository.save(player);
-
-        return "비밀번호가 성공적으로 변경되었습니다.";
     }
 
     @Override
     public List<PlayerMatchResponse> getPlayerMatches() {
+        log.info("[PlayerService] 참여중인 경기 리스트 조회");
         Player currentPlayer = getCurrentLoggedInMember();
         List<Match> matches = matchRepository.findMatchesByPlayerId(currentPlayer.getId());
 
@@ -180,6 +181,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public List<PlayerMatchResponse> getPlayerCompleteMatches() {
+        log.info("[PlayerService] 완료된 경기 리스트 조회");
         Player currentPlayer = getCurrentLoggedInMember();
         List<Match> matches = matchRepository.findCompletedMatchesByPlayerId(currentPlayer.getId());
 
@@ -190,71 +192,72 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public PlayerIdResponse getPlayerId() {
-        return PlayerIdResponse.of(SecurityUtil.getLoginMemberId().orElseThrow(NotAuthenticatedException::new));
+        log.info("[PlayerService] 선수 ID 조회");
+        Long playerId = SecurityUtil.getLoginMemberId()
+                .orElseThrow(NotAuthenticatedException::new);
+        return PlayerIdResponse.of(playerId);
     }
 
     @Override
     public PlayerTotalMatchResponse getPlayerTotalMatch() {
+        log.info("[PlayerService] 전체 경기 횟수 조회");
         Long playerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         return PlayerTotalMatchResponse.of(playerRepository.countMatchesByPlayerId(playerId));
     }
 
     @Override
-    public List<PlayerRankingResponse> getPlayersRanking() {
-        // 현재 로그인한 플레이어의 정보
+    public PlayerRankingResponse getPlayersRanking() {
+        log.info("[PlayerService] 선수 랭킹 조회");
+        Set<ZSetOperations.TypedTuple<String>> topPlayers = rankingUtil.getAllPlayers();
+
+        if (topPlayers.isEmpty()) {
+            playerRepository.findAll().forEach(rankingUtil::savePlayerToRanking);
+        }
+
         Player currentPlayer = getCurrentLoggedInMember();
-        Integer currentPlayerRating = currentPlayer.getRating();
-        String currentPlayerNickname = currentPlayer.getNickname();
-        Integer currentPlayerRanking = rankingUtil.getPlayerRank(currentPlayerNickname).intValue();
+        List<PlayerRankingResponse.PlayerRanking> rankings = new ArrayList<>();
+        int rank = 1;
 
+        for (ZSetOperations.TypedTuple<String> tuple : topPlayers) {
+            if (tuple.getScore() == null){
+                continue;
+            }
 
-        // 레디스에서 상위 플레이어들의 닉네임과 레이팅 정보를 가져옴
-        List<List<Object>> topPlayers = rankingUtil.getAllPlayers(); // 2중 리스트로 [nickname, rating] 형태
+            String nickname = tuple.getValue();
+            int rating = tuple.getScore().intValue();
 
-        AtomicInteger rank = new AtomicInteger(1);
-
-        // 플레이어 순위를 PlayerRankingResponse 객체로 변환
-        List<PlayerRankingResponse> rankings = topPlayers.stream()
-                .map(playerData -> {
-                    String nickname = (String) playerData.get(0);  // nickname
-                    Integer rating = ((Double) playerData.get(1)).intValue();
-                    return PlayerRankingResponse.of(
-                            rank.getAndIncrement(),
-                            nickname,
-                            rating
-                    );
-                })
-                .collect(Collectors.toList());
+            PlayerRankingResponse.PlayerRanking playerRanking =
+                    PlayerRankingResponse.PlayerRanking.of(rank++, nickname, rating);
+            rankings.add(playerRanking);
+        }
 
         // 현재 플레이어 정보 추가
-        rankings.add(PlayerRankingResponse.of(
+        Integer currentPlayerRanking = rankingUtil.getPlayerRank(currentPlayer).intValue();
+        rankings.add(PlayerRankingResponse.PlayerRanking.of(
                 currentPlayerRanking,
-                currentPlayerNickname,
-                currentPlayerRating
+                currentPlayer.getNickname(),
+                currentPlayer.getRating()
         ));
 
-        return rankings;
+        return PlayerRankingResponse.of(rankings);
     }
-
 
     private boolean isDuplicateEmail(Player existingPlayer) {
         return existingPlayer != null && !existingPlayer.getIsDeleted();
     }
 
-    private Player createNewPlayer(MemberSignupCommand signupCommand) {
-        return new Player(
-                signupCommand.email(),
-                signupCommand.gender(),
-                signupCommand.birth(),
-                signupCommand.nickname(),
-                passwordEncoder.encode(signupCommand.password()),
-                null,
-                signupCommand.number(),
-                signupCommand.description(),
-                0,
-                MemberRole.PLAYER
-        );
+    private Player createNewPlayer(MemberSignupCommand command) {
+        return Player.builder()
+                .email(command.email())
+                .gender(command.gender())
+                .birth(command.birth())
+                .nickname(command.nickname())
+                .password(passwordEncoder.encode(command.password()))
+                .number(command.number())
+                .description(command.description())
+                .rating(0)
+                .build();
     }
 
     /**
@@ -306,8 +309,6 @@ public class PlayerServiceImpl implements PlayerService {
             return playerRepository.findByEmail(command.email())
                     .orElseThrow(MemberNotFoundException::new);
         }
-        Player player = getCurrentLoggedInMember();
-        verifyCurrentPassword(command.currentPassword(), player);
         return getCurrentLoggedInMember();
     }
 
@@ -317,17 +318,15 @@ public class PlayerServiceImpl implements PlayerService {
         }
     }
 
-    private void ensureNewPasswordIsNotUsed(String newPassword, Player player) {
+    private void verifyNewPassword(String newPassword, Player player) {
+        if (newPassword.length() < 8 || !newPassword.matches(".*[!@#\\$%^&*].*")) {
+            throw new InvalidPasswordException();
+        }
+
         for (PasswordHistory history : player.getPasswordHistories()) {
             if (passwordEncoder.matches(newPassword, history.getPassword())) {
                 throw new PasswordUsedException();
             }
-        }
-    }
-
-    private void validateNewPassword(String newPassword) {
-        if (newPassword.length() < 8 || !newPassword.matches(".*[!@#\\$%^&*].*")) {
-            throw new InvalidPasswordException();
         }
     }
 

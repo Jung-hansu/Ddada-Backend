@@ -24,7 +24,7 @@ public class RacketController {
     @Operation(summary = "라켓 검색", description = "라켓명, 브랜드명 기반 키워드로 라켓을 검색하는 API입니다.")
     @GetMapping
     public CommonResponse<RacketSearchResponse> getRackets(@RequestParam String keyword){
-        log.info("getRackets >>>> keyword: {}", keyword);
+        log.info("[RacketController] 라켓 검색 >>>> 검색어: {}", keyword);
         RacketSearchResponse response = racketService.getRacketsByElasticKeyword(keyword);
         return CommonResponse.ok(response);
     }

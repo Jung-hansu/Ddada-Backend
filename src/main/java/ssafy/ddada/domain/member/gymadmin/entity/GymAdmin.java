@@ -7,10 +7,11 @@ import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Member;
 import ssafy.ddada.domain.member.common.MemberRole;
 
-@Entity
 @Getter
+@Entity
 @ToString
-@NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GymAdmin extends BaseMemberEntity implements Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,16 +35,6 @@ public class GymAdmin extends BaseMemberEntity implements Member {
     @Setter
     private Integer cumulativeIncome;
 
-    // 회원가입 메서드
-    public void signupGymAdmin(String email, String password, String number) {
-        this.email = email;
-        this.password = password;
-        this.number = number;
-        this.isDeleted = false;
-        this.role = MemberRole.GYM_ADMIN;  // 기본값 설정
-    }
-
-    // 저장 전에 기본 role 설정
     @Override
     public void prePersist() {
         if (this.role == null) {

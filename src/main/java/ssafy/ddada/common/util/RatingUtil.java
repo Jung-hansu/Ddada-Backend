@@ -21,7 +21,7 @@ public class RatingUtil {
         return (int) Math.round(team.stream().mapToInt(Player::getRating).average().orElse(0));
     }
 
-    public Integer updatePlayerRating(Player player, double opponentTeamRating, boolean isWin, Integer teamScore, double earnedRate, double missedRate) {
+    public Integer updatePlayerRating(Player player, double opponentTeamRating, Integer teamScore, double earnedRate, double missedRate, boolean isWin) {
         int minChange = -100;
         int maxChange = 100;
 

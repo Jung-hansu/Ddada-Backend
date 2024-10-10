@@ -2,7 +2,7 @@ package ssafy.ddada.domain.gym.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ssafy.ddada.common.constant.s3.S3_IMAGE;
+import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 

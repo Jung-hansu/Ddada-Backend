@@ -28,6 +28,7 @@ public class HealthController {
     @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
     @GetMapping("/redis/check")
     public CommonResponse<String> checkRedisConnection() {
+        log.info("[HealthController] Redis 연결 확인");
         try {
             String pingResponse = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getClusterConnection().ping();
             if (!"PONG".equals(pingResponse)) {
@@ -43,6 +44,7 @@ public class HealthController {
     @Operation(summary = "PostgreSQL 연결 확인", description = "PostgreSQL 데이터베이스와의 연결 상태를 확인합니다.")
     @GetMapping("/postgres/check")
     public CommonResponse<String> checkPostgresConnection() {
+        log.info("[HealthController] Postgres 연결 확인");
         try (Connection connection = dataSource.getConnection()) {
             if (!connection.isValid(2)) {  // 2초 내에 연결 확인
                 return CommonResponse.ok("PostgreSQL 연결 실패", null);
@@ -57,6 +59,7 @@ public class HealthController {
     @Operation(summary = "서버 상태 확인", description = "서버 상태를 확인합니다.")
     @GetMapping("/ping")
     public CommonResponse<String> ping() {
+        log.info("[HealthController] 백엔드 서버 상태 확인");
         return CommonResponse.ok("pong");
     }
 }

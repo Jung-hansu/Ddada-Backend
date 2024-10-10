@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.common.exception.manager.ManagerNotFoundException;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
@@ -16,8 +17,9 @@ import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ManagerServiceImpl implements ManagerService {
 
     private final ManagerRepository managerRepository;
@@ -26,6 +28,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ManagerDetailResponse getManager() {
+        log.info("[ManagerService] 매니저 정보 조회");
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         Manager manager = managerRepository.findById(managerId)
@@ -34,18 +37,16 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ManagerSignupResponse signupManager(ManagerSignupCommand managerSignupCommand) {
-        Manager manager = new Manager();
-
-        manager.signupManager(
-                managerSignupCommand.email(),
-                managerSignupCommand.nickname(),
-                passwordEncoder.encode(managerSignupCommand.password()),
-                null,
-                managerSignupCommand.number(),
-                managerSignupCommand.description()
-        );
-
+    @Transactional
+    public ManagerSignupResponse signupManager(ManagerSignupCommand command) {
+        log.info("[ManagerService] 매니저 회원가입");
+        Manager manager = Manager.builder()
+                .email(command.email())
+                .nickname(command.nickname())
+                .password(passwordEncoder.encode(command.password()))
+                .number(command.number())
+                .description(command.description())
+                .build();
         Manager signupManager = managerRepository.save(manager);
 
         String accessToken = jwtProcessor.generateAccessToken(signupManager);
@@ -57,6 +58,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ManagerIdResponse getManagerId() {
+        log.info("[ManagerService] 매니저 ID 조회");
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         return ManagerIdResponse.of(managerId);
