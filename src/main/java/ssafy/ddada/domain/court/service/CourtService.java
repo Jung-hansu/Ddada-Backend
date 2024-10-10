@@ -8,9 +8,6 @@ import ssafy.ddada.domain.court.command.CourtSearchCommand;
 public interface CourtService {
 
     CourtDetailResponse getCourtById(Long courtId);
-
-    // Elasticsearch
     Page<CourtSimpleResponse> getElasticFilteredCourts(CourtSearchCommand command);
-    void indexAll();
 
 }
