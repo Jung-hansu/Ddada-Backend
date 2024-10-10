@@ -1,11 +1,10 @@
-package ssafy.ddada.domain.init;
+package ssafy.ddada.domain.initializer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
@@ -20,7 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ssafy.ddada.domain.init.ExcelUtil.*;
+import static ssafy.ddada.common.util.ExcelUtil.*;
 
 @Slf4j
 //@Component
@@ -31,7 +30,6 @@ public class MemberInitializer {
     private final PlayerRepository playerRepository;
     private final ManagerRepository managerRepository;
 
-    @Transactional
     @PostConstruct
     public void init() {
         initManager();
@@ -40,7 +38,7 @@ public class MemberInitializer {
 
     private void initPlayer() {
         log.info("[MemberInitializer] 선수 초기화");
-        String filePath = "init/player_data.xlsx";
+        final String filePath = "init/player_data.xlsx";
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (inputStream == null) {
                 throw new IllegalArgumentException("파일을 찾을 수 없습니다: " + filePath);
@@ -49,16 +47,9 @@ public class MemberInitializer {
             List<Player> players = new ArrayList<>();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
-            boolean firstRow = true;
 
-            for (Row row : sheet) {
-                // 제목 행은 건너뜀
-                if (firstRow) {
-                    firstRow = false;
-                    continue;
-                }
-
-                // 빈 줄이 나오면 반복 종료
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
                 if (isRowEmpty(row)) {
                     break;
                 }
@@ -91,18 +82,18 @@ public class MemberInitializer {
                         .gameCount(gameCount)
                         .build();
 
-                log.debug("[MemberInitializer] 플레이어 생성 >>>> player: {}", player);
+                log.debug("[MemberInitializer] 플레이어 생성: {} / {}", i, sheet.getLastRowNum());
                 players.add(player);
             }
             playerRepository.saveAll(players);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("[MemberInitializer] 선수 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
     private void initManager() {
         log.info("[MemberInitializer] 매니저 초기화");
-        String filePath = "init/manager_data.xlsx";
+        final String filePath = "init/manager_data.xlsx";
         try (InputStream managerInputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (managerInputStream == null) {
                 throw new IllegalArgumentException("파일을 찾을 수 없습니다: " + filePath);
@@ -111,16 +102,9 @@ public class MemberInitializer {
             List<Manager> managers = new ArrayList<>();
             Workbook workbook = new XSSFWorkbook(managerInputStream);
             Sheet sheet = workbook.getSheetAt(0);
-            boolean firstRow = true;
 
-            for (Row row : sheet) {
-                // 제목 행은 건너뜀
-                if (firstRow) {
-                    firstRow = false;
-                    continue;
-                }
-
-                // 빈 줄이 나오면 반복 종료
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
                 if (isRowEmpty(row)) {
                     break;
                 }
@@ -138,12 +122,12 @@ public class MemberInitializer {
                         .description("안녕하세요")
                         .build();
 
-                log.debug("[MemberInitializer] 매니저 생성 >>>> manager: {}", manager);
+                log.debug("[MemberInitializer] 매니저 생성 : {} / {}", i, sheet.getLastRowNum());
                 managers.add(manager);
             }
             managerRepository.saveAll(managers);
         } catch (IOException e) {
-            log.error("매니저 초기화 중 오류 발생: {}", e.getMessage(), e);
+            log.error("[MemberInitializer] 매니저 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 }
