@@ -21,7 +21,7 @@ public abstract class BaseMemberEntity {
     protected MemberRole role;
 
     @Column(nullable = false)
-    protected Boolean isDeleted;
+    protected Boolean isDeleted = false;
 
     @CreatedDate
     @Column(updatable = false)

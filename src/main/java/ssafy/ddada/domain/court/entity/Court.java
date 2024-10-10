@@ -10,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@Builder
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,13 +21,14 @@ public class Court extends BaseCourtEntity {
     @Column(name = "court_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
     @Column(nullable = false)
     private Integer courtNumber;
 
+    @Builder.Default
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 

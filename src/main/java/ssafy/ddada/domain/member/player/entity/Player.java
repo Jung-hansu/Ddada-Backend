@@ -17,7 +17,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder
 @ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 @AllArgsConstructor(access = AccessLevel.PROTECTED)  // 모든 필드를 포함한 생성자 (protected)
@@ -55,9 +54,27 @@ public class Player extends BaseMemberEntity implements Member {
 
     private Integer gameCount;
 
-    @Builder.Default
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
+
+    @Builder
+    public Player(String email, String password, String nickname, String image, String number, Gender gender, LocalDate birth, String description, Integer rating, Integer winStreak, Integer loseStreak, Integer gameCount) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.image = image;
+        this.number = number;
+        this.gender = gender;
+        this.birth = birth;
+        this.description = description;
+        this.rating = rating;
+        this.winStreak = winStreak;
+        this.loseStreak = loseStreak;
+        this.gameCount = gameCount;
+        this.passwordHistories = new ArrayList<>();
+        this.role = MemberRole.PLAYER;
+        this.isDeleted = false;
+    }
 
     // 명시적인 생성자 추가 (null 값 허용)
     public Player(Integer rating, MemberRole role) {
