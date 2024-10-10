@@ -21,7 +21,7 @@ public class Gym extends BaseGymEntity {
     @Column(name = "gym_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private GymAdmin gymAdmin;
 
     @Column(nullable = false)

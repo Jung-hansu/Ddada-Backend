@@ -19,7 +19,7 @@ public class Set extends BaseMatchEntity {
     @Column(name = "set_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
@@ -32,8 +32,8 @@ public class Set extends BaseMatchEntity {
 
     private Integer team2Score;
 
-    @OneToMany(mappedBy = "set", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "set", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Score> scores = new ArrayList<>();
 
 }

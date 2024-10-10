@@ -16,7 +16,7 @@ public class Score extends BaseMatchEntity {
     @Column(name = "score_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "set_id", nullable = false)
     private Set set;
 
