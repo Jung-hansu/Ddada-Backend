@@ -10,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@Builder
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +28,7 @@ public class Court extends BaseCourtEntity {
     @Column(nullable = false)
     private Integer courtNumber;
 
+    @Builder.Default
     @OneToMany(mappedBy = "court", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
 

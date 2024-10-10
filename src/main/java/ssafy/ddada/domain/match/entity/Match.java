@@ -25,7 +25,7 @@ public class Match extends BaseMatchEntity {
     @Column(name = "match_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "court_id", nullable = false)
     private Court court;
 
@@ -38,7 +38,7 @@ public class Match extends BaseMatchEntity {
     private Team team2;
 
     @Setter
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "manager_id")
     private Manager manager;
 
@@ -66,7 +66,7 @@ public class Match extends BaseMatchEntity {
 
     private LocalTime matchTime;
 
-    @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "match", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Set> sets = new ArrayList<>();
 
