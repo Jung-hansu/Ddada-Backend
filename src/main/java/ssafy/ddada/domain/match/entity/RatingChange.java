@@ -19,11 +19,11 @@ public class RatingChange {
     @Setter
     private Integer ratingChange;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "player_id", nullable = false)
     private Player player;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
