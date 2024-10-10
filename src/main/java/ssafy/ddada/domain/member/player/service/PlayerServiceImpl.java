@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.ddada.api.member.player.response.*;
-import ssafy.ddada.common.constant.s3.S3_IMAGE;
+import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.common.exception.player.*;
 import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenSaveFailedException;
@@ -22,7 +22,6 @@ import ssafy.ddada.domain.match.repository.MatchRepository;
 import ssafy.ddada.domain.member.player.command.*;
 import ssafy.ddada.domain.member.player.entity.PasswordHistory;
 import ssafy.ddada.domain.member.player.entity.Player;
-import ssafy.ddada.domain.member.common.MemberRole;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.ArrayList;
@@ -31,9 +30,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class PlayerServiceImpl implements PlayerService {
 
@@ -242,19 +241,17 @@ public class PlayerServiceImpl implements PlayerService {
         return existingPlayer != null && !existingPlayer.getIsDeleted();
     }
 
-    private Player createNewPlayer(MemberSignupCommand signupCommand) {
-        return new Player(
-                signupCommand.email(),
-                signupCommand.gender(),
-                signupCommand.birth(),
-                signupCommand.nickname(),
-                passwordEncoder.encode(signupCommand.password()),
-                null,
-                signupCommand.number(),
-                signupCommand.description(),
-                0,
-                MemberRole.PLAYER
-        );
+    private Player createNewPlayer(MemberSignupCommand command) {
+        return Player.builder()
+                .email(command.email())
+                .gender(command.gender())
+                .birth(command.birth())
+                .nickname(command.nickname())
+                .password(passwordEncoder.encode(command.password()))
+                .number(command.number())
+                .description(command.description())
+                .rating(0)
+                .build();
     }
 
     /**

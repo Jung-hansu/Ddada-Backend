@@ -38,15 +38,17 @@ import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static ssafy.ddada.common.constant.redis.CONST_VALUE.CERTIFICATION_CODE_EXPIRE_TIME;
 import static ssafy.ddada.common.constant.redis.KEY_PREFIX.REFRESH_TOKEN;
 import static ssafy.ddada.common.constant.security.LOGIN_TYPE.BASIC;
 import static ssafy.ddada.common.constant.security.LOGIN_TYPE.KAKAO;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
+
     private final KakaoOauthClient kakaoOauthClient;
     private final KakaoLoginProperties kakaoLoginProperties;
     private final JwtParser jwtParser;
@@ -58,25 +60,24 @@ public class AuthServiceImpl implements AuthService {
     private final SmsCertificationUtil smsCertificationUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final JavaMailSender javaMailSender;
-    private static final Long CERTIFICATION_CODE_EXPIRE_TIME = 5L;
     private final HttpServletRequest request;
 
     @Override
     @Transactional
     public AuthResponse login(LoginCommand command) {
+        log.info("[AuthService] 로그인 >>>> 로그인 타입: {}, 이메일: {}", command.loginType(), command.email());
         LoginToken tokens;
-        log.info(">>> loginType: {}", command.authCode());
 
         switch (command.loginType()) {
             case KAKAO:
                 KakaoLoginCommand kakaoLoginCommand = getKakaoLoginCommand(command.authCode());
                 UserInfo userInfo = jwtParser.getUserInfo(kakaoLoginCommand);
 
-                if (notRegisteredPlayer(userInfo)) {
+                if (isNotRegisteredPlayer(userInfo)) {
                     return AuthResponse.notRegistered(userInfo);
                 }
-                log.debug(">>> hasSignupMember: {}", userInfo.email());
 
+                log.debug("[AuthService] 가입된 멤버 정보 확인 >>>> 이름: {}, 이메일: {}", userInfo.nickname(), userInfo.email());
                 Player kakaoMember = playerRepository.findByEmail(userInfo.email())
                         .orElseThrow(KakaoMailPlayerNotFoundException::new);
 
@@ -95,8 +96,7 @@ public class AuthServiceImpl implements AuthService {
                 Member basicMember = findMemberByEmail(email)
                         .orElseThrow(EmailNotFoundException::new);
 
-
-                if (!passwordEncoder.matches(password, ((Member) basicMember).getPassword())) {
+                if (!passwordEncoder.matches(password, basicMember.getPassword())) {
                     throw new PasswordNotMatchException();
                 }
 
@@ -114,24 +114,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout() {
-        // 헤더에서 Authorization 값 가져오기
+        log.info("[AuthService] 로그아웃");
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            // "Bearer " 이후의 토큰 값만 추출
             String token = authorizationHeader.substring(7);
-
-            // JWT 토큰 만료 처리
             jwtProcessor.expireToken(token);
         } else {
-            // Authorization 헤더가 없거나 올바르지 않을 경우 처리 로직
             throw new IllegalArgumentException("Invalid or missing Authorization header");
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
     public AuthResponse refresh(TokenRefreshRequest request) {
+        log.info("[AuthService] Access 토큰 발급 >>>> Refresh 토큰: {}", request.refreshToken());
         DecodedJwtToken decodedJwtToken = jwtProcessor.decodeToken(request.refreshToken(), REFRESH_TOKEN);
         Member member = findMemberById(decodedJwtToken)
                 .orElseThrow(InvalidTokenException::new);
@@ -142,29 +139,29 @@ public class AuthServiceImpl implements AuthService {
             return AuthResponse.of(newAccessToken, newRefreshToken);
         }
         catch (Exception e) {
+            log.error("[AuthService] Access 토큰 발급 중 오류 발생", e);
             throw new TokenSaveFailedException();
         }
 
     }
+
+    @Override
     @Transactional
     public void sendSms(SmsCommand command) {
-        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
-
-        try {
-            smsCertificationUtil.sendSMS(command.phoneNum(), certificationCode);
-        } catch (MessageSendingException e) {
-            throw new MessageSendingException();
-        }
+        log.info("[AuthService] 이메일 발송 >>>> 전화번호: {}", command.phoneNum());
+        String certificationCode = generateCertificationCode();
 
         redisTemplate.opsForValue().set(command.phoneNum(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+        smsCertificationUtil.sendSMS(command.phoneNum(), certificationCode);
     }
 
+    @Override
     public Boolean verifyCertificationCode(VerifyCommand command) {
+        log.info("[AuthService] Certification 코드 검사 >>>> 코드: {}", command.certificationCode());
         String storedCode;
         try {
             storedCode = redisTemplate.opsForValue().get(command.userInfo());
         } catch (Exception e) {
-            // Redis와의 통신 중 오류가 발생한 경우 VerificationException을 던집니다.
             throw new VerificationException();
         }
 
@@ -175,49 +172,57 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    @Override
     public MemberTypeResponse getMemberType() {
+        log.info("[AuthService] 멤버 타입 조회");
         MemberRole memberType = SecurityUtil.getLoginMemberRole()
                 .orElseThrow(NotAuthenticatedException::new);
         return MemberTypeResponse.of(memberType);
     }
 
 
+    @Override
     public void sendEmail(GmailSendCommand gmailSendCommand) {
-        String title = "DDADA 이메일 인증";
-        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
-        String text = "인증번호는 " + certificationCode + " 입니다.";
+        log.info("[AuthService] 이메일 전송 >>>> 이메일: {}", gmailSendCommand.email());
+        String certificationCode = generateCertificationCode();
+        final String title = "DDADA 이메일 인증";
+        final String text = "인증번호는 " + certificationCode + " 입니다.";
+
         redisTemplate.opsForValue().set(gmailSendCommand.email(), certificationCode, CERTIFICATION_CODE_EXPIRE_TIME, TimeUnit.MINUTES);
-        SimpleMailMessage emailForm = createEmailForm(gmailSendCommand.email(), title, text);
         try {
+            SimpleMailMessage emailForm = createEmailForm(gmailSendCommand.email(), title, text);
             javaMailSender.send(emailForm);
-            log.info("이메일 발송 성공");
+            log.info("[AuthService] 이메일 발송 성공 >>>> 이메일 폼: {}", emailForm);
         } catch (Exception e) {
             log.error("이메일 발송 오류");
         }
     }
 
+    private String generateCertificationCode(){
+        return Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
+    }
+
     // 발신할 이메일 데이터 세팅
     private SimpleMailMessage createEmailForm(String toEmail, String title, String text) {
+        log.debug("[AuthService] 이메일 폼 생성 >>>> 대상: {}, 제목: {}, 내용: {}", toEmail, title, text);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject(title);
         message.setText(text);
-
+        log.debug("[AuthService] 이메일 폼 생성 성공 >>>> 이메일: {}", message);
         return message;
     }
 
-    private Boolean notRegisteredPlayer(UserInfo userInfo) {
-        log.debug(">>> noSignupMember: {}", userInfo.email());
+    private boolean isNotRegisteredPlayer(UserInfo userInfo) {
+        log.debug("[AuthService] 미가입 선수 확인 >>>> 선수 이메일: {}", userInfo.email());
+        String email = userInfo.email();
+        Member member = findMemberByEmail(email).orElse(null);
 
-        if (playerRepository.existsByEmail(userInfo.email()) ||
-                gymAdminRepository.existsByEmail(userInfo.email()) ||
-                managerRepository.existsByEmail(userInfo.email())) {
-            return isTempPlayer(findMemberByEmail(userInfo.email())
-                    .orElseThrow(AbnormalLoginProgressException::new));
+        if (member == null){
+            playerRepository.save(Player.createTempPlayer());
+            return true;
         }
-
-        playerRepository.save(Player.createTempPlayer(userInfo.email()));
-        return true;
+        return isTempPlayer(member);
     }
 
     private Optional<Member> findMemberByEmail(String email) {
@@ -232,17 +237,14 @@ public class AuthServiceImpl implements AuthService {
         return new LoginToken(accessToken, refreshToken);
     }
 
-    private Boolean isTempPlayer(Object member) {
-        if (member instanceof Player) {
-            return ((Player) member).getNickname() == null;
-        }
-        return true;
+    private Boolean isTempPlayer(Member member) {
+        return member.getRole() == MemberRole.TEMP;
     }
 
     private Optional<Member> findMemberById(DecodedJwtToken decodedJwtToken) {
         String role = decodedJwtToken.role();
         Long id = decodedJwtToken.memberId();
-        log.info(">>> role: {}, id: {}", role, id);
+        log.debug("[AuthService] 멤버 ID 조회 >>>> 역할: {}, ID: {}", role, id);
 
         return switch (role) {
             case "PLAYER" -> playerRepository.findById(id)
@@ -256,9 +258,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private KakaoLoginCommand getKakaoLoginCommand(String code) {
-        log.info(">>> code: {}", code);
+        log.debug("[AuthService] 카카오 로그인 토큰 발급 >>>> 인증 코드: {}", code);
         KakaoToken kakaoToken = getKakaoToken(code);
-        log.info(">>> kakaoTokenInfo: {}", kakaoToken);
+        log.debug("[AuthService] 카카오 로그인 토큰 발급 성공 >>>> 카카오 토큰: {}", kakaoToken);
         return KakaoLoginCommand.byKakao(kakaoToken, kakaoOauthClient.getPublicKeys(), jwtParser, kakaoLoginProperties);
     }
 
@@ -268,6 +270,7 @@ public class AuthServiceImpl implements AuthService {
                 kakaoLoginProperties.clientId(),
                 kakaoLoginProperties.loginRedirectUri(),
                 code,
-                kakaoLoginProperties.clientSecret());
+                kakaoLoginProperties.clientSecret()
+        );
     }
 }

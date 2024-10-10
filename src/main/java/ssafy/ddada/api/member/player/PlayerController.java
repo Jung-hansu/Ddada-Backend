@@ -31,7 +31,7 @@ public class PlayerController {
      """)
     @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
     public CommonResponse<PlayerSignupResponse> signup(@ModelAttribute @Validated PlayerSignupRequest request) {
-        log.info("회원가입 >>>> request: {}", request);
+        log.info("[PlayerController] 회원가입 >>>> request: {}", request);
         PlayerSignupResponse response = playerService.signupMember(request.toCommand());
         return CommonResponse.ok(response);
     }
@@ -40,7 +40,7 @@ public class PlayerController {
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하는 API입니다.")
     @PatchMapping
     public CommonResponse<?> deleteMember() {
-        log.info("회원 탈퇴");
+        log.info("[PlayerController] 회원 탈퇴");
         String message = playerService.deleteMember();
         return CommonResponse.ok(message, null);
     }
@@ -48,7 +48,7 @@ public class PlayerController {
     @Operation(summary = "닉네임 중복 조회", description = "닉네임 중복 조회하는 API입니다.")
     @GetMapping("/nickname")
     public CommonResponse<String> checkNickname(@RequestParam String nickname) {
-        log.info("닉네임 중복 조회 >>>> nickname: {}", nickname);
+        log.info("[PlayerController] 닉네임 중복 조회 >>>> nickname: {}", nickname);
         boolean isDuplicated = playerService.checkNickname(nickname);
         String message = isDuplicated ? "이미 사용중인 닉네임입니다." : "사용 가능한 닉네임입니다.";
         return CommonResponse.ok(message, null);
@@ -58,7 +58,7 @@ public class PlayerController {
     @Operation(summary = "로그인 시 회원 정보 조회", description = "로그인 시 회원 정보를 조회하는 API입니다.")
     @GetMapping
     public CommonResponse<PlayerDetailResponse> getMemberDetail() {
-        log.info("로그인 시 회원 정보 조회");
+        log.info("[PlayerController] 로그인 시 회원 정보 조회");
         PlayerDetailResponse response = playerService.getMemberDetail();
         return CommonResponse.ok(response);
     }
@@ -67,7 +67,7 @@ public class PlayerController {
     @Operation(summary = "프로필에서 회원 정보 조회", description = "프로필에서 회원 정보를 조회하는 API입니다.")
     @GetMapping("/profile")
     public CommonResponse<PlayerProfileDetailResponse> getMemberProfileDetail() {
-        log.info("프로필에서 회원 정보 조회");
+        log.info("[PlayerController] 프로필에서 회원 정보 조회");
         PlayerProfileDetailResponse response = playerService.getMemberProfileDetail();
         return CommonResponse.ok(response);
     }
@@ -76,7 +76,7 @@ public class PlayerController {
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정하는 API입니다.")
     @PutMapping(value = "/profile", consumes = { "multipart/form-data" })
     public CommonResponse<PlayerDetailResponse> updateMemberProfile(@ModelAttribute @Validated PlayerUpdateRequest request) {
-        log.info("회원 정보 수정 >>>> request: {}", request);
+        log.info("[PlayerController] 회원 정보 수정 >>>> request: {}", request);
         PlayerDetailResponse response = playerService.updateMemberProfile(request.toCommand());
         return CommonResponse.ok(response);
     }
@@ -84,7 +84,7 @@ public class PlayerController {
     @Operation(summary = "회원 비밀번호 수정", description = "회원 비밀번호를 수정하는 API입니다.")
     @PatchMapping(value = "/password")
     public CommonResponse<String> updateMemberPassword(@RequestBody PasswordUpdateRequest request) {
-        log.info("회원 비밀번호 수정 >>>> request: {}", request);
+        log.info("[PlayerController] 회원 비밀번호 수정 >>>> request: {}", request);
         String response = playerService.updateMemberPassword(request.toCommand());
         return CommonResponse.ok(response);
     }
@@ -93,7 +93,7 @@ public class PlayerController {
     @Operation(summary = "플레이어의 경기 조회", description = "플레이어의 경기들을 조회하는 API입니다.")
     @GetMapping("/matches")
     public CommonResponse<List<PlayerMatchResponse>> getPlayerMatches() {
-        log.info("플레이어의 경기 조회");
+        log.info("[PlayerController] 플레이어의 경기 조회");
         List<PlayerMatchResponse> response = playerService.getPlayerMatches();
         return CommonResponse.ok(response);
     }
@@ -102,7 +102,7 @@ public class PlayerController {
     @Operation(summary = "플레이어의 완료된 경기 조회", description = "플레이어의 완료된 경기들을 조회하는 API입니다.")
     @GetMapping("/matches/finished")
     public CommonResponse<List<PlayerMatchResponse>> getPlayerCompleteMatches() {
-        log.info("플레이어의 완료된 경기 조회");
+        log.info("[PlayerController] 플레이어의 완료된 경기 조회");
         List<PlayerMatchResponse> response = playerService.getPlayerCompleteMatches();
         return CommonResponse.ok(response);
     }
@@ -111,7 +111,7 @@ public class PlayerController {
     @Operation(summary = "플레이어의 ID 조회", description = "나의 id를 조회하는 API입니다.")
     @GetMapping("/id")
     public CommonResponse<PlayerIdResponse> getPlayerId() {
-        log.info("플레이어의 ID 조회");
+        log.info("[PlayerController] 플레이어의 ID 조회");
         PlayerIdResponse response = playerService.getPlayerId();
         return CommonResponse.ok(response);
     }

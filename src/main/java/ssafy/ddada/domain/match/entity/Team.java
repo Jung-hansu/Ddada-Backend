@@ -9,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -28,24 +29,9 @@ public class Team extends BaseMatchEntity {
     @JoinColumn(name = "player2_id")
     private Player player2;
 
-    private Integer playerCount;
+    private int playerCount;
 
-    private Integer rating;
-
-    public Team(Player player1, Player player2, Integer playerCount, Integer rating) {
-        this.player1 = player1;
-        this.player2 = player2;
-        this.playerCount = playerCount;
-        this.rating = rating;
-    }
-
-    public static Team createNewTeam(Player creator){
-        return new Team(creator, null, 1, creator.getRating());
-    }
-
-    public static Team createNewTeam(){
-        return new Team(null, null, 0, 0);
-    }
+    private int rating;
 
     public List<Player> getPlayers() {
         List<Player> players = new ArrayList<>();

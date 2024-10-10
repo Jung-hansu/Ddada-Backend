@@ -5,6 +5,7 @@ import lombok.*;
 import ssafy.ddada.domain.member.player.entity.Player;
 
 @Getter
+@Builder
 @Entity
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,7 +27,4 @@ public class RatingChange {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    public static RatingChange createRatingChange(Integer ratingChange, Player player, Match match) {
-        return new RatingChange(null, ratingChange, player, match);
-    }
 }

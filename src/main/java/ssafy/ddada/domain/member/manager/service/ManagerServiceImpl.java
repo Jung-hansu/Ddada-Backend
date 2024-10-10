@@ -34,18 +34,14 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ManagerSignupResponse signupManager(ManagerSignupCommand managerSignupCommand) {
-        Manager manager = new Manager();
-
-        manager.signupManager(
-                managerSignupCommand.email(),
-                managerSignupCommand.nickname(),
-                passwordEncoder.encode(managerSignupCommand.password()),
-                null,
-                managerSignupCommand.number(),
-                managerSignupCommand.description()
-        );
-
+    public ManagerSignupResponse signupManager(ManagerSignupCommand command) {
+        Manager manager = Manager.builder()
+                .email(command.email())
+                .nickname(command.nickname())
+                .password(passwordEncoder.encode(command.password()))
+                .number(command.number())
+                .description(command.description())
+                .build();
         Manager signupManager = managerRepository.save(manager);
 
         String accessToken = jwtProcessor.generateAccessToken(signupManager);

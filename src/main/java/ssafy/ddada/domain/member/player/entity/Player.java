@@ -2,7 +2,8 @@ package ssafy.ddada.domain.member.player.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ssafy.ddada.common.constant.s3.S3_IMAGE;
+import ssafy.ddada.common.constant.global.RATING;
+import ssafy.ddada.common.constant.global.S3_IMAGE;
 import ssafy.ddada.domain.member.common.BaseMemberEntity;
 import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.common.Member;
@@ -16,6 +17,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor(access = AccessLevel.PUBLIC)  // public 기본 생성자
 @AllArgsConstructor(access = AccessLevel.PROTECTED)  // 모든 필드를 포함한 생성자 (protected)
@@ -57,15 +59,7 @@ public class Player extends BaseMemberEntity implements Member {
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 
     // 명시적인 생성자 추가 (null 값 허용)
-    public Player(String email, Gender gender, LocalDate birth, String nickname, String password, String image, String number, String description, Integer rating, MemberRole role) {
-        this.email = email;
-        this.gender = gender;
-        this.birth = birth;
-        this.nickname = nickname;
-        this.password = password;
-        this.image = image;
-        this.number = number;
-        this.description = description;
+    public Player(Integer rating, MemberRole role) {
         this.rating = rating;
         this.isDeleted = false;
         this.role = role;
@@ -74,22 +68,11 @@ public class Player extends BaseMemberEntity implements Member {
         this.gameCount = 0;
     }
 
-    public static Player createTempPlayer(String email) {
-        return new Player(
-                null,
-                null,  // 성별 기본값 설정
-                null,   // 생년월일 기본값 설정
-                null,   // 닉네임 기본값
-                null,   // 임시 비밀번호
-                null,   // 프로필 이미지 기본값
-                null,   // 전화번호 기본값
-                null,   // 임시 설명
-                800,      // 초기 레이팅
-                MemberRole.TEMP
-        );
+    public static Player createTempPlayer() {
+        return new Player(RATING.INITIAL_RATING, MemberRole.TEMP);
     }
 
-    public Player signupMember(MemberSignupCommand signupCommand, String imageUrl, String password) {
+    public void signupMember(MemberSignupCommand signupCommand, String imageUrl, String password) {
         this.email = signupCommand.email();
         this.password = password;
         this.nickname = signupCommand.nickname();
@@ -102,9 +85,6 @@ public class Player extends BaseMemberEntity implements Member {
         this.isDeleted = false;
         this.role = MemberRole.PLAYER;
         this.gameCount = 0;
-
-        // 현재 객체 (Player) 반환
-        return this;
     }
 
     public void updateProfile(String nickname, String profileImagePath, String description) {
@@ -114,12 +94,15 @@ public class Player extends BaseMemberEntity implements Member {
     }
 
     public void addPasswordHistory(String password) {
-        PasswordHistory passwordHistory = new PasswordHistory(this, password);
+        PasswordHistory passwordHistory = PasswordHistory.builder()
+                .player(this)
+                .password(password)
+                .build();
         this.passwordHistories.add(passwordHistory);
     }
 
+    // 비밀번호 변경 전에 이력을 저장
     public void updatePassword(String newPassword) {
-        // 비밀번호 변경 전에 이력을 저장
         this.addPasswordHistory(this.password);
         this.password = newPassword;
     }
