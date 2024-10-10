@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.common.exception.player.AbnormalLoginProgressException;
-import ssafy.ddada.common.exception.security.FilterException;
-import ssafy.ddada.common.exception.security.IssuerTokenIncorrectException;
-import ssafy.ddada.common.exception.security.KakaoTokenExpireException;
-import ssafy.ddada.common.exception.security.TokenExpiredException;
+import ssafy.ddada.common.exception.security.*;
 import ssafy.ddada.common.exception.token.TokenTypeNotMatchedException;
 
 @RestControllerAdvice
@@ -56,6 +53,13 @@ public class AuthExceptionHandler {
     public CommonResponse handleKakaoTokenExpireException(KakaoTokenExpireException e) {
         log.error("KakaoTokenExpireException", e);
         return CommonResponse.internalServerError(e.getErrorCode());
+    }
+
+    @ExceptionHandler(NotAuthenticatedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public CommonResponse handleNotAuthenticatedException(NotAuthenticatedException e) {
+        log.error("NotAuthenticatedException", e);
+        return CommonResponse.unauthorized(e.getErrorCode());
     }
 
 }
