@@ -19,5 +19,5 @@ public interface PlayerService {
     List<PlayerMatchResponse> getPlayerCompleteMatches();
     PlayerIdResponse getPlayerId();
     PlayerTotalMatchResponse getPlayerTotalMatch();
-    List<PlayerRankingResponse> getPlayersRanking();
+    PlayerRankingResponse getPlayersRanking();
 }

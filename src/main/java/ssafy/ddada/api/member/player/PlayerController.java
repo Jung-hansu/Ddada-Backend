@@ -127,8 +127,8 @@ public class PlayerController {
     @PreAuthorize("hasRole('ROLE_PLAYER')")
     @Operation(summary = "플레이어들의 랭킹 조회", description = "플레이어들의 랭킹을 조회하는 API입니다.")
     @GetMapping("/rankings")
-    public CommonResponse<List<PlayerRankingResponse>> getPlayersRanking() {
-        List<PlayerRankingResponse> response = playerService.getPlayersRanking();
+    public CommonResponse<PlayerRankingResponse> getPlayersRanking() {
+        PlayerRankingResponse response = playerService.getPlayersRanking();
         return CommonResponse.ok(response);
     }
 }
