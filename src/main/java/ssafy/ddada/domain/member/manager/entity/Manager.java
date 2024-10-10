@@ -8,7 +8,6 @@ import ssafy.ddada.domain.member.common.MemberRole;
 
 @Getter
 @Entity
-@Builder
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,5 +39,16 @@ public class Manager extends BaseMemberEntity implements Member {
         if (this.role == null) {
             this.role = MemberRole.MANAGER;  // 기본값 설정
         }
+    }
+
+    @Builder
+    public Manager(String email, String password, String nickname, String number, String description) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.number = number;
+        this.role = MemberRole.MANAGER;
+        this.isDeleted = false;
+        this.description = description;
     }
 }

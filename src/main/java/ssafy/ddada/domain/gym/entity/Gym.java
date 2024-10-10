@@ -12,6 +12,7 @@ import java.util.ArrayList;
 @Getter
 @Entity
 @ToString
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Gym extends BaseGymEntity {
@@ -42,6 +43,7 @@ public class Gym extends BaseGymEntity {
     @Enumerated(EnumType.STRING)
     private Region region;
 
+    @Builder.Default
     @OneToMany(mappedBy = "gym", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Court> courts = new ArrayList<>();
 
