@@ -13,8 +13,14 @@ import java.util.Optional;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
 
-    Optional<Player> findByEmail(String email);
     boolean existsByNickname(String nickname);
+
+    @Query("""
+        SELECT p
+        FROM Player p
+        WHERE p.email = :email AND p.isDeleted = false
+    """)
+    Optional<Player> findByEmail(@Param("email") String email);
 
     @Query("""
         SELECT COUNT(m)
