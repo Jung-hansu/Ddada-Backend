@@ -48,11 +48,11 @@ public class Player extends BaseMemberEntity implements Member {
 
     private Integer rating;
 
-    private Integer winStreak;
+    private int winStreak;
 
-    private Integer loseStreak;
+    private int loseStreak;
 
-    private Integer gameCount;
+    private int gameCount;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
