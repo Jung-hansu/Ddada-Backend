@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.constant.global.COURT;
 import ssafy.ddada.common.constant.global.S3_IMAGE;
+import ssafy.ddada.common.exception.data.DataNotFoundException;
 import ssafy.ddada.common.exception.gym.CourtNotFoundException;
 import ssafy.ddada.common.exception.gym.GymAdminNotFoundException;
 import ssafy.ddada.common.exception.manager.ManagerAlreadyBookedException;
@@ -17,6 +20,7 @@ import ssafy.ddada.common.exception.match.*;
 import ssafy.ddada.common.exception.player.MemberNotFoundException;
 import ssafy.ddada.common.exception.player.PlayerAlreadyBookedException;
 import ssafy.ddada.common.exception.security.NotAuthenticatedException;
+import ssafy.ddada.common.properties.WebClientProperties;
 import ssafy.ddada.common.util.RankingUtil;
 import ssafy.ddada.common.util.RatingUtil;
 import ssafy.ddada.common.util.S3Util;
@@ -60,6 +64,8 @@ public class MatchServiceImpl implements MatchService {
     private final RatingChangeRepository ratingChangeRepository;
     private final S3Util s3Util;
     private final RankingUtil rankingUtil;
+    private final WebClient webClient;
+    private final WebClientProperties webClientProperties;
 
     @Override
     public Page<MatchSimpleResponse> getFilteredMatches(MatchSearchCommand command) {
@@ -382,6 +388,7 @@ public class MatchServiceImpl implements MatchService {
         updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, false);
 
         updateGymIncome(match);
+        savedMatchAnalysis(matchId);
     }
 
     private Match validateMatch(Long matchId){
@@ -588,4 +595,17 @@ public class MatchServiceImpl implements MatchService {
         return s3Util.getPresignedUrlFromS3(player.getImage());
     }
 
+    private void savedMatchAnalysis(Long matchId) {
+        String requestUrl = webClientProperties.url() + "add_match_analysis/" + matchId + "/";
+
+        webClient.post()
+                .uri(requestUrl)
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("Unknown error")
+                                .flatMap(errorBody -> Mono.error(new DataNotFoundException()))
+                );
+    }
 }
