@@ -46,8 +46,8 @@ import static ssafy.ddada.common.util.ParameterUtil.nullToZero;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
@@ -259,6 +259,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void createMatch(MatchCreateCommand command) {
+        log.info("[MatchService] 경기 생성");
         Long creatorId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
 
@@ -295,6 +296,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public Page<MatchSimpleResponse> getMatchesByManagerId(ManagerSearchMatchCommand command) {
+        log.info("[MatchService] 경기 조회");
         Long managerId = SecurityUtil.getLoginMemberId()
                 .orElseThrow(NotAuthenticatedException::new);
         Page<Match> matchPage = matchRepository.findFilteredMatches(
@@ -314,6 +316,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void allocateManager(Long matchId) {
+        log.info("[MatchService] 매니저 할당");
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         if (match.getManager() != null) {
@@ -340,6 +343,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void deallocateManager(Long matchId) {
+        log.info("[MatchService] 매니저 할당 해제 >>>> 경기 ID: {}", matchId);
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
         if (match.getManager() == null) {
@@ -362,6 +366,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public void saveMatch(Long matchId, MatchResultCommand matchCommand) {
+        log.info("[MatchService] 경기 저장 >>>> 경기 ID: {}", matchId);
         Match match = validateMatch(matchId);
         Match newMatch = buildMatchFrom(match, matchCommand);
         matchRepository.save(newMatch);
@@ -559,6 +564,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public boolean CheckPlayerBooked(CheckPlayerBookedCommand command) {
+        log.info("[MatchService] 선수 예약 여부 확인");
         Long playerId = SecurityUtil.getLoginMemberId().orElseThrow(GymAdminNotFoundException::new);
         int conflictCount = matchRepository.countByPlayerAndDateTime(playerId, command.matchDate(), command.matchTime());
         if (conflictCount > 0) {
