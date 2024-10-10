@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -85,7 +85,6 @@ public class DataServiceImpl implements DataService {
                 command.shaft()
         );
 
-        // 쿼리 파라미터 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(requestUrl);
         if (command.racketIds() != null && !command.racketIds().isEmpty()) {
             command.racketIds().forEach(racketId -> uriBuilder.queryParam("racket_id", racketId));
@@ -95,31 +94,34 @@ public class DataServiceImpl implements DataService {
         String finalUrl = uriBuilder.toUriString();
 
         // WebClient 요청
-        ClientResponse response = webClient.get()
+        ResponseEntity<String> response = webClient.get()
                 .uri(finalUrl)
-                .exchange()
+                .retrieve()
+                .toEntity(String.class)
                 .block();
 
-        if (response.statusCode().is3xxRedirection()) {
-            // 리다이렉션 처리
-            String redirectUrl = response.headers().header("Location").get(0);  // Location 헤더에서 리다이렉션 URL 가져오기
+        if (response.getStatusCode().is3xxRedirection()) {
+            String redirectUrl = response.getHeaders().getLocation().toString();
             log.debug("[DataService] Redirect URL: {}", redirectUrl);
+
             response = webClient.get()
                     .uri(redirectUrl)
-                    .exchange()
-                    .block();  // 리다이렉션된 URL로 재요청
+                    .retrieve()
+                    .toEntity(String.class)
+                    .block();
         }
 
-        String responseString = response.bodyToMono(String.class).block();
+        // 응답 본문 처리
+        String responseString = response.getBody();
         log.debug("[DataService] Response Body: {}", responseString);
 
         try {
+            // JSON 응답 파싱
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(responseString, RacketRecommendResponse.class);
         } catch (JsonProcessingException e) {
             log.error("JSON parsing error", e);
-            throw new DataNotFoundException();  // 필요한 예외 던짐
+            throw new DataNotFoundException();
         }
     }
-
 }
