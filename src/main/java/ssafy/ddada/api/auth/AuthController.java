@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.auth.request.*;
@@ -13,6 +12,8 @@ import ssafy.ddada.api.auth.response.MemberTypeResponse;
 import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.api.auth.request.TokenRefreshRequest;
 import ssafy.ddada.domain.auth.service.AuthService;
+import ssafy.ddada.domain.court.service.CourtService;
+import ssafy.ddada.domain.racket.service.RacketService;
 
 @Slf4j
 @RestController
@@ -20,6 +21,7 @@ import ssafy.ddada.domain.auth.service.AuthService;
 @RequestMapping("/auth")
 @Tag(name = "Auth", description = "인증/인가 API")
 public class AuthController {
+
     private final AuthService authService;
 
     @Operation(summary = "로그인", description = "유저 정보를 이용하여 login type으로 로그인 합니다.")
