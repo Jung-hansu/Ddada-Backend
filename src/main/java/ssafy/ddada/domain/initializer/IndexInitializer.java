@@ -81,6 +81,7 @@ public class IndexInitializer {
                 .courtId(court.getId())
                 .gymName(gym != null ? gym.getName() : null)
                 .gymAddress(gym != null ? gym.getAddress() : null)
+                .gymRegion(gym != null ? gym.getRegion().getKorValue() : null)
                 .build();
     }
 
