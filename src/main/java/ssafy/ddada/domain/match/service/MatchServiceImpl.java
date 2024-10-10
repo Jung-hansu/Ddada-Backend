@@ -295,6 +295,7 @@ public class MatchServiceImpl implements MatchService {
                 .matchType(command.matchType())
                 .matchDate(command.matchDate())
                 .matchTime(command.matchTime())
+                .status(MatchStatus.CREATED)
                 .build();
 
         matchRepository.save(match);
