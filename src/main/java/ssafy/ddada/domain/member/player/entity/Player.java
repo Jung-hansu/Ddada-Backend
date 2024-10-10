@@ -55,6 +55,7 @@ public class Player extends BaseMemberEntity implements Member {
 
     private Integer gameCount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 

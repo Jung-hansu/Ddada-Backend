@@ -388,6 +388,7 @@ public class MatchServiceImpl implements MatchService {
         updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, false);
 
         updateGymIncome(match);
+
         savedMatchAnalysis(matchId);
     }
 
