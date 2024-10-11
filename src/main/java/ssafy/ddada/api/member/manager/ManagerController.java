@@ -81,15 +81,8 @@ public class ManagerController {
     public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
         log.info("[ManagerController] 할당된 경기 저장 >>>> 경기 ID: {}", matchId);
         matchService.saveMatch(matchId, request.toCommand());
-        return CommonResponse.ok("저장되었습니다.", null);
-    }
-
-    @PostMapping("/match/analysis/{match_id}")
-    public CommonResponse<?> saveAnalysis(
-            @PathVariable("match_id") Long matchId
-    ) {
         matchService.saveMatchAnalysisData(matchId);
-        return CommonResponse.ok("저장되었습니다", null);
+        return CommonResponse.ok("저장되었습니다.", null);
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")
