@@ -312,7 +312,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     private Player getPlayerForPasswordUpdate(PasswordUpdateCommand command) {
         if (command.email() != null) {
-            return playerRepository.findByEmail(command.email())
+            return playerRepository.findNotDeletedPlayerByEmail(command.email())
                     .orElseThrow(MemberNotFoundException::new);
         }
         return getCurrentLoggedInMember();
