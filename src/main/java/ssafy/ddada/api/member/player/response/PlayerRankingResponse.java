@@ -17,10 +17,13 @@ public record PlayerRankingResponse(
             String nickname,
 
             @Schema(description = "선수 점수", example = "1500")
-            Integer rating
+            Integer rating,
+
+            @Schema(description = "플레이어 경기 수", example = "2")
+            Integer playCount
     ) {
-        public static PlayerRanking of(Integer ranking, String nickname, Integer rating) {
-            return new PlayerRanking(ranking, nickname, rating);
+        public static PlayerRanking of(Integer ranking, String nickname, Integer rating, Integer playCount) {
+            return new PlayerRanking(ranking, nickname, rating, playCount);
         }
     }
 

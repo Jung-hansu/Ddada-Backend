@@ -224,9 +224,11 @@ public class PlayerServiceImpl implements PlayerService {
 
             String nickname = tuple.getValue();
             int rating = tuple.getScore().intValue();
+            Integer gameCount = playerRepository.findGameCountByNickname(nickname)
+                    .orElse(0);
 
             PlayerRankingResponse.PlayerRanking playerRanking =
-                    PlayerRankingResponse.PlayerRanking.of(rank++, nickname, rating);
+                    PlayerRankingResponse.PlayerRanking.of(rank++, nickname, rating, gameCount);
             rankings.add(playerRanking);
         }
 
@@ -235,7 +237,8 @@ public class PlayerServiceImpl implements PlayerService {
         rankings.add(PlayerRankingResponse.PlayerRanking.of(
                 currentPlayerRanking,
                 currentPlayer.getNickname(),
-                currentPlayer.getRating()
+                currentPlayer.getRating(),
+                playerRepository.findGameCountByNickname(currentPlayer.getNickname()).orElse(0)
         ));
 
         return PlayerRankingResponse.of(rankings);

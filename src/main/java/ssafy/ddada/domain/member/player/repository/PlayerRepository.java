@@ -60,4 +60,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     """)
     List<Player> findDeletedPlayers();
 
+    @Query("SELECT p.gameCount FROM Player p WHERE p.nickname = :nickname")
+    Optional<Integer> findGameCountByNickname(String nickname);
 }
