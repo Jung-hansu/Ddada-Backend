@@ -288,23 +288,8 @@ public class MatchServiceImpl implements MatchService {
         teamRepository.save(team);
 
         if (isMatchEmpty(match)){
-            deleteMatch(match);
+            matchRepository.delete(match);
         }
-    }
-
-    private void deleteMatch(Match match) {
-        Team team1 = match.getTeam1();
-        Team team2 = match.getTeam2();
-        match.unsetTeams();
-        matchRepository.delete(match);
-        deleteTeam(team1);
-        deleteTeam(team2);
-    }
-
-    private void deleteTeam(Team team){
-        team.setPlayer1(null);
-        team.setPlayer2(null);
-        teamRepository.delete(team);
     }
 
     @Override
