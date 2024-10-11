@@ -644,6 +644,8 @@ public class MatchServiceImpl implements MatchService {
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .defaultIfEmpty("Unknown error")
                                 .flatMap(errorBody -> Mono.error(new DataNotFoundException()))
-                );
+                )
+                .bodyToMono(String.class)
+                .block();  // 동기 처리로 변환
     }
 }
