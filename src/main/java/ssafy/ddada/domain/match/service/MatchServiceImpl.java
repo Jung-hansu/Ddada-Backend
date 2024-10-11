@@ -288,6 +288,8 @@ public class MatchServiceImpl implements MatchService {
         teamRepository.save(team);
 
         if (isMatchEmpty(match)){
+            teamRepository.delete(match.getTeam1());
+            teamRepository.delete(match.getTeam2());
             matchRepository.delete(match);
         }
     }
