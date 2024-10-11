@@ -119,20 +119,19 @@ public class Match extends BaseMatchEntity {
             teamGender.add(femalePlayer2);
         } else {
             // 예약되지 않은 플레이어가 있으면 "notReserved" 추가
-            if (player1 == null) {
+            if (malePlayer1 != null) {
+                teamGender.add(malePlayer1);
                 teamGender.add("notReserved");
             }
-            if (player2 == null) {
+            else if (femalePlayer1 != null) {
+                teamGender.add("notReserved");
+                teamGender.add(femalePlayer1);
+            }
+            else {
+                teamGender.add("notReserved");
                 teamGender.add("notReserved");
             }
 
-            // 남자나 여자가 하나만 있을 경우 추가
-            if (malePlayer1 != null) {
-                teamGender.add(malePlayer1);
-            }
-            if (femalePlayer1 != null) {
-                teamGender.add(femalePlayer1);
-            }
         }
 
         return teamGender;

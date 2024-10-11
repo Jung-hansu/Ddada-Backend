@@ -58,7 +58,7 @@ public class Player extends BaseMemberEntity implements Member {
     private List<PasswordHistory> passwordHistories = new ArrayList<>();
 
     @Builder
-    public Player(String email, String password, String nickname, String image, String number, Gender gender, LocalDate birth, String description, Integer rating, Integer winStreak, Integer loseStreak, Integer gameCount) {
+    public Player(String email, String password, String nickname, String image, String number, Gender gender, LocalDate birth, String description, Integer rating, int winStreak, int loseStreak, int gameCount) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;

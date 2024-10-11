@@ -1,4 +1,4 @@
-package ssafy.ddada.domain.init;
+package ssafy.ddada.domain.initializer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ssafy.ddada.domain.init.ExcelUtil.isRowEmpty;
+import static ssafy.ddada.common.util.ExcelUtil.isRowEmpty;
 
 @Slf4j
 //@Component
@@ -27,18 +27,13 @@ public class RacketInitializer {
 
     @PostConstruct
     public void init() {
-
-        String AdminFilePath = "init/racket_data.xlsx";
-
-        try {
-
-            racket(AdminFilePath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data file", e);
-        }
+        initRacket();
     }
 
-    private void racket(String filePath) throws IOException {
+    private void initRacket() {
+        log.info("[RacketInitializer] 라켓 초기화");
+        final String filePath = "init/racket_data.xlsx";
+
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (inputStream == null) {
                 throw new IllegalArgumentException("파일을 찾을 수 없습니다: " + filePath);
@@ -77,9 +72,11 @@ public class RacketInitializer {
                         .build();
 
                 rackets.add(racket);
-                log.debug("[RacketInitializer] 라켓 생성: {}", racket);
+                log.debug("[RacketInitializer] 라켓 생성: {} / {}", i, sheet.getLastRowNum());
             }
             racketRepository.saveAll(rackets);
+        } catch (IOException e){
+            log.error("[RacketInitializer] 라켓 초기화 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 }

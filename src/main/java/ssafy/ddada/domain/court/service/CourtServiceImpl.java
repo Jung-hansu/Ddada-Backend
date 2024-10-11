@@ -18,11 +18,8 @@ import ssafy.ddada.common.util.S3Util;
 import ssafy.ddada.domain.court.command.CourtSearchCommand;
 import ssafy.ddada.domain.court.entity.Court;
 import ssafy.ddada.domain.court.entity.CourtDocument;
-import ssafy.ddada.domain.gym.entity.Gym;
-import ssafy.ddada.domain.court.repository.CourtElasticsearchRepository;
 import ssafy.ddada.domain.court.repository.CourtRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,7 +33,6 @@ import static ssafy.ddada.common.util.ParameterUtil.*;
 public class CourtServiceImpl implements CourtService {
 
     private final CourtRepository courtRepository;
-    private final CourtElasticsearchRepository courtElasticsearchRepository;
     private final ElasticsearchOperations elasticsearchOperations;
     private final S3Util s3Util;
 
@@ -84,36 +80,6 @@ public class CourtServiceImpl implements CourtService {
             criteria = criteria.and("gymRegion").in(regions);
         }
         return new CriteriaQuery(criteria).setPageable(pageable);
-    }
-
-    @Override
-    public void indexAll() {
-        log.info("[CourtService] 코트 인덱싱");
-        final int batchSize = 10;
-        List<Court> courts = courtRepository.findAll();
-        List<CourtDocument> courtDocuments = new ArrayList<>(batchSize);
-        int size = courts.size(), cur = 0;
-
-        for (Court court : courts) {
-            courtDocuments.add(createCourtDocument(court));
-            cur++;
-
-            if (cur % batchSize == 0 || cur == size) {
-                log.info("코트 인덱싱 진행도: {}%", Math.round(1000.0 * ++cur / size) / 10.0);
-                courtElasticsearchRepository.saveAll(courtDocuments);
-                courtDocuments.clear();
-            }
-        }
-    }
-
-    private CourtDocument createCourtDocument(Court court) {
-        Gym gym = court.getGym();
-        return CourtDocument.builder()
-                .id(String.valueOf(court.getId()))
-                .courtId(court.getId())
-                .gymName(gym != null ? gym.getName() : null)
-                .gymAddress(gym != null ? gym.getAddress() : null)
-                .build();
     }
 
 }

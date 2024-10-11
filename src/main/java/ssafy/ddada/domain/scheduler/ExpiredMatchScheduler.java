@@ -39,7 +39,7 @@ public class ExpiredMatchScheduler {
             log.info("미진행 경기 {}개 취소 완료", outDatedMatches.size());
 
         } catch (Exception e) {
-            log.error("미진행 경기 취소 프로세스 비정상 종료: {}", e.getMessage());
+            log.error("미진행 경기 취소 프로세스 비정상 종료: {}", e.getMessage(), e);
             throw e; // 트랜잭션 롤백
         }
         log.info("미진행 경기 취소 프로세스 정상 종료");
