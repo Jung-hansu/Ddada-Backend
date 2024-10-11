@@ -293,10 +293,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private void deleteMatch(Match match) {
-        deleteTeam(match.getTeam1());
-        deleteTeam(match.getTeam2());
+        Team team1 = match.getTeam1();
+        Team team2 = match.getTeam2();
+        match.unsetTeams();
         matchRepository.delete(match);
-
+        deleteTeam(team1);
+        deleteTeam(team2);
     }
 
     private void deleteTeam(Team team){
