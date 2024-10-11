@@ -3,16 +3,14 @@ package ssafy.ddada.domain.match.service;
 import org.springframework.data.domain.Page;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.domain.match.command.*;
-import ssafy.ddada.domain.match.entity.MatchStatus;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
-import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand;
 
 public interface MatchService {
 
     Page<MatchSimpleResponse> getFilteredMatches(MatchSearchCommand command);
     void createMatch(MatchCreateCommand command);
     MatchDetailResponse getMatchByIdWithInfos(Long matchId);
-    void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command);
+    void startMatch(Long matchId);
     boolean CheckPlayerBooked(CheckPlayerBookedCommand command);
 
     // Team 관련 메소드
