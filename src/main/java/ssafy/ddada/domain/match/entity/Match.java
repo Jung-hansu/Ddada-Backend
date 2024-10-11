@@ -70,6 +70,11 @@ public class Match extends BaseMatchEntity {
     @Builder.Default
     private List<Set> sets = new ArrayList<>();
 
+    public void unsetTeams(){
+        this.team1 = null;
+        this.team2 = null;
+    }
+
     public List<String> getTeamGender(Team team) {
         List<String> teamGender = new ArrayList<>();
 
