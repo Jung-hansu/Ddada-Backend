@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ssafy.ddada.api.CommonResponse;
+import ssafy.ddada.common.exception.data.DataNotFoundException;
 import ssafy.ddada.common.exception.errorcode.GlobalErrorCode;
+import ssafy.ddada.common.properties.WebClientProperties;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,6 +26,8 @@ public class HealthController {
 
     private final RedisTemplate<String, ?> redisTemplate;
     private final DataSource dataSource;
+    private final WebClientProperties webClientProperties;
+    private final WebClient webClient;
 
     @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
     @GetMapping("/redis/check")
