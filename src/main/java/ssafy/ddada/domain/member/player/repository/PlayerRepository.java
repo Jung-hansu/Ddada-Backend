@@ -13,14 +13,21 @@ import java.util.Optional;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
 
-    boolean existsByNickname(String nickname);
+    Optional<Player> findByEmail(String email);
+
+    @Query("""
+        SELECT p
+        FROM Player p
+        WHERE p.nickname = :nickname AND p.isDeleted = false
+    """)
+    boolean existsByNickname(@Param("nickname") String nickname);
 
     @Query("""
         SELECT p
         FROM Player p
         WHERE p.email = :email AND p.isDeleted = false
     """)
-    Optional<Player> findByEmail(@Param("email") String email);
+    Optional<Player> findNotDeletedPlayerByEmail(@Param("email") String email);
 
     @Query("""
         SELECT COUNT(m)
@@ -60,4 +67,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     """)
     List<Player> findDeletedPlayers();
 
+    @Query("SELECT p.gameCount FROM Player p WHERE p.nickname = :nickname")
+    Optional<Integer> findGameCountByNickname(String nickname);
 }

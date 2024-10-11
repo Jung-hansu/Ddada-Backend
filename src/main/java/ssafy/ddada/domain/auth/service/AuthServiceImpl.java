@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
                 }
 
                 log.debug("[AuthService] 가입된 멤버 정보 확인 >>>> 이름: {}, 이메일: {}", userInfo.nickname(), userInfo.email());
-                Player kakaoMember = playerRepository.findByEmail(userInfo.email())
+                Player kakaoMember = playerRepository.findNotDeletedPlayerByEmail(userInfo.email())
                         .orElseThrow(KakaoMailPlayerNotFoundException::new);
 
                 if (kakaoMember.getIsDeleted()) {
@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Optional<Member> findMemberByEmail(String email) {
-        return playerRepository.findByEmail(email).map(member -> (Member) member)
+        return playerRepository.findNotDeletedPlayerByEmail(email).map(member -> (Member) member)
                 .or(() -> gymAdminRepository.findByEmail(email).map(member -> (Member) member))
                 .or(() -> managerRepository.findByEmail(email).map(member -> (Member) member));
     }
