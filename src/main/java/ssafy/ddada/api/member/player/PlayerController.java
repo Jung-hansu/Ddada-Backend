@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
@@ -12,6 +13,9 @@ import ssafy.ddada.api.member.player.request.PasswordUpdateRequest;
 import ssafy.ddada.api.member.player.request.PlayerSignupRequest;
 import ssafy.ddada.api.member.player.request.PlayerUpdateRequest;
 import ssafy.ddada.api.member.player.response.*;
+import ssafy.ddada.domain.gym.repository.GymRepository;
+import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
+import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.player.service.PlayerService;
 
 import java.util.List;
@@ -24,6 +28,9 @@ import java.util.List;
 public class PlayerController {
 
     private final PlayerService playerService;
+    private final GymRepository gymRepository;
+    private final GymAdminRepository gymAdminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "회원가입", description = """
          소셜로그인 시 저장된 임시 회원 정보를 정식 회원으로 업데이트하는 API입니다.
@@ -130,5 +137,15 @@ public class PlayerController {
     public CommonResponse<PlayerRankingResponse> getPlayersRanking() {
         PlayerRankingResponse response = playerService.getPlayersRanking();
         return CommonResponse.ok(response);
+    }
+
+    @PatchMapping("/gymadmin")
+    public CommonResponse<?> updateGymAdmin() {
+        List<GymAdmin> gymadmins = gymAdminRepository.findAll();
+        gymadmins.forEach(gymAdmin -> {
+            gymAdmin.setPassword(passwordEncoder.encode("password123"));
+            gymAdminRepository.save(gymAdmin);
+        });
+        return null;
     }
 }
