@@ -26,8 +26,6 @@ public class HealthController {
 
     private final RedisTemplate<String, ?> redisTemplate;
     private final DataSource dataSource;
-    private final WebClientProperties webClientProperties;
-    private final WebClient webClient;
 
     @Operation(summary = "Redis 연결 확인", description = "Redis 서버와의 연결 상태를 확인합니다.")
     @GetMapping("/redis/check")

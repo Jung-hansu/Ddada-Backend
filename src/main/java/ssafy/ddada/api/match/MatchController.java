@@ -7,11 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.request.CheckPlayerBookedRequest;
 import ssafy.ddada.api.match.request.MatchCreateRequest;
 import ssafy.ddada.api.match.request.MatchSearchRequest;
 import ssafy.ddada.api.match.response.*;
+import ssafy.ddada.common.exception.data.DataNotFoundException;
+import ssafy.ddada.common.properties.WebClientProperties;
 import ssafy.ddada.domain.match.service.MatchService;
 
 import java.time.LocalDate;
@@ -25,6 +29,8 @@ import java.time.LocalTime;
 public class MatchController {
 
     private final MatchService matchService;
+    private final WebClientProperties webClientProperties;
+    private final WebClient webClient;
 
     @Operation(summary = "경기 리스트 조회", description = "키워드 및 경기 상태 기반으로 경기 리스트를 조회하는 api입니다.")
     @GetMapping

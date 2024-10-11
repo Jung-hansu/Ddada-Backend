@@ -24,5 +24,5 @@ public interface MatchService {
     void allocateManager(Long matchId);
     void deallocateManager(Long matchId);
     void saveMatch(Long matchId, MatchResultCommand command);
-
+    void saveMatchAnalysisData(Long matchId);
 }
