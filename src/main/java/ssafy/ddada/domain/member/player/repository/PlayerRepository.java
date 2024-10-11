@@ -16,7 +16,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     Optional<Player> findByEmail(String email);
 
     @Query("""
-        SELECT p
+        SELECT COUNT(p) > 0
         FROM Player p
         WHERE p.nickname = :nickname AND p.isDeleted = false
     """)
