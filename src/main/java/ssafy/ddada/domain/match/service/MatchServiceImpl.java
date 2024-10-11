@@ -526,20 +526,31 @@ public class MatchServiceImpl implements MatchService {
             List<Integer> playerScoreList = calculatePlayerMatchStats(match, player, matchCommand);
             double earnedRate = winTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(0) / winTeamTotalScore;
             double missedRate = loseTeamTotalScore == 0 ? 0.5 : (double) playerScoreList.get(1) / loseTeamTotalScore;
-
+            int newRating = 0;
             // 플레이어의 레이팅 및 랭킹 업데이트
-            int newRating = ratingUtil.updatePlayerRating(
-                    player,
-                    oppositeTeamRating,
-                    winTeamTotalScore,
-                    earnedRate,
-                    missedRate,
-                    true
-            );
+            if (isWin) {
+                newRating = ratingUtil.updatePlayerRating(
+                        player,
+                        oppositeTeamRating,
+                        winTeamTotalScore,
+                        earnedRate,
+                        missedRate,
+                        true
+                );
+            }
+            else {
+                newRating = ratingUtil.updatePlayerRating(
+                        player,
+                        oppositeTeamRating,
+                        winTeamTotalScore,
+                        earnedRate,
+                        missedRate,
+                        false
+                );
+            }
             player.setRating(newRating);
             player.setGameCount(player.getGameCount() + 1);
-            playerRepository.save(player);
-            rankingUtil.updatePlayerRating(player);
+
 
             // 레이팅 변화 기록
             RatingChange ratingChange = ratingChangeRepository
@@ -553,6 +564,8 @@ public class MatchServiceImpl implements MatchService {
                     );
             ratingChange.setRatingChange(newRating - player.getRating());
             ratingChangeRepository.save(ratingChange);
+            playerRepository.save(player);
+            rankingUtil.updatePlayerRating(player);
         }
     }
 
