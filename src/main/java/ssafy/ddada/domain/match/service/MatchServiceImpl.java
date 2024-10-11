@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.constant.global.COURT;
 import ssafy.ddada.common.constant.global.S3_IMAGE;
@@ -420,6 +421,26 @@ public class MatchServiceImpl implements MatchService {
         updateGymIncome(match);
 
         savedMatchAnalysis(matchId);
+    }
+    @Override
+    @Transactional
+    public void saveMatchAnalysisData(Long matchId)
+    {
+        String requestUrl = webClientProperties.url() + "add_match_analysis/" + matchId + "/";
+        log.info("requestUrl {}", requestUrl);
+
+        // 동기적으로 응답을 받음
+        webClient.post()
+                .uri(requestUrl)
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("Unknown error")
+                                .flatMap(errorBody -> Mono.error(new DataNotFoundException()))
+                )
+                .bodyToMono(String.class)
+                .block();  // 동기 처리로 변환
     }
 
     private Match getValidatedMatch(Long matchId){

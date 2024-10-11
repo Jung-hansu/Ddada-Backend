@@ -81,6 +81,7 @@ public class ManagerController {
     public CommonResponse<?> saveMatch(@PathVariable("match_id") Long matchId, @RequestBody MatchResultRequest request){
         log.info("[ManagerController] 할당된 경기 저장 >>>> 경기 ID: {}", matchId);
         matchService.saveMatch(matchId, request.toCommand());
+        matchService.saveMatchAnalysisData(matchId);
         return CommonResponse.ok("저장되었습니다.", null);
     }
 
