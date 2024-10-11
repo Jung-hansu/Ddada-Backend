@@ -296,6 +296,7 @@ public class MatchServiceImpl implements MatchService {
         Team team1 = match.getTeam1();
         Team team2 = match.getTeam2();
         match.unsetTeams();
+        matchRepository.save(match);
         matchRepository.delete(match);
         deleteTeam(team1);
         deleteTeam(team2);
@@ -304,6 +305,7 @@ public class MatchServiceImpl implements MatchService {
     private void deleteTeam(Team team){
         team.setPlayer1(null);
         team.setPlayer2(null);
+        teamRepository.save(team);
         teamRepository.delete(team);
     }
 
