@@ -548,10 +548,6 @@ public class MatchServiceImpl implements MatchService {
                         false
                 );
             }
-            player.setRating(newRating);
-            player.setGameCount(player.getGameCount() + 1);
-
-
             // 레이팅 변화 기록
             RatingChange ratingChange = ratingChangeRepository
                     .findRatingChangeByMatchIdAndPlayerId(match.getId(), player.getId())
@@ -564,6 +560,10 @@ public class MatchServiceImpl implements MatchService {
                     );
             ratingChange.setRatingChange(newRating - player.getRating());
             ratingChangeRepository.save(ratingChange);
+
+            player.setRating(newRating);
+            player.setGameCount(player.getGameCount() + 1);
+
             playerRepository.save(player);
             rankingUtil.updatePlayerRating(player);
         }
