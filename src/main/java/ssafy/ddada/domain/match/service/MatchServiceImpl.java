@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ssafy.ddada.api.CommonResponse;
 import ssafy.ddada.api.match.response.*;
 import ssafy.ddada.common.constant.global.COURT;
 import ssafy.ddada.common.constant.global.S3_IMAGE;
@@ -36,14 +35,12 @@ import ssafy.ddada.domain.member.common.Gender;
 import ssafy.ddada.domain.member.gymadmin.entity.GymAdmin;
 import ssafy.ddada.domain.member.gymadmin.repository.GymAdminRepository;
 import ssafy.ddada.domain.member.manager.command.ManagerSearchMatchCommand;
-import ssafy.ddada.domain.member.manager.command.ManagerMatchStatusChangeCommand;
 import ssafy.ddada.domain.member.player.entity.Player;
 import ssafy.ddada.domain.member.manager.entity.Manager;
 import ssafy.ddada.domain.member.manager.repository.ManagerRepository;
 import ssafy.ddada.domain.member.player.repository.PlayerRepository;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -120,15 +117,14 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional
-    public void updateMatchStatus(Long matchId, ManagerMatchStatusChangeCommand command) {
-        log.info("[MatchService] 경기 상태 변경 >>>> 경기 ID: {}, 변경할 경기 상태: {}", matchId, command.status());
+    public void startMatch(Long matchId) {
+        log.info("[MatchService] 경기 상태 변경 >>>> 경기 ID: {}, 변경할 경기 상태: {}", matchId);
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(MatchNotFoundException::new);
-
-        if (command.status() == MatchStatus.PLAYING && match.getStatus() != MatchStatus.RESERVED){
+        if (match.getStatus() != MatchStatus.RESERVED){
             throw new InvalidMatchStatusException();
         }
-        match.setStatus(command.status());
+        match.setStatus(MatchStatus.PLAYING);
         match = matchRepository.save(match);
         log.info("[MatchService] 경기 상태 변경 성공 >>>> 변경된 경기 상태: {}", match.getStatus());
     }
@@ -409,18 +405,11 @@ public class MatchServiceImpl implements MatchService {
         Match match = getValidatedMatch(matchId);
         saveMatchResult(match, matchCommand);
 
-        int winTeamNumber = match.getWinnerTeamNumber();
-        int loseTeamNumber = 3 - winTeamNumber;
-
-        int winTeamTotalScore = getTotalTeamScore(matchCommand, winTeamNumber);
-        int loseTeamTotalScore = getTotalTeamScore(matchCommand, loseTeamNumber);
-
-        // 팀 플레이어 점수 계산
-        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, true);
-        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, false);
+        updateRating(match, matchCommand);
 
         updateGymIncome(match);
     }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveMatchAnalysisData(Long matchId)
@@ -466,7 +455,7 @@ public class MatchServiceImpl implements MatchService {
                 .team1(match.getTeam1())
                 .team2(match.getTeam2())
                 .manager(match.getManager())
-                .status(match.getStatus())
+                .status(MatchStatus.FINISHED)
                 .rankType(match.getRankType())
                 .matchType(match.getMatchType())
                 .matchDate(match.getMatchDate())
@@ -475,7 +464,6 @@ public class MatchServiceImpl implements MatchService {
                 .team1SetScore(matchCommand.team1SetScore())
                 .team2SetScore(matchCommand.team2SetScore())
                 .build();
-
         newMatch = matchRepository.save(newMatch);
         for (SetResultCommand setCommand : matchCommand.sets()){
             saveSetResult(newMatch, setCommand);
@@ -667,5 +655,17 @@ public class MatchServiceImpl implements MatchService {
                 )
                 .bodyToMono(String.class)
                 .block();  // 동기 처리로 변환
+    }
+
+    private void updateRating(Match match, MatchResultCommand matchCommand) {
+        int winTeamNumber = match.getWinnerTeamNumber();
+        int loseTeamNumber = 3 - winTeamNumber;
+
+        int winTeamTotalScore = getTotalTeamScore(matchCommand, winTeamNumber);
+        int loseTeamTotalScore = getTotalTeamScore(matchCommand, loseTeamNumber);
+
+        // 팀 플레이어 점수 계산
+        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, true);
+        updatePlayersRatings(match, matchCommand, loseTeamTotalScore, winTeamTotalScore, false);
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ssafy.ddada.api.CommonResponse;
-import ssafy.ddada.api.member.manager.request.ManagerMatchStatusChangeRequest;
 import ssafy.ddada.api.member.manager.request.ManagerSearchMatchRequest;
 import ssafy.ddada.api.member.manager.request.ManagerSignupRequest;
 import ssafy.ddada.api.member.manager.response.ManagerDetailResponse;
@@ -17,8 +16,6 @@ import ssafy.ddada.api.match.request.MatchResultRequest;
 import ssafy.ddada.api.match.response.MatchSimpleResponse;
 import ssafy.ddada.api.member.manager.response.ManagerIdResponse;
 import ssafy.ddada.api.member.manager.response.ManagerSignupResponse;
-import ssafy.ddada.common.exception.security.NotAuthenticatedException;
-import ssafy.ddada.common.util.SecurityUtil;
 import ssafy.ddada.domain.member.manager.service.ManagerService;
 import ssafy.ddada.domain.match.service.MatchService;
 
@@ -89,12 +86,11 @@ public class ManagerController {
     @Operation(summary = "경기 상태 전환", description = "경기 상태를 전환하는 api입니다.")
     @PatchMapping("/matches/{match_id}/status")
     public CommonResponse<?> updateMatchStatus(
-            @PathVariable("match_id") Long matchId,
-            @RequestBody ManagerMatchStatusChangeRequest request
+            @PathVariable("match_id") Long matchId
     ){
-        log.info("[ManagerController] 경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", matchId, request.status());
-        matchService.updateMatchStatus(matchId, request.toCommand());
-        return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.", request.toCommand());
+        log.info("[ManagerController] 경기 상태 전환 >>>> 경기 번호: {}, 경기 상태: {}", matchId);
+        matchService.startMatch(matchId);
+        return CommonResponse.ok("경기 상태가 성공적으로 전환되었습니다.");
     }
 
     @Operation(summary = "매니저 회원가입", description = "매니저 회원가입 api입니다.")
